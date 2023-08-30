@@ -40,9 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import io.github.caimucheng.leaf.common.component.AnimatedNavHost
 import io.github.caimucheng.leaf.common.component.LaunchMode
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.common.component.PrivacyPolicy
@@ -103,19 +103,28 @@ class SplashActivity : ComponentActivity() {
                             when {
                                 !it[Manifest.permission.READ_EXTERNAL_STORAGE]!! && !it[Manifest.permission.WRITE_EXTERNAL_STORAGE]!! -> {
                                     coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(readAndWritePermissionDenied, withDismissAction = true)
+                                        snackbarHostState.showSnackbar(
+                                            readAndWritePermissionDenied,
+                                            withDismissAction = true
+                                        )
                                     }
                                 }
 
                                 !it[Manifest.permission.READ_EXTERNAL_STORAGE]!! -> {
                                     coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(readPermissionDenied, withDismissAction = true)
+                                        snackbarHostState.showSnackbar(
+                                            readPermissionDenied,
+                                            withDismissAction = true
+                                        )
                                     }
                                 }
 
                                 !it[Manifest.permission.WRITE_EXTERNAL_STORAGE]!! -> {
                                     coroutineScope.launch {
-                                        snackbarHostState.showSnackbar(writePermissionDenied, withDismissAction = true)
+                                        snackbarHostState.showSnackbar(
+                                            writePermissionDenied,
+                                            withDismissAction = true
+                                        )
                                     }
                                 }
 
@@ -141,7 +150,7 @@ class SplashActivity : ComponentActivity() {
                                     modifier = Modifier
                                         .fillMaxSize()
                                 ) {
-                                    NavHost(
+                                    AnimatedNavHost(
                                         navController = navController,
                                         startDestination = "privacyPolicy"
                                     ) {

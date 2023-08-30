@@ -11,7 +11,7 @@ object Versions {
     // Project option versions
     val CompilingJavaVersion = JavaVersion.VERSION_11;
     const val JvmTarget = "11"
-    const val AndroidGradlePluginVersion = "8.1.0"
+    const val AndroidGradlePluginVersion = "8.1.1"
     const val KotlinVersion = "1.8.10"
     const val KotlinCompilerExtensionVersion = "1.4.3"
 

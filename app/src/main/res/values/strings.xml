@@ -11,4 +11,6 @@
     <string name="read_permission_denied">Read permission denied</string>
     <string name="write_permission_denied">Write permission denied</string>
     <string name="root_permission_denied">Root permission denied</string>
+    <string name="home">Home</string>
+    <string name="settings">Settings</string>
 </resources>
