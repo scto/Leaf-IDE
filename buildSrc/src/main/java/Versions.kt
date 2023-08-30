@@ -26,6 +26,9 @@ object Versions {
     const val ConstraintLayout = "1.0.1"
     const val DataStorePreferences = "1.0.0"
 
+    // Lottie animation lib
+    const val LottieCompose = "6.1.0"
+
     // The blur lib
     const val Cloudy = "0.1.2"
 }

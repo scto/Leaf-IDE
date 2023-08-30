@@ -57,10 +57,6 @@ import kotlinx.coroutines.launch
 
 class SplashActivity : ComponentActivity() {
 
-    companion object {
-        private const val MAX_STEP = 2
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,9 +78,6 @@ class SplashActivity : ComponentActivity() {
                 ) {
                     var titleResId by rememberSaveable {
                         mutableIntStateOf(R.string.privacy_policy)
-                    }
-                    var step by rememberSaveable {
-                        mutableIntStateOf(0)
                     }
                     var launchMode by rememberSaveable {
                         mutableStateOf("external")
@@ -156,17 +149,14 @@ class SplashActivity : ComponentActivity() {
                                     ) {
                                         composable("privacyPolicy") {
                                             titleResId = R.string.privacy_policy
-                                            step = 0
                                             PrivacyPolicy()
                                         }
                                         composable("userAgreement") {
                                             titleResId = R.string.user_agreement
-                                            step = 1
                                             UserAgreement()
                                         }
                                         composable("launchMode") {
                                             titleResId = R.string.launch_mode
-                                            step = 2
                                             LaunchMode(launchMode) { type ->
                                                 launchMode = type
                                             }
@@ -179,12 +169,12 @@ class SplashActivity : ComponentActivity() {
                             BottomAppBar {
                                 FilledTonalIconButton(
                                     onClick = {
-                                        when (step) {
-                                            0 -> {
+                                        when (titleResId) {
+                                            R.string.privacy_policy -> {
                                                 finish()
                                             }
 
-                                            1 -> {
+                                            R.string.user_agreement -> {
                                                 navController.popBackStack()
                                             }
 
@@ -201,13 +191,13 @@ class SplashActivity : ComponentActivity() {
                                         .padding(top = 15.dp, bottom = 15.dp)
                                 ) {
                                     AnimatedContent(
-                                        targetState = step,
+                                        targetState = titleResId,
                                         label = "AnimatedCloseButton"
                                     ) {
                                         Icon(
-                                            imageVector = if (it == 0) Icons.Filled.Close else Icons.Filled.ArrowBack,
+                                            imageVector = if (it == R.string.privacy_policy) Icons.Filled.Close else Icons.Filled.ArrowBack,
                                             contentDescription = stringResource(
-                                                id = if (it == 0) R.string.refuse else R.string.previous
+                                                id = if (it == R.string.privacy_policy) R.string.refuse else R.string.previous
                                             )
                                         )
                                     }
@@ -215,12 +205,12 @@ class SplashActivity : ComponentActivity() {
                                 Spacer(modifier = Modifier.width(20.dp))
                                 FilledIconButton(
                                     onClick = {
-                                        when (step) {
-                                            0 -> {
+                                        when (titleResId) {
+                                            R.string.privacy_policy -> {
                                                 navController.navigate("userAgreement")
                                             }
 
-                                            1 -> {
+                                            R.string.user_agreement -> {
                                                 navController.navigate("launchMode")
                                             }
 
@@ -265,13 +255,13 @@ class SplashActivity : ComponentActivity() {
                                         .padding(top = 15.dp, bottom = 15.dp)
                                 ) {
                                     AnimatedContent(
-                                        targetState = step,
+                                        targetState = titleResId,
                                         label = "AnimatedAllowButton"
                                     ) {
                                         Icon(
-                                            imageVector = if (it < MAX_STEP) Icons.Filled.ArrowForward else Icons.Filled.Done,
+                                            imageVector = if (it != R.string.launch_mode) Icons.Filled.ArrowForward else Icons.Filled.Done,
                                             contentDescription = stringResource(
-                                                id = if (it < MAX_STEP) R.string.next else R.string.allow
+                                                id = if (it != R.string.launch_mode) R.string.next else R.string.allow
                                             )
                                         )
                                     }

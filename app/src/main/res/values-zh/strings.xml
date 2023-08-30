@@ -13,4 +13,6 @@
     <string name="root_permission_denied">Root 权限被拒绝</string>
     <string name="home">主页</string>
     <string name="settings">设置</string>
+    <string name="plugin">插件</string>
+    <string name="create_project">创建工程</string>
 </resources>

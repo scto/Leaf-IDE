@@ -11,4 +11,5 @@
     <string name="launch_mode_root">以 Root 身份启动</string>
     <string name="root">Root 身份</string>
     <string name="launch_mode_root_description">将工程文件存储到 adb 目录</string>
+    <string name="no_implementation">此处还没有实现</string>
 </resources>

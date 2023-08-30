@@ -78,7 +78,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:${Versions.SplashScreen}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.MaterialIconsExtended}")
     implementation("androidx.constraintlayout:constraintlayout-compose:${Versions.ConstraintLayout}")
-    implementation("androidx.datastore:datastore-preferences:${Versions.DataStorePreferences}")
+    implementation("com.airbnb.android:lottie-compose:${Versions.LottieCompose}")
     //noinspection GradleDependency
     implementation("androidx.core:core-ktx:${Versions.CoreKtx}")
     implementation("androidx.navigation:navigation-compose:${Versions.Navigation}")

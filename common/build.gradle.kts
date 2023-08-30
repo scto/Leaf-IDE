@@ -34,7 +34,6 @@ android {
 dependencies {
     implementation("androidx.constraintlayout:constraintlayout-compose:${Versions.ConstraintLayout}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.MaterialIconsExtended}")
-    implementation("androidx.datastore:datastore-preferences:${Versions.DataStorePreferences}")
     implementation("androidx.navigation:navigation-compose:${Versions.Navigation}")
     implementation("androidx.core:core-ktx:${Versions.CoreKtx}")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:${Versions.LifecycleRuntimeKtx}")
