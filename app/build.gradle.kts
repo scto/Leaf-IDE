@@ -1,18 +1,6 @@
-import java.io.FileInputStream
-import java.util.Properties
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-}
-
-val keystorePropertiesFile = rootProject.file("keystore.properties")
-var keystoreProperties: Properties? = null
-if (keystorePropertiesFile.isFile && keystorePropertiesFile.exists()) {
-    keystoreProperties = Properties()
-    FileInputStream(keystorePropertiesFile).use {
-        keystoreProperties!!.load(it)
-    }
 }
 
 android {
@@ -29,28 +17,25 @@ android {
     }
 
     signingConfigs {
-        if (keystorePropertiesFile.isFile && keystorePropertiesFile.exists()) {
-            create("shared") {
-                storePassword = keystoreProperties!!.getProperty("storePassword")
-                keyAlias = keystoreProperties!!.getProperty("keyAlias")
-                keyPassword = keystoreProperties!!.getProperty("keyPassword")
-                storeFile = rootProject.file("buildKey.jks")
-            }
+        create("shared") {
+            storeFile = file("../buildKey.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+            this.enableV1Signing = true
+            this.enableV2Signing = true
+            this.enableV3Signing = true
         }
     }
 
     buildTypes {
         debug {
             isMinifyEnabled = false
-            if (keystorePropertiesFile.isFile && keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("shared")
-            }
+            signingConfig = signingConfigs.getByName("shared")
         }
         release {
             isMinifyEnabled = false
-            if (keystorePropertiesFile.isFile && keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("shared")
-            }
+            signingConfig = signingConfigs.getByName("shared")
         }
     }
     compileOptions {
@@ -90,4 +75,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+}
+
+tasks.register("printVersionName") {
+    doLast {
+        println(android.defaultConfig.versionName)
+    }
 }
