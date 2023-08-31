@@ -1,6 +1,26 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+}
+
+var extStorePassword: String? = System.getenv("KEYSTORE_PASSWORD")
+var extKeyAlias: String? = System.getenv("KEY_ALIAS")
+var extKeyPassword: String? = System.getenv("KEY_PASSWORD")
+var extStoreFile = file("../buildKey.jks")
+val extIsNativeEnvironment =
+    extStorePassword == null || extKeyAlias == null || extKeyPassword == null
+val extKeystoreProperties = Properties()
+if (extIsNativeEnvironment) {
+    FileInputStream(rootProject.file("keystore.properties")).use {
+        extKeystoreProperties.load(it)
+    }
+    extStorePassword = extKeystoreProperties.getProperty("storePassword")!!
+    extKeyAlias = extKeystoreProperties.getProperty("keyAlias")!!
+    extKeyPassword = extKeystoreProperties.getProperty("keyPassword")!!
+    extStoreFile = rootProject.file("buildKey.jks")
 }
 
 android {
@@ -19,12 +39,12 @@ android {
     signingConfigs {
         create("shared") {
             storeFile = file("../buildKey.jks")
-            storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias = System.getenv("KEY_ALIAS")
-            keyPassword = System.getenv("KEY_PASSWORD")
-            this.enableV1Signing = true
-            this.enableV2Signing = true
-            this.enableV3Signing = true
+            storePassword = extStorePassword
+            keyAlias = extKeyAlias
+            keyPassword = extKeyPassword
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
         }
     }
 
@@ -53,7 +73,10 @@ android {
     }
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += setOf(
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "/DebugProbesKt.bin"
+            )
         }
     }
 }
