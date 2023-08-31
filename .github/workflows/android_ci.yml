@@ -58,23 +58,16 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Rename APK
-        run: |
-          APK_NAME="LeafIDE-$(./gradlew -q printVersionName)"
-          echo $APK_NAME
-          mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/$APK_NAME-release.apk
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/$APK_NAME-debug.apk
-          echo "APK_NAME=$APK_NAME" >> $GITHUB_ENV
-
       - name: Upload release APK artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.APK_NAME }}
-          path: app/build/outputs/apk/release/${{ env.APK_NAME }}-release.apk
+          name: app-release.apk
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
+
       - name: Upload debug APK artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.APK_NAME }}
-          path: app/build/outputs/apk/debug/${{ env.APK_NAME }}-debug.apk
+          name: app-debug.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error

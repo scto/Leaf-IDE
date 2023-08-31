@@ -27,12 +27,15 @@ android {
             extStorePassword == null || extKeyAlias == null || extKeyPassword == null
         val extKeystoreProperties = Properties()
         if (extIsNativeEnvironment) {
-            FileInputStream(rootProject.file("keystore.properties")).use {
-                extKeystoreProperties.load(it)
+            val keystorePropertiesFile = file("../keystore.properties")
+            if (keystorePropertiesFile.exists() && keystorePropertiesFile.exists()) {
+                FileInputStream(keystorePropertiesFile).use {
+                    extKeystoreProperties.load(it)
+                }
+                extStorePassword = extKeystoreProperties.getProperty("storePassword")
+                extKeyAlias = extKeystoreProperties.getProperty("keyAlias")
+                extKeyPassword = extKeystoreProperties.getProperty("keyPassword")
             }
-            extStorePassword = extKeystoreProperties.getProperty("storePassword")!!
-            extKeyAlias = extKeystoreProperties.getProperty("keyAlias")!!
-            extKeyPassword = extKeystoreProperties.getProperty("keyPassword")!!
         }
 
         create("shared") {
@@ -97,10 +100,4 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-}
-
-tasks.register("printVersionName") {
-    doLast {
-        println(android.defaultConfig.versionName)
-    }
 }
