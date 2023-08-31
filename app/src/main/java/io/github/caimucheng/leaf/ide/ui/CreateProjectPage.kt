@@ -25,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.ide.R
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +60,7 @@ fun CreateProjectPage(pageNavController: NavHostController) {
         },
         content = { paddings ->
             var isLoading by rememberSaveable {
-                mutableStateOf(false)
+                mutableStateOf(true)
             }
             Crossfade(
                 targetState = isLoading,
@@ -73,6 +75,10 @@ fun CreateProjectPage(pageNavController: NavHostController) {
                     NewProjectList()
                 }
             }
+            LaunchedEffect(key1 = null, block = {
+                delay(2000)
+                isLoading = false
+            })
         }
     )
 }

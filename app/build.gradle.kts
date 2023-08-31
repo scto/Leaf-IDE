@@ -6,23 +6,6 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-var extStorePassword: String? = System.getenv("KEYSTORE_PASSWORD")
-var extKeyAlias: String? = System.getenv("KEY_ALIAS")
-var extKeyPassword: String? = System.getenv("KEY_PASSWORD")
-var extStoreFile = file("../buildKey.jks")
-val extIsNativeEnvironment =
-    extStorePassword == null || extKeyAlias == null || extKeyPassword == null
-val extKeystoreProperties = Properties()
-if (extIsNativeEnvironment) {
-    FileInputStream(rootProject.file("keystore.properties")).use {
-        extKeystoreProperties.load(it)
-    }
-    extStorePassword = extKeystoreProperties.getProperty("storePassword")!!
-    extKeyAlias = extKeystoreProperties.getProperty("keyAlias")!!
-    extKeyPassword = extKeystoreProperties.getProperty("keyPassword")!!
-    extStoreFile = rootProject.file("buildKey.jks")
-}
-
 android {
     namespace = "io.github.caimucheng.leaf.ide"
     compileSdk = Versions.CompileSdkVersion
@@ -37,6 +20,21 @@ android {
     }
 
     signingConfigs {
+        var extStorePassword: String? = System.getenv("KEYSTORE_PASSWORD")
+        var extKeyAlias: String? = System.getenv("KEY_ALIAS")
+        var extKeyPassword: String? = System.getenv("KEY_PASSWORD")
+        val extIsNativeEnvironment =
+            extStorePassword == null || extKeyAlias == null || extKeyPassword == null
+        val extKeystoreProperties = Properties()
+        if (extIsNativeEnvironment) {
+            FileInputStream(rootProject.file("keystore.properties")).use {
+                extKeystoreProperties.load(it)
+            }
+            extStorePassword = extKeystoreProperties.getProperty("storePassword")!!
+            extKeyAlias = extKeystoreProperties.getProperty("keyAlias")!!
+            extKeyPassword = extKeystoreProperties.getProperty("keyPassword")!!
+        }
+
         create("shared") {
             storeFile = file("../buildKey.jks")
             storePassword = extStorePassword
