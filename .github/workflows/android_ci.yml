@@ -38,7 +38,7 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | /usr/local/lib/android/sdk/tools/bin/sdkmanager --licenses
 
-      - name: Build Release APK
+      - name: Build release APK
         id: buildRelease
         uses: gradle/gradle-build-action@v2.4.2
         with:
@@ -48,7 +48,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Build Debug APK
+      - name: Build debug APK
         id: buildDebug
         uses: gradle/gradle-build-action@v2.4.2
         with:
@@ -62,15 +62,19 @@ jobs:
         run: |
           APK_NAME="LeafIDE-$(./gradlew -q printVersionName)"
           echo $APK_NAME
-          mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/$APK_NAME.apk
-          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/$APK_NAME.apk
+          mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/$APK_NAME-release.apk
+          mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/$APK_NAME-debug.apk
           echo "APK_NAME=$APK_NAME" >> $GITHUB_ENV
 
-      - name: Upload APK artifact
+      - name: Upload release APK artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.APK_NAME }}
-          path: |
-            app/build/outputs/apk/release/${{ env.APK_NAME }}.apk
-            app/build/outputs/apk/debug/${{ env.APK_NAME }}.apk
+          path: app/build/outputs/apk/release/${{ env.APK_NAME }}-release.apk
+          if-no-files-found: error
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.APK_NAME }}
+          path: app/build/outputs/apk/debug/${{ env.APK_NAME }}-debug.apk
           if-no-files-found: error
