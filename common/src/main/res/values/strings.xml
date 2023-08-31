@@ -11,4 +11,5 @@
     <string name="root">Root</string>
     <string name="launch_mode_root_description">Save project files to the adb directory</string>
     <string name="no_implementation">Not implemented here yet</string>
+    <string name="shared_user_label">Leaf IDE Shared User</string>
 </resources>

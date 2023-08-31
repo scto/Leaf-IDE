@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NodeJS Plugin For Leaf IDE</string>
+    <string name="displayed_nodejs_title">NodeJS Project</string>
 </resources>

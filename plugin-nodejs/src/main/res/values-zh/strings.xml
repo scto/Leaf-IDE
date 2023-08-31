@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">适用于 Leaf IDE 的 NodeJS 插件</string>
+    <string name="displayed_nodejs_title">NodeJS 工程</string>
+</resources>

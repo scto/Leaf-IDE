@@ -11,6 +11,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.github.caimucheng.leaf.common.component.AnimatedNavHost
 import io.github.caimucheng.leaf.common.ui.theme.LeafIDETheme
+import io.github.caimucheng.leaf.common.util.launchMode
+import io.github.caimucheng.leaf.common.util.setupMainActivity
 import io.github.caimucheng.leaf.ide.ui.CreateProjectPage
 import io.github.caimucheng.leaf.ide.ui.MainPage
 
@@ -21,6 +23,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupMainActivity(launchMode())
 
         setContent {
             LeafIDETheme {
