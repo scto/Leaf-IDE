@@ -4,10 +4,10 @@ plugins {
 }
 
 android {
-    namespace = "io.github.caimucheng.leaf.ide"
+    namespace = "leaf.plugin.nodejs"
 
     defaultConfig {
-        applicationId = "io.github.caimucheng.leaf.ide"
+        applicationId = "leaf.plugin.nodejs"
     }
 
     kotlinOptions {

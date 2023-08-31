@@ -5,27 +5,15 @@ plugins {
 
 android {
     namespace = "io.github.caimucheng.leaf.plugin"
-    compileSdk = Versions.CompileSdkVersion
 
-    defaultConfig {
-        minSdk = Versions.MinSdkVersion
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-        }
-    }
-    compileOptions {
-        sourceCompatibility = Versions.CompilingJavaVersion
-        targetCompatibility = Versions.CompilingJavaVersion
-    }
     kotlinOptions {
         jvmTarget = Versions.JvmTarget
     }
+
     buildFeatures {
         compose = true
     }
+
     composeOptions {
         kotlinCompilerExtensionVersion = Versions.KotlinCompilerExtensionVersion
     }
@@ -33,10 +21,17 @@ android {
 
 dependencies {
     implementation(project(":common"))
+    implementation("androidx.core:core-splashscreen:${Versions.SplashScreen}")
+    implementation("androidx.compose.material:material-icons-extended:${Versions.MaterialIconsExtended}")
+    implementation("androidx.constraintlayout:constraintlayout-compose:${Versions.ConstraintLayout}")
+    implementation("com.airbnb.android:lottie-compose:${Versions.LottieCompose}")
+    //noinspection GradleDependency
     implementation("androidx.core:core-ktx:${Versions.CoreKtx}")
+    implementation("androidx.navigation:navigation-compose:${Versions.Navigation}")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:${Versions.LifecycleRuntimeKtx}")
     implementation("androidx.activity:activity-compose:${Versions.ActivityCompose}")
     implementation(platform("androidx.compose:compose-bom:${Versions.ComposeBom}"))
+    implementation("com.github.skydoves:cloudy:${Versions.Cloudy}")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")

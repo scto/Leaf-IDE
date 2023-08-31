@@ -1,7 +1,9 @@
 @file:Suppress("UnstableApiUsage")
 
+include(":app")
+include(":common")
 include(":plugin-api")
-
+include(":plugin-nodejs")
 
 pluginManagement {
     repositories {
@@ -21,5 +23,3 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Leaf IDE"
-include(":app")
-include(":common")
