@@ -15,5 +15,6 @@
     <string name="settings">Settings</string>
     <string name="leaf_flow" translatable="false">Leaf Flow</string>
     <string name="plugin">Plugin</string>
-    <string name="create_project">Create project</string>
+    <string name="create_project">Create Project</string>
+    <string name="back">Back</string>
 </resources>

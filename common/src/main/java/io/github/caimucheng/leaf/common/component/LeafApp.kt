@@ -21,6 +21,7 @@ fun LeafApp(
     content: @Composable (PaddingValues) -> Unit,
     bottomBar: @Composable () -> Unit = {},
     snackbarHost: @Composable () -> Unit = {},
+    navigationIcon: @Composable () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 ) {
     Scaffold(
@@ -37,6 +38,7 @@ fun LeafApp(
                         )
                     }
                 },
+                navigationIcon = navigationIcon,
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,

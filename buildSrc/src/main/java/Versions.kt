@@ -9,7 +9,7 @@ object Versions {
     const val VersionName = "1.0.0.0"
 
     // Project option versions
-    val CompilingJavaVersion = JavaVersion.VERSION_11;
+    val CompilingJavaVersion = JavaVersion.VERSION_11
     const val JvmTarget = "11"
     const val AndroidGradlePluginVersion = "8.1.1"
     const val KotlinVersion = "1.8.10"
@@ -24,7 +24,6 @@ object Versions {
     const val Navigation = "2.7.1"
     const val MaterialIconsExtended = "1.5.0"
     const val ConstraintLayout = "1.0.1"
-    const val DataStorePreferences = "1.0.0"
 
     // Lottie animation lib
     const val LottieCompose = "6.1.0"

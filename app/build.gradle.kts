@@ -75,6 +75,7 @@ android {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":plugin-api"))
     implementation("androidx.core:core-splashscreen:${Versions.SplashScreen}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.MaterialIconsExtended}")
     implementation("androidx.constraintlayout:constraintlayout-compose:${Versions.ConstraintLayout}")

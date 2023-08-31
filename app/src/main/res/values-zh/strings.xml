@@ -15,4 +15,5 @@
     <string name="settings">设置</string>
     <string name="plugin">插件</string>
     <string name="create_project">创建工程</string>
+    <string name="back">返回</string>
 </resources>
