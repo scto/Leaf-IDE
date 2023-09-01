@@ -1,5 +1,6 @@
 package io.github.caimucheng.leaf.common.util
 
+import com.topjohnwu.superuser.Shell
 import java.io.File
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -11,12 +12,7 @@ object FileSystem {
 
     fun mkdirs(file: File): Boolean {
         return if (isRootLaunchMode) {
-            try {
-                sudo("mkdir -p ${file.absolutePath}").waitFor() == 0
-            } catch (e: Exception) {
-                e.printStackTrace()
-                false
-            }
+            Shell.cmd("mkdir -p ${file.absolutePath}").exec().isSuccess
         } else {
             file.mkdirs()
         }
@@ -28,19 +24,23 @@ object FileSystem {
 
     fun exists(file: File): Boolean {
         return if (isRootLaunchMode) {
-            try {
-                sudo("find ${file.absolutePath}").waitFor() == 0
-            } catch (e: Exception) {
-                e.printStackTrace()
-                false
-            }
+            Shell.cmd("find ${file.absolutePath}").exec().isSuccess
         } else {
             file.exists()
         }
     }
 
-    private fun sudo(command: String): Process {
-        return Runtime.getRuntime().exec("su -c $command")
+    fun isFile(file: File): Boolean {
+        return !isDirectory(file)
+    }
+
+    fun isDirectory(file: File): Boolean {
+        return if (isRootLaunchMode) {
+            val result = Shell.cmd("find ${file.absolutePath} -maxdepth 0 -type d").exec()
+            result.isSuccess && result.out.isNotEmpty()
+        } else {
+            file.isDirectory
+        }
     }
 
 }

@@ -25,10 +25,10 @@ object Versions {
     const val MaterialIconsExtended = "1.5.0"
     const val ConstraintLayout = "1.0.1"
 
-    // Lottie animation lib
-    const val LottieCompose = "6.1.0"
-
     // The blur lib
     const val Cloudy = "0.1.2"
+
+    // Su process and file-system
+    const val LibSU = "5.2.0"
 
 }

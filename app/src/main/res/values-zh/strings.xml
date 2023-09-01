@@ -16,4 +16,6 @@
     <string name="plugin">插件</string>
     <string name="create_project">创建工程</string>
     <string name="back">返回</string>
+    <string name="no_plugin_project">没有插件工程</string>
+    <string name="download_from_leaf_flow">可从 Leaf Flow 中下载</string>
 </resources>

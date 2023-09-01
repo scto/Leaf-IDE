@@ -9,9 +9,9 @@ import android.content.SharedPreferences
 import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.core.content.edit
+import com.topjohnwu.superuser.Shell
 import io.github.caimucheng.leaf.common.application.AppContext
 import java.io.File
-import java.io.IOException
 import kotlin.properties.Delegates
 import kotlin.system.exitProcess
 
@@ -81,28 +81,16 @@ private fun setupRoot() {
     FileSystem.mkdirs(_LeafIDERootPath)
 }
 
+@Suppress("DEPRECATION")
 fun ComponentActivity.setupRootApp(
     launchMode: String,
     targetClass: Class<out Activity>,
     onError: () -> Unit
 ) {
-    try {
-        // Request root permission
-        val process = Runtime.getRuntime().exec("su -c /system/bin/id -u")
-        process.waitFor()
-
-        process.outputStream.use {
-            process.inputStream.use {
-                // "0\n".equals("0\n")
-                if (process.inputStream.readBytes().contentEquals(byteArrayOf(48, 10))) {
-                    setupApp(launchMode, targetClass)
-                } else {
-                    onError()
-                }
-            }
-        }
-    } catch (e: IOException) {
-        e.printStackTrace()
+    val result = Shell.su().exec()
+    if (result.isSuccess) {
+        setupApp(launchMode, targetClass)
+    } else {
         onError()
     }
 }

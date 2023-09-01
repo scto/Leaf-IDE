@@ -23,7 +23,9 @@ dependencies {
     implementation("androidx.core:core-splashscreen:${Versions.SplashScreen}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.MaterialIconsExtended}")
     implementation("androidx.constraintlayout:constraintlayout-compose:${Versions.ConstraintLayout}")
-    implementation("com.airbnb.android:lottie-compose:${Versions.LottieCompose}")
+    implementation("com.github.topjohnwu.libsu:core:${Versions.LibSU}")
+    implementation("com.github.topjohnwu.libsu:service:${Versions.LibSU}")
+    implementation("com.github.topjohnwu.libsu:nio:${Versions.LibSU}")
     //noinspection GradleDependency
     implementation("androidx.core:core-ktx:${Versions.CoreKtx}")
     implementation("androidx.navigation:navigation-compose:${Versions.Navigation}")

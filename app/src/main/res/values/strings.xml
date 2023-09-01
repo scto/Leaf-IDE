@@ -17,4 +17,6 @@
     <string name="plugin">Plugin</string>
     <string name="create_project">Create Project</string>
     <string name="back">Back</string>
+    <string name="no_plugin_project">No Plugin Project</string>
+    <string name="download_from_leaf_flow">Available for download from Leaf Flow</string>
 </resources>
