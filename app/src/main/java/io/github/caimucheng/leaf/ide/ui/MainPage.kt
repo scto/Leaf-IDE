@@ -224,12 +224,61 @@ fun MainPage(pageNavController: NavController) {
 }
 
 @Composable
-fun Home(pageNavController: NavController) {
+fun Home(pageNavController: NavController, viewModel: MainPageViewModel = viewModel()) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-        val (floatingActionButton) = createRefs()
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+        val (floatingActionButton, crossFade) = createRefs()
 
+        var isLoading by rememberSaveable {
+            mutableStateOf(true)
         }
+        var plugins: List<Plugin> by remember {
+            mutableStateOf(emptyList())
+        }
+        Crossfade(
+            targetState = isLoading,
+            label = "CrossfadeLoadingHome",
+            modifier = Modifier
+                .fillMaxSize()
+                .constrainAs(crossFade) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                }
+        ) {
+            if (it) {
+                LoadingPlugin()
+            } else {
+                ProjectList(plugins)
+            }
+        }
+
+        val state by viewModel.state.collectAsState()
+        when (state) {
+            MainPageUIState.Default -> {}
+            MainPageUIState.Loading -> {
+                isLoading = true
+            }
+
+            is MainPageUIState.UnLoadingProject -> {
+                plugins = (state as MainPageUIState.UnLoadingProject).plugins
+                isLoading = false
+            }
+
+            is MainPageUIState.UnLoadingPlugin -> {}
+        }
+
+        val lifecycle = LocalLifecycleOwner.current.lifecycle
+        DisposableEffect(key1 = lifecycle) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event === Lifecycle.Event.ON_START) {
+                    viewModel.intent.trySend(MainPageUIIntent.RefreshProject)
+                }
+            }
+            lifecycle.addObserver(observer)
+            onDispose {
+                lifecycle.removeObserver(observer)
+            }
+        }
+
         FloatingActionButton(
             onClick = {
                 pageNavController.navigate(CREATE_PROJECT_PAGE)
@@ -249,6 +298,44 @@ fun Home(pageNavController: NavController) {
 }
 
 @Composable
+private fun ProjectList(plugins: List<Plugin>) {
+    if (plugins.isEmpty()) {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            val (column) = createRefs()
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
+                    .constrainAs(column) {
+                        centerTo(parent)
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(id = R.string.no_project_or_plugins_for_projects),
+                    fontSize = 18.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = stringResource(id = R.string.click_to_create_project),
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                )
+            }
+        }
+    } else {
+
+    }
+}
+
+@Composable
 fun Plugin(viewModel: MainPageViewModel = viewModel()) {
     var isLoading by rememberSaveable {
         mutableStateOf(true)
@@ -258,7 +345,7 @@ fun Plugin(viewModel: MainPageViewModel = viewModel()) {
     }
     Crossfade(
         targetState = isLoading,
-        label = "CrossfadeLoading",
+        label = "CrossfadeLoadingPlugin",
         modifier = Modifier
             .fillMaxSize()
     ) {
@@ -276,17 +363,19 @@ fun Plugin(viewModel: MainPageViewModel = viewModel()) {
             isLoading = true
         }
 
-        is MainPageUIState.UnLoading -> {
-            plugins = (state as MainPageUIState.UnLoading).plugins
+        is MainPageUIState.UnLoadingPlugin -> {
+            plugins = (state as MainPageUIState.UnLoadingPlugin).plugins
             isLoading = false
         }
+
+        is MainPageUIState.UnLoadingProject -> {}
     }
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(key1 = lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
             if (event === Lifecycle.Event.ON_START) {
-                viewModel.intent.trySend(MainPageUIIntent.Refresh)
+                viewModel.intent.trySend(MainPageUIIntent.RefreshPlugin)
             }
         }
         lifecycle.addObserver(observer)
@@ -300,7 +389,11 @@ fun Plugin(viewModel: MainPageViewModel = viewModel()) {
 @Composable
 private fun PluginList(plugins: List<Plugin>) {
     if (plugins.isEmpty()) {
-        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
             val (column) = createRefs()
             Column(
                 Modifier

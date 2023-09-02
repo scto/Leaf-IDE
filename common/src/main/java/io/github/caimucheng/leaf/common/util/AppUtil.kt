@@ -9,7 +9,6 @@ import android.content.SharedPreferences
 import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.core.content.edit
-import com.topjohnwu.superuser.Shell
 import io.github.caimucheng.leaf.common.application.AppContext
 import java.io.File
 import kotlin.properties.Delegates
@@ -17,12 +16,19 @@ import kotlin.system.exitProcess
 
 const val LAUNCH_MODE = "launch_mode"
 
-val ExternalRootPath = Environment.getExternalStorageDirectory()!!
+val ExternalRootPath =
+    Environment.getExternalStorageDirectory()!!
 
 private var _LeafIDERootPath: File by Delegates.notNull()
 val LeafIDERootPath: File
     get() {
         return _LeafIDERootPath
+    }
+
+private var _LeafIDEProjectPath: File by Delegates.notNull()
+val LeafIDEProjectPath: File
+    get() {
+        return _LeafIDEProjectPath
     }
 
 inline val Context.sharedPreferences: SharedPreferences
@@ -40,14 +46,10 @@ inline val isInternalLaunchMode: Boolean
         return AppContext.context.launchMode() == "internal"
     }
 
-inline val isRootLaunchMode: Boolean
-    get() {
-        return AppContext.context.launchMode() == "root"
-    }
-
 fun Context.launchMode(): String {
     return sharedPreferences.getString(LAUNCH_MODE, null) ?: exitProcess(1)
 }
+
 
 fun ComponentActivity.setupApp(launchMode: String, targetClass: Class<out Activity>) {
     sharedPreferences.edit {
@@ -62,35 +64,24 @@ fun setupMainActivity(launchMode: String) {
     when (launchMode) {
         "external" -> setupExternal()
         "internal" -> setupInternal()
-        "root" -> setupRoot()
     }
 }
 
 private fun setupExternal() {
     _LeafIDERootPath = File(ExternalRootPath, "LeafIDE")
-    FileSystem.mkdirs(_LeafIDERootPath)
+    _LeafIDERootPath.mkdirs()
+
+    setupCommonChildren()
 }
 
 private fun setupInternal() {
     _LeafIDERootPath = File(AppContext.context.filesDir, "LeafIDE")
-    FileSystem.mkdirs(_LeafIDERootPath)
+    _LeafIDERootPath.mkdirs()
+
+    setupCommonChildren()
 }
 
-private fun setupRoot() {
-    _LeafIDERootPath = File("/data/adb/LeafIDE")
-    FileSystem.mkdirs(_LeafIDERootPath)
-}
-
-@Suppress("DEPRECATION")
-fun ComponentActivity.setupRootApp(
-    launchMode: String,
-    targetClass: Class<out Activity>,
-    onError: () -> Unit
-) {
-    val result = Shell.su().exec()
-    if (result.isSuccess) {
-        setupApp(launchMode, targetClass)
-    } else {
-        onError()
-    }
+private fun setupCommonChildren() {
+    _LeafIDEProjectPath = File(_LeafIDERootPath, "projects")
+    _LeafIDEProjectPath.mkdirs()
 }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.Card
@@ -108,14 +107,6 @@ fun LaunchMode(launchMode: String, onClick: (type: String) -> Unit) {
             descriptionText = stringResource(id = R.string.launch_mode_internal_description),
             selected = launchMode == "internal",
             onClick = { onClick("internal") }
-        )
-        RadioItem(
-            imageVector = Icons.Filled.AdminPanelSettings,
-            contentDescription = stringResource(id = R.string.root),
-            titleText = stringResource(id = R.string.launch_mode_root),
-            descriptionText = stringResource(id = R.string.launch_mode_root_description),
-            selected = launchMode == "root",
-            onClick = { onClick("root") }
         )
         val context = LocalContext.current
         val language = stringResource(id = R.string.current_language)

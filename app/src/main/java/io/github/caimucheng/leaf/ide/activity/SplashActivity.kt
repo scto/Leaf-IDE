@@ -2,7 +2,9 @@ package io.github.caimucheng.leaf.ide.activity
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -49,8 +52,9 @@ import io.github.caimucheng.leaf.common.component.PrivacyPolicy
 import io.github.caimucheng.leaf.common.component.UserAgreement
 import io.github.caimucheng.leaf.common.ui.theme.LeafIDETheme
 import io.github.caimucheng.leaf.common.util.LAUNCH_MODE
+import io.github.caimucheng.leaf.common.util.isExternalLaunchMode
+import io.github.caimucheng.leaf.common.util.isInternalLaunchMode
 import io.github.caimucheng.leaf.common.util.setupApp
-import io.github.caimucheng.leaf.common.util.setupRootApp
 import io.github.caimucheng.leaf.common.util.sharedPreferences
 import io.github.caimucheng.leaf.ide.R
 import kotlinx.coroutines.launch
@@ -64,8 +68,48 @@ class SplashActivity : ComponentActivity() {
 
         val launchModeValue = sharedPreferences.getString(LAUNCH_MODE, null)
         if (launchModeValue != null) {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            if (isExternalLaunchMode) {
+                val permissions = arrayOf(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+
+                val readPermissionKind = ContextCompat.checkSelfPermission(this, permissions[0])
+                val writePermissionKind = ContextCompat.checkSelfPermission(this, permissions[1])
+                when {
+                    readPermissionKind == writePermissionKind &&
+                            readPermissionKind == PackageManager.PERMISSION_DENIED -> {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.read_and_write_permission_denied),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                    readPermissionKind == PackageManager.PERMISSION_DENIED -> {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.read_permission_denied),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                    writePermissionKind == PackageManager.PERMISSION_DENIED -> {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.write_permission_denied),
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+
+                    else -> {
+                        startActivity(Intent(this, MainActivity::class.java))
+                    }
+                }
+                finish()
+            } else if (isInternalLaunchMode) {
+                startActivity(Intent(this, MainActivity::class.java))
+            }
             return
         }
 
@@ -89,7 +133,6 @@ class SplashActivity : ComponentActivity() {
                     val readPermissionDenied = stringResource(id = R.string.read_permission_denied)
                     val writePermissionDenied =
                         stringResource(id = R.string.write_permission_denied)
-                    val rootPermissionDenied = stringResource(id = R.string.root_permission_denied)
                     val launcher = rememberLauncherForActivityResult(
                         contract = ActivityResultContracts.RequestMultiplePermissions(),
                         onResult = {
@@ -228,20 +271,6 @@ class SplashActivity : ComponentActivity() {
                                                             launchMode,
                                                             MainActivity::class.java
                                                         )
-                                                    }
-
-                                                    "root" -> {
-                                                        setupRootApp(
-                                                            launchMode,
-                                                            MainActivity::class.java
-                                                        ) {
-                                                            coroutineScope.launch {
-                                                                snackbarHostState.showSnackbar(
-                                                                    rootPermissionDenied,
-                                                                    withDismissAction = true
-                                                                )
-                                                            }
-                                                        }
                                                     }
                                                 }
                                             }
