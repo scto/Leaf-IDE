@@ -23,7 +23,7 @@ object PluginManager {
         return withContext(Dispatchers.IO) {
             mutex.lock()
             try {
-                // Remove all plugins
+                // Create a new list
                 plugins.clear()
 
                 val context = AppContext.context
@@ -33,6 +33,7 @@ object PluginManager {
                 )
                 for (application in applications) {
                     val name = application.loadLabel(packageManager).toString()
+                    val icon = application.loadIcon(packageManager)
                     val packageName = application.packageName
                     val packageInfo = packageManager.getPackageInfo(packageName, 0)
                     val versionName = packageInfo.versionName
@@ -102,6 +103,7 @@ object PluginManager {
                     plugins.add(
                         Plugin(
                             name,
+                            icon,
                             packageName,
                             versionName,
                             versionCode,

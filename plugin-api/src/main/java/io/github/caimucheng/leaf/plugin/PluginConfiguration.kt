@@ -16,6 +16,8 @@ abstract class PluginConfiguration {
 
     abstract fun enabled(): Boolean
 
+    abstract fun descriptionId(): Int
+
     open fun author(): String? {
         return null
     }

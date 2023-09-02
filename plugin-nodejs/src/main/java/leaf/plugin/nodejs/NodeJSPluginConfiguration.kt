@@ -8,6 +8,10 @@ class NodeJSPluginConfiguration : PluginConfiguration() {
         return true
     }
 
+    override fun descriptionId(): Int {
+        return R.string.plugin_description
+    }
+
     override fun author(): String {
         return "SuMuCheng"
     }

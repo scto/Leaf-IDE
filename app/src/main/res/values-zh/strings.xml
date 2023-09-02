@@ -18,4 +18,8 @@
     <string name="back">返回</string>
     <string name="no_plugin_project">没有插件工程</string>
     <string name="download_from_leaf_flow">可从 Leaf Flow 中下载</string>
+    <string name="no_plugin">没有插件</string>
+    <string name="download_from_leaf_flow_or_install_from_local">可从 Leaf Flow 下载或从本地安装</string>
+    <string name="expand">展开</string>
+    <string name="collapse">收起</string>
 </resources>

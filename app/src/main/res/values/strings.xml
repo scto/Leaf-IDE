@@ -19,4 +19,8 @@
     <string name="back">Back</string>
     <string name="no_plugin_project">No Plugin Project</string>
     <string name="download_from_leaf_flow">Available for download from Leaf Flow</string>
+    <string name="no_plugin">No Plugin</string>
+    <string name="download_from_leaf_flow_or_install_from_local">Can be downloaded from Leaf Flow or installed locally</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
 </resources>
