@@ -6,6 +6,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.core.content.edit
@@ -81,7 +82,19 @@ private fun setupInternal() {
     setupCommonChildren()
 }
 
+fun Context.uninstallAPP(packageName: String) {
+    val uri = Uri.fromParts("package", packageName, null)
+    startActivity(Intent(Intent.ACTION_DELETE, uri))
+}
+
 private fun setupCommonChildren() {
+    val nomediaFile = File(_LeafIDERootPath, ".nomedia")
+    try {
+        nomediaFile.createNewFile()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+
     _LeafIDEProjectPath = File(_LeafIDERootPath, "projects")
     _LeafIDEProjectPath.mkdirs()
 }

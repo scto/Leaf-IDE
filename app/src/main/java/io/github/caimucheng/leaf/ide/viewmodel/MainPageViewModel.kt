@@ -3,6 +3,8 @@ package io.github.caimucheng.leaf.ide.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.caimucheng.leaf.ide.manager.PluginManager
+import io.github.caimucheng.leaf.ide.manager.ProjectManager
+import io.github.caimucheng.leaf.ide.model.Project
 import io.github.caimucheng.leaf.plugin.model.Plugin
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +19,7 @@ sealed class MainPageUIState {
 
     object Loading : MainPageUIState()
 
-    data class UnLoadingProject(val plugins: List<Plugin>) : MainPageUIState()
+    data class UnLoadingProject(val projects: List<Project>) : MainPageUIState()
 
     data class UnLoadingPlugin(val plugins: List<Plugin>) : MainPageUIState()
 
@@ -60,10 +62,13 @@ class MainPageViewModel : ViewModel() {
             // Update plugin list first.
             PluginManager.fetchPlugins()
 
-            val plugins = PluginManager.getPlugins()
-                .filter { it.configuration.enabled() && it.project != null }
+            // Update project list
+            ProjectManager.fetchProjects()
+
+            val projects = ProjectManager.getProjects()
+                .filter { it.plugin.configuration.enabled() }
             // Update state
-            _state.value = MainPageUIState.UnLoadingProject(plugins)
+            _state.value = MainPageUIState.UnLoadingProject(projects)
         }
     }
 

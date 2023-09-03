@@ -24,4 +24,5 @@
     <string name="collapse">Collapse</string>
     <string name="no_project_or_plugins_for_projects">No Project Or Plugins For Projects</string>
     <string name="click_to_create_project">Click the floating button to create a project</string>
+    <string name="uninstall">Uninstall</string>
 </resources>

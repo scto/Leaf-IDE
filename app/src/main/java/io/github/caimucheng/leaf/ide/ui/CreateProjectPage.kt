@@ -116,7 +116,7 @@ fun CreateProjectPage(
             val lifecycle = LocalLifecycleOwner.current.lifecycle
             DisposableEffect(key1 = lifecycle) {
                 val observer = LifecycleEventObserver { _, event ->
-                    if (event === ON_START) {
+                    if (event === ON_RESUME) {
                         viewModel.intent.trySend(CreateProjectUIIntent.Refresh)
                     }
                 }
@@ -163,14 +163,14 @@ private fun NewProjectList(plugins: List<Plugin>) {
             ) {
                 Text(
                     text = stringResource(id = R.string.no_plugin_project),
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = stringResource(id = R.string.download_from_leaf_flow),
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
             }

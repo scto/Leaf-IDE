@@ -23,7 +23,7 @@ object PluginManager {
         return withContext(Dispatchers.IO) {
             mutex.lock()
             try {
-                // Create a new list
+                // Clear list
                 plugins.clear()
 
                 val context = AppContext.context
@@ -121,6 +121,17 @@ object PluginManager {
 
     fun getPlugins(): List<Plugin> {
         return plugins
+    }
+
+    fun getPluginByPackageName(packageName: String): Plugin? {
+        var result: Plugin? = null
+        for (plugin in plugins) {
+            if (plugin.packageName == packageName) {
+                result = plugin
+                break
+            }
+        }
+        return result
     }
 
 }

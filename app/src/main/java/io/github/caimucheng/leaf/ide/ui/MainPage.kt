@@ -1,11 +1,19 @@
 package io.github.caimucheng.leaf.ide.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +21,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +37,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -45,13 +57,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -66,12 +82,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.common.component.NoImplementation
+import io.github.caimucheng.leaf.common.util.uninstallAPP
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.activity.CREATE_PROJECT_PAGE
+import io.github.caimucheng.leaf.ide.model.Project
 import io.github.caimucheng.leaf.ide.viewmodel.MainPageUIIntent
 import io.github.caimucheng.leaf.ide.viewmodel.MainPageUIState
 import io.github.caimucheng.leaf.ide.viewmodel.MainPageViewModel
 import io.github.caimucheng.leaf.plugin.model.Plugin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 private const val HOME = "home"
 private const val PLUGIN = "plugin"
@@ -231,7 +252,7 @@ fun Home(pageNavController: NavController, viewModel: MainPageViewModel = viewMo
         var isLoading by rememberSaveable {
             mutableStateOf(true)
         }
-        var plugins: List<Plugin> by remember {
+        var projects: List<Project> by remember {
             mutableStateOf(emptyList())
         }
         Crossfade(
@@ -247,7 +268,7 @@ fun Home(pageNavController: NavController, viewModel: MainPageViewModel = viewMo
             if (it) {
                 LoadingPlugin()
             } else {
-                ProjectList(plugins)
+                ProjectList(projects)
             }
         }
 
@@ -259,7 +280,7 @@ fun Home(pageNavController: NavController, viewModel: MainPageViewModel = viewMo
             }
 
             is MainPageUIState.UnLoadingProject -> {
-                plugins = (state as MainPageUIState.UnLoadingProject).plugins
+                projects = (state as MainPageUIState.UnLoadingProject).projects
                 isLoading = false
             }
 
@@ -269,7 +290,7 @@ fun Home(pageNavController: NavController, viewModel: MainPageViewModel = viewMo
         val lifecycle = LocalLifecycleOwner.current.lifecycle
         DisposableEffect(key1 = lifecycle) {
             val observer = LifecycleEventObserver { _, event ->
-                if (event === Lifecycle.Event.ON_START) {
+                if (event === Lifecycle.Event.ON_RESUME) {
                     viewModel.intent.trySend(MainPageUIIntent.RefreshProject)
                 }
             }
@@ -298,8 +319,8 @@ fun Home(pageNavController: NavController, viewModel: MainPageViewModel = viewMo
 }
 
 @Composable
-private fun ProjectList(plugins: List<Plugin>) {
-    if (plugins.isEmpty()) {
+private fun ProjectList(projects: List<Project>) {
+    if (projects.isEmpty()) {
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()
@@ -318,14 +339,14 @@ private fun ProjectList(plugins: List<Plugin>) {
             ) {
                 Text(
                     text = stringResource(id = R.string.no_project_or_plugins_for_projects),
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = stringResource(id = R.string.click_to_create_project),
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
             }
@@ -374,7 +395,7 @@ fun Plugin(viewModel: MainPageViewModel = viewModel()) {
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(key1 = lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event === Lifecycle.Event.ON_START) {
+            if (event === Lifecycle.Event.ON_RESUME) {
                 viewModel.intent.trySend(MainPageUIIntent.RefreshPlugin)
             }
         }
@@ -385,7 +406,8 @@ fun Plugin(viewModel: MainPageViewModel = viewModel()) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("ReturnFromAwaitPointerEventScope")
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PluginList(plugins: List<Plugin>) {
     if (plugins.isEmpty()) {
@@ -407,14 +429,14 @@ private fun PluginList(plugins: List<Plugin>) {
             ) {
                 Text(
                     text = stringResource(id = R.string.no_plugin),
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = stringResource(id = R.string.download_from_leaf_flow_or_install_from_local),
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
             }
@@ -423,96 +445,172 @@ private fun PluginList(plugins: List<Plugin>) {
         Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxSize(),
             ) {
                 items(plugins.size) {
-                    val plugin = plugins[it]
-                    val pluginConfiguration = plugin.configuration
-                    val resources = plugin.main.getResources()
-                    val descriptionId = pluginConfiguration.descriptionId()
-                    Card(
-                        onClick = {
-
-                        }, colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.background
-                        ), shape = RoundedCornerShape(0.dp),
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        ConstraintLayout(
+                        val plugin = plugins[it]
+                        val pluginConfiguration = plugin.configuration
+                        val resources = plugin.main.getResources()
+                        val descriptionId = pluginConfiguration.descriptionId()
+                        val animatedOffset = remember {
+                            Animatable(Offset.Zero, Offset.VectorConverter)
+                        }
+                        var expanded by remember {
+                            mutableStateOf(false)
+                        }
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.background
+                            ), shape = RoundedCornerShape(0.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp)
+                                .combinedClickable(onLongClick = {
+                                    expanded = true
+                                }, onClick = {})
+                                .pointerInput(Unit) {
+                                    coroutineScope {
+                                        while (true) {
+                                            //获取点击位置
+                                            val newOffset = awaitPointerEventScope {
+                                                awaitFirstDown().position
+                                            }
+                                            launch {
+                                                animatedOffset.animateTo(
+                                                    newOffset,
+                                                    animationSpec = spring(stiffness = Spring.StiffnessLow)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                         ) {
-                            val (icon, content) = createRefs()
-                            Icon(
-                                bitmap = plugin.icon.toBitmap().asImageBitmap(),
-                                contentDescription = null,
+                            ConstraintLayout(
                                 modifier = Modifier
-                                    .size(40.dp)
-                                    .constrainAs(icon) {
-                                        centerVerticallyTo(parent)
-                                    },
-                                tint = Color.Unspecified
-                            )
-                            Column(Modifier.constrainAs(content) {
-                                linkTo(icon.end, parent.end, startMargin = 20.dp)
-                                centerVerticallyTo(parent)
-                                width = Dimension.fillToConstraints
-                            }) {
-                                Text(
-                                    text = plugin.name,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                                Spacer(modifier = Modifier.height(10.dp))
-                                var showExpandText by remember {
-                                    mutableStateOf(false)
-                                }
-                                var maxLines by remember {
-                                    mutableIntStateOf(2)
-                                }
-                                if (descriptionId != 0) {
-                                    Text(
-                                        text = resources.getString(descriptionId),
-                                        fontSize = 14.sp,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                        overflow = TextOverflow.Ellipsis,
-                                        onTextLayout = { textLayoutResult ->
-                                            if (textLayoutResult.hasVisualOverflow) {
-                                                showExpandText = true
-                                            }
+                                    .fillMaxWidth()
+                                    .padding(20.dp)
+                            ) {
+                                val (icon, content) = createRefs()
+                                Icon(
+                                    bitmap = plugin.icon.toBitmap().asImageBitmap(),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .constrainAs(icon) {
+                                            centerVerticallyTo(parent)
                                         },
-                                        maxLines = maxLines,
-                                        modifier = Modifier.animateContentSize()
+                                    tint = Color.Unspecified
+                                )
+                                Column(Modifier.constrainAs(content) {
+                                    linkTo(icon.end, parent.end, startMargin = 20.dp)
+                                    centerVerticallyTo(parent)
+                                    width = Dimension.fillToConstraints
+                                }) {
+                                    Text(
+                                        text = plugin.name,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
                                     )
-                                    if (showExpandText) {
-                                        Spacer(modifier = Modifier.height(10.dp))
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    var showExpandText by remember {
+                                        mutableStateOf(false)
+                                    }
+                                    var maxLines by remember {
+                                        mutableIntStateOf(2)
+                                    }
+                                    if (descriptionId != 0) {
                                         Text(
-                                            text = if (maxLines == 2)
-                                                stringResource(id = R.string.expand)
-                                            else
-                                                stringResource(id = R.string.collapse),
-                                            fontSize = 16.sp,
-                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                                            modifier = Modifier.clickable {
-                                                maxLines = if (maxLines == 2) {
-                                                    Int.MAX_VALUE
-                                                } else {
-                                                    2
+                                            text = resources.getString(descriptionId),
+                                            fontSize = 14.sp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                            overflow = TextOverflow.Ellipsis,
+                                            onTextLayout = { textLayoutResult ->
+                                                if (textLayoutResult.hasVisualOverflow) {
+                                                    showExpandText = true
                                                 }
-                                            }
+                                            },
+                                            maxLines = maxLines,
+                                            modifier = Modifier.animateContentSize()
                                         )
+                                        if (showExpandText) {
+                                            Spacer(modifier = Modifier.height(10.dp))
+                                            Text(
+                                                text = if (maxLines == 2)
+                                                    stringResource(id = R.string.expand)
+                                                else
+                                                    stringResource(id = R.string.collapse),
+                                                fontSize = 16.sp,
+                                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                                modifier = Modifier.clickable {
+                                                    maxLines = if (maxLines == 2) {
+                                                        Int.MAX_VALUE
+                                                    } else {
+                                                        2
+                                                    }
+                                                }
+                                            )
+                                        }
                                     }
                                 }
                             }
+                        }
+                        Box(modifier = Modifier.offset {
+                            IntOffset(
+                                animatedOffset.value.x.roundToInt(),
+                                animatedOffset.value.y.roundToInt()
+                            )
+                        }) {
+                            PluginDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                plugin = plugin
+                            )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PluginDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    plugin: Plugin
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier
+            .sizeIn(maxWidth = 240.dp)
+    ) {
+        Text(
+            text = plugin.name,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        val context = LocalContext.current
+        DropdownMenuItem(
+            text = {
+                Text(text = stringResource(id = R.string.uninstall))
+            },
+            onClick = {
+                onDismissRequest()
+                context.uninstallAPP(plugin.packageName)
+            }
+        )
     }
 }
 

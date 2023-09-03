@@ -23,4 +23,5 @@
     <string name="collapse">收起</string>
     <string name="no_project_or_plugins_for_projects">没有工程或适用于工程的插件</string>
     <string name="click_to_create_project">点击悬浮按钮以创建工程</string>
+    <string name="uninstall">卸载</string>
 </resources>
