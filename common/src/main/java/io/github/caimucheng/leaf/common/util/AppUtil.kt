@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.core.content.edit
-import io.github.caimucheng.leaf.common.application.AppContext
 import java.io.File
 import kotlin.properties.Delegates
 import kotlin.system.exitProcess
@@ -37,14 +36,14 @@ inline val Context.sharedPreferences: SharedPreferences
         return getSharedPreferences("Settings", Context.MODE_PRIVATE)
     }
 
-inline val isExternalLaunchMode: Boolean
+inline val Context.isExternalLaunchMode: Boolean
     get() {
-        return AppContext.context.launchMode() == "external"
+        return launchMode() == "external"
     }
 
-inline val isInternalLaunchMode: Boolean
+inline val Context.isInternalLaunchMode: Boolean
     get() {
-        return AppContext.context.launchMode() == "internal"
+        return launchMode() == "internal"
     }
 
 fun Context.launchMode(): String {
@@ -61,7 +60,7 @@ fun ComponentActivity.setupApp(launchMode: String, targetClass: Class<out Activi
     finish()
 }
 
-fun setupMainActivity(launchMode: String) {
+fun Context.setupMainActivity(launchMode: String) {
     when (launchMode) {
         "external" -> setupExternal()
         "internal" -> setupInternal()
@@ -75,8 +74,8 @@ private fun setupExternal() {
     setupCommonChildren()
 }
 
-private fun setupInternal() {
-    _LeafIDERootPath = File(AppContext.context.filesDir, "LeafIDE")
+private fun Context.setupInternal() {
+    _LeafIDERootPath = File(filesDir, "LeafIDE")
     _LeafIDERootPath.mkdirs()
 
     setupCommonChildren()

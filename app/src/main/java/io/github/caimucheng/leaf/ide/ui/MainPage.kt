@@ -47,8 +47,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,12 +56,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -73,9 +72,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.graphics.drawable.toBitmap
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -85,11 +81,11 @@ import io.github.caimucheng.leaf.common.component.NoImplementation
 import io.github.caimucheng.leaf.common.util.uninstallAPP
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.activity.CREATE_PROJECT_PAGE
-import io.github.caimucheng.leaf.ide.model.Project
-import io.github.caimucheng.leaf.ide.viewmodel.MainPageUIIntent
-import io.github.caimucheng.leaf.ide.viewmodel.MainPageUIState
-import io.github.caimucheng.leaf.ide.viewmodel.MainPageViewModel
+import io.github.caimucheng.leaf.plugin.application.appViewModel
 import io.github.caimucheng.leaf.plugin.model.Plugin
+import io.github.caimucheng.leaf.plugin.model.Project
+import io.github.caimucheng.leaf.plugin.viewmodel.AppUIIntent
+import io.github.caimucheng.leaf.plugin.viewmodel.AppUIState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -244,13 +240,14 @@ fun MainPage(pageNavController: NavController) {
     )
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun Home(pageNavController: NavController, viewModel: MainPageViewModel = viewModel()) {
+fun Home(pageNavController: NavController) {
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         val (floatingActionButton, crossFade) = createRefs()
 
         var isLoading by rememberSaveable {
-            mutableStateOf(true)
+            mutableStateOf(appViewModel.state.value !is AppUIState.Done)
         }
         var projects: List<Project> by remember {
             mutableStateOf(emptyList())
@@ -272,32 +269,25 @@ fun Home(pageNavController: NavController, viewModel: MainPageViewModel = viewMo
             }
         }
 
-        val state by viewModel.state.collectAsState()
-        when (state) {
-            MainPageUIState.Default -> {}
-            MainPageUIState.Loading -> {
-                isLoading = true
-            }
+        LaunchedEffect(key1 = appViewModel.state) {
+            appViewModel.state.collect {
+                when (it) {
+                    AppUIState.Default -> {}
+                    AppUIState.Loading -> {
+                        isLoading = true
+                    }
 
-            is MainPageUIState.UnLoadingProject -> {
-                projects = (state as MainPageUIState.UnLoadingProject).projects
-                isLoading = false
-            }
-
-            is MainPageUIState.UnLoadingPlugin -> {}
-        }
-
-        val lifecycle = LocalLifecycleOwner.current.lifecycle
-        DisposableEffect(key1 = lifecycle) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event === Lifecycle.Event.ON_RESUME) {
-                    viewModel.intent.trySend(MainPageUIIntent.RefreshProject)
+                    is AppUIState.Done -> {
+                        projects = it.projects
+                            .filter { project -> project.plugin.configuration.enabled() }
+                        isLoading = false
+                    }
                 }
             }
-            lifecycle.addObserver(observer)
-            onDispose {
-                lifecycle.removeObserver(observer)
-            }
+        }
+
+        if (appViewModel.state.value === AppUIState.Default) {
+            appViewModel.intent.trySend(AppUIIntent.Refresh)
         }
 
         FloatingActionButton(
@@ -356,10 +346,11 @@ private fun ProjectList(projects: List<Project>) {
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun Plugin(viewModel: MainPageViewModel = viewModel()) {
+fun Plugin() {
     var isLoading by rememberSaveable {
-        mutableStateOf(true)
+        mutableStateOf(appViewModel.state.value !is AppUIState.Done)
     }
     var plugins: List<Plugin> by remember {
         mutableStateOf(emptyList())
@@ -377,31 +368,19 @@ fun Plugin(viewModel: MainPageViewModel = viewModel()) {
         }
     }
 
-    val state by viewModel.state.collectAsState()
-    when (state) {
-        MainPageUIState.Default -> {}
-        MainPageUIState.Loading -> {
-            isLoading = true
-        }
+    LaunchedEffect(key1 = appViewModel.state) {
+        appViewModel.state.collect {
+            when (it) {
+                AppUIState.Default -> {}
+                AppUIState.Loading -> {
+                    isLoading = true
+                }
 
-        is MainPageUIState.UnLoadingPlugin -> {
-            plugins = (state as MainPageUIState.UnLoadingPlugin).plugins
-            isLoading = false
-        }
-
-        is MainPageUIState.UnLoadingProject -> {}
-    }
-
-    val lifecycle = LocalLifecycleOwner.current.lifecycle
-    DisposableEffect(key1 = lifecycle) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event === Lifecycle.Event.ON_RESUME) {
-                viewModel.intent.trySend(MainPageUIIntent.RefreshPlugin)
+                is AppUIState.Done -> {
+                    plugins = (appViewModel.state.value as AppUIState.Done).plugins
+                    isLoading = false
+                }
             }
-        }
-        lifecycle.addObserver(observer)
-        onDispose {
-            lifecycle.removeObserver(observer)
         }
     }
 }
@@ -492,6 +471,7 @@ private fun PluginList(plugins: List<Plugin>) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(20.dp)
+                                    .alpha(if (plugin.configuration.enabled()) 1f else 0.6f)
                             ) {
                                 val (icon, content) = createRefs()
                                 Icon(

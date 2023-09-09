@@ -24,6 +24,7 @@ object Versions {
     const val Navigation = "2.7.1"
     const val MaterialIconsExtended = "1.5.0"
     const val ConstraintLayout = "1.0.1"
+    const val LifecycleExtensions = "2.2.0"
 
     // The blur lib
     const val Cloudy = "0.1.2"

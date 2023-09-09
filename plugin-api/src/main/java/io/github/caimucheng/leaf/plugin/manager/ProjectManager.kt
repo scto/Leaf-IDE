@@ -1,7 +1,7 @@
-package io.github.caimucheng.leaf.ide.manager
+package io.github.caimucheng.leaf.plugin.manager
 
 import io.github.caimucheng.leaf.common.util.LeafIDEProjectPath
-import io.github.caimucheng.leaf.ide.model.Project
+import io.github.caimucheng.leaf.plugin.model.Project
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext

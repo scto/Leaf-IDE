@@ -8,6 +8,8 @@ android {
 
     defaultConfig {
         applicationId = "leaf.plugin.nodejs"
+        versionCode = NodeJSPluginVersions.VersionCode
+        versionName = NodeJSPluginVersions.VersionName
     }
 
     kotlinOptions {

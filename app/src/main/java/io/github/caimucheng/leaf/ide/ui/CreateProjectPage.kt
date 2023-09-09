@@ -29,8 +29,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -50,22 +48,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.Lifecycle.Event.*
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.ide.R
-import io.github.caimucheng.leaf.ide.viewmodel.CreateProjectUIIntent
-import io.github.caimucheng.leaf.ide.viewmodel.CreateProjectUIState
-import io.github.caimucheng.leaf.ide.viewmodel.CreateProjectViewModel
+import io.github.caimucheng.leaf.plugin.application.appViewModel
 import io.github.caimucheng.leaf.plugin.model.Plugin
+import io.github.caimucheng.leaf.plugin.viewmodel.AppUIState
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateProjectPage(
-    pageNavController: NavHostController,
-    viewModel: CreateProjectViewModel = viewModel()
+    pageNavController: NavHostController
 ) {
     LeafApp(
         title = stringResource(id = R.string.create_project),
@@ -100,29 +94,20 @@ fun CreateProjectPage(
                 }
             }
 
-            val state by viewModel.state.collectAsState()
-            when (state) {
-                CreateProjectUIState.Default -> {}
-                CreateProjectUIState.Loading -> {
-                    isLoading = true
-                }
+            LaunchedEffect(key1 = appViewModel.state) {
+                appViewModel.state.collect {
+                    when (it) {
+                        AppUIState.Default -> {}
+                        AppUIState.Loading -> {
+                            isLoading = true
+                        }
 
-                is CreateProjectUIState.UnLoading -> {
-                    plugins = (state as CreateProjectUIState.UnLoading).plugins
-                    isLoading = false
-                }
-            }
-
-            val lifecycle = LocalLifecycleOwner.current.lifecycle
-            DisposableEffect(key1 = lifecycle) {
-                val observer = LifecycleEventObserver { _, event ->
-                    if (event === ON_RESUME) {
-                        viewModel.intent.trySend(CreateProjectUIIntent.Refresh)
+                        is AppUIState.Done -> {
+                            plugins = it.plugins
+                                .filter { plugin -> plugin.configuration.enabled() }
+                            isLoading = false
+                        }
                     }
-                }
-                lifecycle.addObserver(observer)
-                onDispose {
-                    lifecycle.removeObserver(observer)
                 }
             }
         }
@@ -204,12 +189,9 @@ private fun NewProjectList(plugins: List<Plugin>) {
                     ) {
                         Card(
                             modifier = Modifier.padding(top = 10.dp),
-                            shape = RoundedCornerShape(4.dp),
+                            shape = RoundedCornerShape(0.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.background
-                            ),
-                            elevation = CardDefaults.cardElevation(
-                                defaultElevation = 4.dp
                             )
                         ) {
                             Icon(

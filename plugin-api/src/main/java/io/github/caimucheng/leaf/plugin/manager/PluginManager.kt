@@ -1,10 +1,9 @@
-package io.github.caimucheng.leaf.ide.manager
+package io.github.caimucheng.leaf.plugin.manager
 
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import dalvik.system.PathClassLoader
-import io.github.caimucheng.leaf.common.application.AppContext
 import io.github.caimucheng.leaf.plugin.PluginConfiguration
 import io.github.caimucheng.leaf.plugin.PluginMain
 import io.github.caimucheng.leaf.plugin.PluginProject
@@ -19,14 +18,13 @@ object PluginManager {
 
     private val plugins = ArrayList<Plugin>()
 
-    suspend fun fetchPlugins() {
+    suspend fun fetchPlugins(context: Context) {
         return withContext(Dispatchers.IO) {
             mutex.lock()
             try {
                 // Clear list
                 plugins.clear()
 
-                val context = AppContext.context
                 val packageManager = context.packageManager
                 val applications = packageManager.getInstalledApplications(
                     PackageManager.GET_META_DATA
