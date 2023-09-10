@@ -7,48 +7,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import io.github.caimucheng.leaf.common.component.AnimatedNavHost
 import io.github.caimucheng.leaf.common.ui.theme.LeafIDETheme
 import io.github.caimucheng.leaf.common.util.launchMode
 import io.github.caimucheng.leaf.common.util.setupMainActivity
-import io.github.caimucheng.leaf.ide.ui.CreateProjectPage
-import io.github.caimucheng.leaf.ide.ui.MainPage
-import io.github.caimucheng.leaf.ide.ui.SettingsGeneralPage
-
-const val MAIN_PAGE = "/main_page"
-const val CREATE_PROJECT_PAGE = "/create_project_page"
-const val SETTINGS_GENERAL_PAGE = "/settings_general_page"
+import io.github.caimucheng.leaf.ide.LeafIDENavHost
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setupMainActivity(launchMode())
 
         setContent {
             LeafIDETheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val pageNavController = rememberNavController()
-                    AnimatedNavHost(pageNavController, MAIN_PAGE) {
-                        composable(MAIN_PAGE) {
-                            MainPage(pageNavController)
-                        }
-                        composable(CREATE_PROJECT_PAGE) {
-                            CreateProjectPage(pageNavController)
-                        }
-                        composable(SETTINGS_GENERAL_PAGE) {
-                            SettingsGeneralPage(pageNavController)
-                        }
-                    }
+                    LeafIDENavHost(
+                        pageNavController = pageNavController
+                    )
                 }
             }
         }
     }
-
 }

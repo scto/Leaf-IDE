@@ -82,9 +82,8 @@ import io.github.caimucheng.leaf.common.model.Preference
 import io.github.caimucheng.leaf.common.ui.preferences.PreferenceScreen
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import io.github.caimucheng.leaf.common.util.uninstallAPP
+import io.github.caimucheng.leaf.ide.Destinations
 import io.github.caimucheng.leaf.ide.R
-import io.github.caimucheng.leaf.ide.activity.CREATE_PROJECT_PAGE
-import io.github.caimucheng.leaf.ide.activity.SETTINGS_GENERAL_PAGE
 import io.github.caimucheng.leaf.plugin.application.appViewModel
 import io.github.caimucheng.leaf.plugin.model.Plugin
 import io.github.caimucheng.leaf.plugin.model.Project
@@ -296,7 +295,7 @@ fun Home(pageNavController: NavController) {
 
         FloatingActionButton(
             onClick = {
-                pageNavController.navigate(CREATE_PROJECT_PAGE)
+                pageNavController.navigate(Destinations.CREATE_PROJECT_PAGE)
             },
             containerColor = MaterialTheme.colorScheme.primary,
             shape = RoundedCornerShape(48.dp),
@@ -631,7 +630,7 @@ fun Settings(pageNavController: NavController) {
                         summary = stringResource(id = R.string.general_summary),
                         singleLineTitle = true,
                         onClick = {
-                            pageNavController.navigate(SETTINGS_GENERAL_PAGE)
+                            pageNavController.navigate(Destinations.SETTINGS_GENERAL_PAGE)
                         }
                     ),
                     Preference.PreferenceItem.TextPreference(
