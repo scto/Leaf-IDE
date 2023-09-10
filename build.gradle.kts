@@ -1,13 +1,11 @@
-
 import com.android.build.gradle.BaseExtension
 import java.io.FileInputStream
 import java.util.Properties
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
-    id("com.android.application") version Versions.AndroidGradlePluginVersion apply false
-    id("org.jetbrains.kotlin.android") version Versions.KotlinVersion apply false
-    id("com.android.library") version Versions.AndroidGradlePluginVersion apply false
+    alias(libs.plugins.com.android.application) apply false
+    alias(libs.plugins.org.jetbrains.kotlin.android) apply false
+    alias(libs.plugins.com.android.library) apply false
 }
 
 fun Project.configureBaseExtension() {
@@ -16,7 +14,6 @@ fun Project.configureBaseExtension() {
 
         defaultConfig {
             minSdk = Versions.MinSdkVersion
-            //noinspection ExpiredTargetSdkVersion
             targetSdk = Versions.TargetSdkVersion
             versionCode = Versions.VersionCode
             versionName = Versions.VersionName
