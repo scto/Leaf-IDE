@@ -17,6 +17,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +39,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -82,9 +86,10 @@ import io.github.caimucheng.leaf.common.model.Preference
 import io.github.caimucheng.leaf.common.ui.preferences.PreferenceScreen
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import io.github.caimucheng.leaf.common.util.uninstallAPP
-import io.github.caimucheng.leaf.ide.Destinations
 import io.github.caimucheng.leaf.ide.R
+import io.github.caimucheng.leaf.ide.navhost.Destinations
 import io.github.caimucheng.leaf.plugin.application.appViewModel
+import io.github.caimucheng.leaf.plugin.manager.PluginManager
 import io.github.caimucheng.leaf.plugin.model.Plugin
 import io.github.caimucheng.leaf.plugin.model.Project
 import io.github.caimucheng.leaf.plugin.viewmodel.AppUIIntent
@@ -266,7 +271,7 @@ fun Home(pageNavController: NavController) {
                 }
         ) {
             if (it) {
-                LoadingPlugin()
+                Loading()
             } else {
                 ProjectList(projects)
             }
@@ -311,9 +316,10 @@ fun Home(pageNavController: NavController) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProjectList(projects: List<Project>) {
-    if (projects.isEmpty()) {
+    if (!projects.isEmpty()) {
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()
@@ -345,7 +351,96 @@ private fun ProjectList(projects: List<Project>) {
             }
         }
     } else {
+        if (PluginManager.getPlugins().firstOrNull() == null) {
+            return
+        }
+        val testLists = listOf(
+            Project(
+                "NodeJS Project",
+                PluginManager.getPlugins().first(),
+                emptyMap()
+            )
+        )
+        Column(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(testLists.size) {
+                    val project = testLists[it]
+                    val plugin = project.plugin
+                    val pluginProject = plugin.project!!
+                    val resources = pluginProject.getResources()
 
+                    Card(
+                        onClick = {},
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.background
+                        ),
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 2.dp,
+                            pressedElevation = 2.dp
+                        )
+                    ) {
+                        Column(Modifier.fillMaxWidth()) {
+                            Text(
+                                text = project.name,
+                                fontSize = 18.sp,
+                                modifier = Modifier.padding(
+                                    start = 20.dp, end = 20.dp, top = 20.dp
+                                )
+                            )
+                            Text(
+                                text = stringResource(
+                                    id = R.string.plugin_support,
+                                    plugin.packageName
+                                ),
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(
+                                    start = 20.dp, end = 20.dp, top = 5.dp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                            Divider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 20.dp, end = 20.dp, top = 15.dp)
+                                    .height(1.dp),
+                                color = DividerDefaults.color.copy(alpha = 0.4f)
+                            )
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        start = 20.dp,
+                                        end = 20.dp,
+                                        top = 15.dp,
+                                        bottom = 15.dp
+                                    ),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Icon(
+                                    bitmap = resources.getDrawable(
+                                        pluginProject.getDisplayedProjectLogoResId(),
+                                        LocalContext.current.theme
+                                    ).toBitmap().asImageBitmap(),
+                                    tint = Color.Unspecified,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = resources.getString(pluginProject.getDisplayedProjectTitleId()),
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
     }
 }
 
@@ -365,7 +460,7 @@ fun Plugin() {
             .fillMaxSize()
     ) {
         if (it) {
-            LoadingPlugin()
+            Loading()
         } else {
             PluginList(plugins)
         }
@@ -598,7 +693,7 @@ private fun PluginDropdownMenu(
 }
 
 @Composable
-private fun LoadingPlugin() {
+private fun Loading() {
     Box(
         modifier = Modifier
             .fillMaxSize()
