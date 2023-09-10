@@ -11,7 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import io.github.caimucheng.leaf.common.ui.theme.LeafIDETheme
 import io.github.caimucheng.leaf.common.util.launchMode
 import io.github.caimucheng.leaf.common.util.setupMainActivity
-import io.github.caimucheng.leaf.ide.LeafIDENavHost
+import io.github.caimucheng.leaf.ide.navhost.LeafIDENavHost
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

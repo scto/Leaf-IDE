@@ -12,4 +12,12 @@ class NodeJSPluginProject : PluginProject() {
         return R.string.displayed_nodejs_title
     }
 
+    override fun getDisplayedProjectLogoResId(): Int {
+        return R.drawable.nodejs_logo
+    }
+
+    override fun getDisplayedProjectTitleId(): Int {
+        return R.string.displayed_project_title
+    }
+
 }

@@ -38,4 +38,5 @@
     <string name="auto_light_and_dark_theme_summary">系统为深色或浅色主题时自动切换到相同的主题</string>
     <string name="dark_theme">深色主题</string>
     <string name="dark_theme_summary">将软件切换至深色主题</string>
+    <string name="plugin_support">插件支持: %s</string>
 </resources>

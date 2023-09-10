@@ -1,4 +1,4 @@
-package io.github.caimucheng.leaf.ide
+package io.github.caimucheng.leaf.ide.navhost
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController

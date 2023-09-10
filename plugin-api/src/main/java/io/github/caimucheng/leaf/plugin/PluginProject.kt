@@ -24,4 +24,14 @@ abstract class PluginProject {
      * */
     abstract fun getDisplayedTitleId(): Int
 
+    /**
+     * @return The displayed project logo resource id
+     * */
+    abstract fun getDisplayedProjectLogoResId(): Int
+
+    /**
+     * @return The displayed project title resource id
+     * */
+    abstract fun getDisplayedProjectTitleId(): Int
+
 }
