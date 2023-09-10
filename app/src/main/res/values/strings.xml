@@ -25,4 +25,19 @@
     <string name="no_project_or_plugins_for_projects">No Project Or Plugins For Projects</string>
     <string name="click_to_create_project">Click the floating button to create a project</string>
     <string name="uninstall">Uninstall</string>
+    <string name="configuration">Configuration</string>
+    <string name="general">General</string>
+    <string name="editor">Editor</string>
+    <string name="build_and_run">Build &amp; Run</string>
+    <string name="general_summary">General IDE configuration</string>
+    <string name="editor_summary">Configure the editor</string>
+    <string name="build_and_run_summary">Configure the build</string>
+    <string name="general_configuration">General Configuration</string>
+    <string name="material_you" translatable="false">Material You</string>
+    <string name="material_you_summary_supported">Determine the app theme based on your device\'s current wallpaper</string>
+    <string name="material_you_summary_unsupported">Determine the app theme based on your device\'s current wallpaper (not supported, requires device to be Android 12+)</string>
+    <string name="auto_light_and_dark_theme">Automatically Enable Light And Dark Themes</string>
+    <string name="auto_light_and_dark_theme_summary">Automatically switch to the same theme when the system is in dark or light theme</string>
+    <string name="dark_theme">Dark Theme</string>
+    <string name="dark_theme_summary">Switch the software to dark theme</string>
 </resources>

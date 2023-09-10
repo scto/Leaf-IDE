@@ -36,6 +36,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":plugin-api"))
 
+    implementation("androidx.datastore:datastore-preferences:${Versions.DataStore}")
     implementation("androidx.lifecycle:lifecycle-extensions:${Versions.LifecycleExtensions}")
     implementation("androidx.core:core-splashscreen:${Versions.SplashScreen}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.MaterialIconsExtended}")

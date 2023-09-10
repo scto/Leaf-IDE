@@ -78,9 +78,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.common.component.NoImplementation
+import io.github.caimucheng.leaf.common.model.Preference
+import io.github.caimucheng.leaf.common.ui.preferences.PreferenceScreen
+import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import io.github.caimucheng.leaf.common.util.uninstallAPP
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.activity.CREATE_PROJECT_PAGE
+import io.github.caimucheng.leaf.ide.activity.SETTINGS_GENERAL_PAGE
 import io.github.caimucheng.leaf.plugin.application.appViewModel
 import io.github.caimucheng.leaf.plugin.model.Plugin
 import io.github.caimucheng.leaf.plugin.model.Project
@@ -131,7 +135,7 @@ fun MainPage(pageNavController: NavController) {
                             LeafFlow()
                         }
                         composable(SETTINGS) {
-                            Settings()
+                            Settings(pageNavController)
                         }
                     }
                 }
@@ -616,6 +620,40 @@ fun LeafFlow() {
 }
 
 @Composable
-fun Settings() {
-    NoImplementation()
+fun Settings(pageNavController: NavController) {
+    PreferenceScreen(
+        items = listOf(
+            Preference.PreferenceGroup(
+                title = stringResource(id = R.string.configuration),
+                preferenceItems = listOf(
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(id = R.string.general),
+                        summary = stringResource(id = R.string.general_summary),
+                        singleLineTitle = true,
+                        onClick = {
+                            pageNavController.navigate(SETTINGS_GENERAL_PAGE)
+                        }
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(id = R.string.editor),
+                        summary = stringResource(id = R.string.editor_summary),
+                        singleLineTitle = true,
+                        onClick = {
+
+                        }
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(id = R.string.build_and_run),
+                        summary = stringResource(id = R.string.build_and_run_summary),
+                        singleLineTitle = true,
+                        onClick = {
+
+                        }
+                    )
+                )
+            )
+        ),
+        modifier = Modifier.fillMaxSize(),
+        dataStore = LocalContext.current.SettingsDataStore
+    )
 }

@@ -10,9 +10,18 @@ import android.net.Uri
 import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import java.io.File
 import kotlin.properties.Delegates
 import kotlin.system.exitProcess
+
+val Context.SettingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+val MaterialYouEnabledKey = booleanPreferencesKey("material_you_enabled")
+val AutoDarkLightTheme = booleanPreferencesKey("auto_dark_light_theme")
+val AppBrightness = booleanPreferencesKey("app_brightness")
 
 const val LAUNCH_MODE = "launch_mode"
 

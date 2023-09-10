@@ -24,4 +24,18 @@
     <string name="no_project_or_plugins_for_projects">没有工程或适用于工程的插件</string>
     <string name="click_to_create_project">点击悬浮按钮以创建工程</string>
     <string name="uninstall">卸载</string>
+    <string name="configuration">配置</string>
+    <string name="general">常规</string>
+    <string name="editor">编辑器</string>
+    <string name="build_and_run">构建和运行</string>
+    <string name="general_summary">常规 IDE 配置</string>
+    <string name="editor_summary">编辑器配置</string>
+    <string name="build_and_run_summary">构建配置</string>
+    <string name="general_configuration">常规配置</string>
+    <string name="material_you_summary_supported">根据您设备的当前的壁纸来决定应用主题</string>
+    <string name="material_you_summary_unsupported">根据您设备的当前的壁纸来决定应用主题（不支持，需要设备为 Android 12+）</string>
+    <string name="auto_light_and_dark_theme">自动启用深浅色主题</string>
+    <string name="auto_light_and_dark_theme_summary">系统为深色或浅色主题时自动切换到相同的主题</string>
+    <string name="dark_theme">深色主题</string>
+    <string name="dark_theme_summary">将软件切换至深色主题</string>
 </resources>

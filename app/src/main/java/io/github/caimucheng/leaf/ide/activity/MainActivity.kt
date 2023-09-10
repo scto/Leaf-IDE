@@ -15,9 +15,11 @@ import io.github.caimucheng.leaf.common.util.launchMode
 import io.github.caimucheng.leaf.common.util.setupMainActivity
 import io.github.caimucheng.leaf.ide.ui.CreateProjectPage
 import io.github.caimucheng.leaf.ide.ui.MainPage
+import io.github.caimucheng.leaf.ide.ui.SettingsGeneralPage
 
 const val MAIN_PAGE = "/main_page"
 const val CREATE_PROJECT_PAGE = "/create_project_page"
+const val SETTINGS_GENERAL_PAGE = "/settings_general_page"
 
 class MainActivity : ComponentActivity() {
 
@@ -39,6 +41,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(CREATE_PROJECT_PAGE) {
                             CreateProjectPage(pageNavController)
+                        }
+                        composable(SETTINGS_GENERAL_PAGE) {
+                            SettingsGeneralPage(pageNavController)
                         }
                     }
                 }

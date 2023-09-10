@@ -20,6 +20,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:${Versions.DataStore}")
     implementation("androidx.core:core-splashscreen:${Versions.SplashScreen}")
     implementation("androidx.compose.material:material-icons-extended:${Versions.MaterialIconsExtended}")
     implementation("androidx.constraintlayout:constraintlayout-compose:${Versions.ConstraintLayout}")
