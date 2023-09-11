@@ -8,8 +8,8 @@ on:
       - '.github/**'
       - '.idea/**'
       - '!.github/workflows/**'
-    branches:
-      - master
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -38,19 +38,9 @@ jobs:
       - name: Accept Android SDK licenses
         run: yes | /usr/local/lib/android/sdk/tools/bin/sdkmanager --licenses
 
-      - name: Build release APK
-        id: buildRelease
-        uses: gradle/gradle-build-action@v2.4.2
-        with:
-          arguments: assembleRelease
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-
       - name: Build debug APK
-        id: buildDebug
         uses: gradle/gradle-build-action@v2.4.2
+        id: buildDebug
         with:
           arguments: assembleDebug
         env:
@@ -58,16 +48,28 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Upload release APK artifact
-        uses: actions/upload-artifact@v3
+      - name: Build release APK
+        uses: gradle/gradle-build-action@v2.4.2
+        id: buildRelease
         with:
-          name: app-release
-          path: app/build/outputs/apk/release/app-release.apk
-          if-no-files-found: error
+          arguments: assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload debug APK artifact
         uses: actions/upload-artifact@v3
+        if: ${{ always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && steps.buildDebug.outcome == 'success' }}
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Upload release APK artifact
+        uses: actions/upload-artifact@v3
+        if: ${{ always() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master' && steps.buildRelease.outcome == 'success' }}
+        with:
+          name: app-release
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
