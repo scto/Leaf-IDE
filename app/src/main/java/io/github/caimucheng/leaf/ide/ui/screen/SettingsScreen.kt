@@ -72,6 +72,7 @@ fun SettingsGeneralScreen(pageNavController: NavHostController) {
 private fun MineUI() {
     val dataStoreManager = DataStoreManager(LocalContext.current.SettingsDataStore)
     val isSupportedMaterialYou = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val isSupportedDarkMode = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
     val materialYouRequest = PreferenceRequest(
         key = MaterialYouEnabledKey,
         defaultValue = isSupportedMaterialYou
@@ -113,7 +114,7 @@ private fun MineUI() {
                         title = stringResource(id = R.string.auto_light_and_dark_theme),
                         summary = stringResource(id = R.string.auto_light_and_dark_theme_summary),
                         singleLineTitle = true,
-                        enabled = isSupportedMaterialYou,
+                        enabled = isSupportedDarkMode,
                         icon = {
                             Icon(
                                 imageVector = Icons.Filled.Brightness6,
