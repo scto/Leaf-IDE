@@ -10,18 +10,18 @@ plugins {
 
 fun Project.configureBaseExtension() {
     extensions.findByType(BaseExtension::class.java)?.run {
-        compileSdkVersion(Versions.CompileSdkVersion)
+        compileSdkVersion(Versions.COMPILE_SDK_VERSION)
 
         defaultConfig {
-            minSdk = Versions.MinSdkVersion
-            targetSdk = Versions.TargetSdkVersion
-            versionCode = Versions.VersionCode
-            versionName = Versions.VersionName
+            minSdk = Versions.MIN_SDK_VERSION
+            targetSdk = Versions.TARGET_SDK_VERSION
+            versionCode = Versions.VERSION_CODE
+            versionName = Versions.VERSION_NAME
         }
 
         compileOptions {
-            sourceCompatibility = Versions.CompilingJavaVersion
-            targetCompatibility = Versions.CompilingJavaVersion
+            sourceCompatibility = Versions.COMPILING_JAVA_VERSION
+            targetCompatibility = Versions.COMPILING_JAVA_VERSION
         }
 
         signingConfigs {
@@ -69,12 +69,12 @@ fun Project.configureBaseExtension() {
 
         buildTypes {
             getByName("debug") {
-                isMinifyEnabled = false
                 signingConfig = signingConfigs.getByName("shared")
+                isMinifyEnabled = false
             }
             getByName("release") {
-                isMinifyEnabled = false
                 signingConfig = signingConfigs.getByName("shared")
+                isMinifyEnabled = false
             }
         }
     }

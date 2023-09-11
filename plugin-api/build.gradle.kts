@@ -7,7 +7,7 @@ android {
     namespace = "io.github.caimucheng.leaf.plugin"
 
     kotlinOptions {
-        jvmTarget = Versions.JvmTarget
+        jvmTarget = Versions.JVM_TARGET_VERSION
     }
 
     buildFeatures {
@@ -15,7 +15,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = Versions.KotlinCompilerExtensionVersion
+        kotlinCompilerExtensionVersion = Versions.KOTLIN_COMPILER_EXTENSION_VERSION
     }
 }
 

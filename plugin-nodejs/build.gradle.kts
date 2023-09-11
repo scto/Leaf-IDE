@@ -8,12 +8,12 @@ android {
 
     defaultConfig {
         applicationId = "leaf.plugin.nodejs"
-        versionCode = NodeJSPluginVersions.VersionCode
-        versionName = NodeJSPluginVersions.VersionName
+        versionCode = NodeJSPluginVersions.VERSION_CODE
+        versionName = NodeJSPluginVersions.VERSION_NAME
     }
 
     kotlinOptions {
-        jvmTarget = Versions.JvmTarget
+        jvmTarget = Versions.JVM_TARGET_VERSION
     }
 
     buildFeatures {
@@ -21,7 +21,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = Versions.KotlinCompilerExtensionVersion
+        kotlinCompilerExtensionVersion = Versions.KOTLIN_COMPILER_EXTENSION_VERSION
     }
 
     packaging {
