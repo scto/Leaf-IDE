@@ -1,4 +1,4 @@
-package io.github.caimucheng.leaf.ide.ui
+package io.github.caimucheng.leaf.ide.ui.screen
 
 import android.annotation.SuppressLint
 import android.os.Build
@@ -40,7 +40,7 @@ import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsGeneralPage(pageNavController: NavHostController) {
+fun SettingsGeneralScreen(pageNavController: NavHostController) {
     LeafApp(
         title = stringResource(id = R.string.general_configuration),
         navigationIcon = {

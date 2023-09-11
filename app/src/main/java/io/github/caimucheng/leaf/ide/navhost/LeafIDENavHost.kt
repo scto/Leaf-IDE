@@ -4,11 +4,11 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import io.github.caimucheng.leaf.common.component.AnimatedNavHost
-import io.github.caimucheng.leaf.ide.ui.CreateProjectPage
-import io.github.caimucheng.leaf.ide.ui.MainPage
-import io.github.caimucheng.leaf.ide.ui.SettingsGeneralPage
+import io.github.caimucheng.leaf.ide.ui.screen.CreateProjectScreen
+import io.github.caimucheng.leaf.ide.ui.screen.MainScreen
+import io.github.caimucheng.leaf.ide.ui.screen.SettingsGeneralScreen
 
-object Destinations {
+object LeafIDEDestinations {
     const val MAIN_PAGE = "/main_page"
     const val CREATE_PROJECT_PAGE = "/create_project_page"
     const val SETTINGS_GENERAL_PAGE = "/settings_general_page"
@@ -16,15 +16,15 @@ object Destinations {
 
 @Composable
 fun LeafIDENavHost(pageNavController: NavHostController) {
-    AnimatedNavHost(pageNavController, Destinations.MAIN_PAGE) {
-        composable(Destinations.MAIN_PAGE) {
-            MainPage(pageNavController)
+    AnimatedNavHost(pageNavController, LeafIDEDestinations.MAIN_PAGE) {
+        composable(LeafIDEDestinations.MAIN_PAGE) {
+            MainScreen(pageNavController)
         }
-        composable(Destinations.CREATE_PROJECT_PAGE) {
-            CreateProjectPage(pageNavController)
+        composable(LeafIDEDestinations.CREATE_PROJECT_PAGE) {
+            CreateProjectScreen(pageNavController)
         }
-        composable(Destinations.SETTINGS_GENERAL_PAGE) {
-            SettingsGeneralPage(pageNavController)
+        composable(LeafIDEDestinations.SETTINGS_GENERAL_PAGE) {
+            SettingsGeneralScreen(pageNavController)
         }
     }
 }

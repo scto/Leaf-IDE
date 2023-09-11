@@ -1,4 +1,4 @@
-package io.github.caimucheng.leaf.ide.ui
+package io.github.caimucheng.leaf.ide.ui.screen
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.Crossfade
@@ -47,7 +47,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.lifecycle.Lifecycle.Event.*
 import androidx.navigation.NavHostController
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.ide.R
@@ -58,7 +57,7 @@ import io.github.caimucheng.leaf.plugin.viewmodel.AppUIState
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateProjectPage(
+fun CreateProjectScreen(
     pageNavController: NavHostController
 ) {
     LeafApp(
