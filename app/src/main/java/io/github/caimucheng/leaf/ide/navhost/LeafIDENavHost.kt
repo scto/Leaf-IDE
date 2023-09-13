@@ -9,9 +9,9 @@ import io.github.caimucheng.leaf.ide.ui.screen.MainScreen
 import io.github.caimucheng.leaf.ide.ui.screen.SettingsGeneralScreen
 
 object LeafIDEDestinations {
-    const val MAIN_PAGE = "/main_page"
-    const val CREATE_PROJECT_PAGE = "/create_project_page"
-    const val SETTINGS_GENERAL_PAGE = "/settings_general_page"
+    const val MAIN_PAGE = "/main"
+    const val CREATE_PROJECT_PAGE = "/project/create"
+    const val SETTINGS_GENERAL_PAGE = "/settings/general"
 }
 
 @Composable

@@ -1,9 +1,6 @@
 package io.github.caimucheng.leaf.ide.ui.screen
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,21 +24,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.common.icon.Needle
 import io.github.caimucheng.leaf.ide.R
-import io.github.caimucheng.leaf.ide.ui.page.HomePage
-import io.github.caimucheng.leaf.ide.ui.page.LeafFlowPage
-import io.github.caimucheng.leaf.ide.ui.page.PluginPage
-import io.github.caimucheng.leaf.ide.ui.page.SettingsPage
-
-private const val HOME = "home"
-private const val PLUGIN = "plugin"
-private const val LEAF_FLOW = "leaf_flow"
-private const val SETTINGS = "settings"
+import io.github.caimucheng.leaf.ide.navhost.MainNavHost
+import io.github.caimucheng.leaf.ide.navhost.MainNavHostDestinations.HOME
+import io.github.caimucheng.leaf.ide.navhost.MainNavHostDestinations.LEAF_FLOW
+import io.github.caimucheng.leaf.ide.navhost.MainNavHostDestinations.PLUGIN
+import io.github.caimucheng.leaf.ide.navhost.MainNavHostDestinations.SETTINGS
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,27 +66,10 @@ private fun AppContent(
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            NavHost(
-                navController = navController,
-                startDestination = HOME,
-                enterTransition = { scaleIn(initialScale = 0.8f) + fadeIn() },
-                exitTransition = { fadeOut() }
-            ) {
-                composable(HOME) {
-                    HomePage(pageNavController)
-                }
-                composable(PLUGIN) {
-                    PluginPage()
-                }
-                composable(LEAF_FLOW) {
-                    LeafFlowPage()
-                }
-                composable(SETTINGS) {
-                    SettingsPage(pageNavController)
-                }
-            }
-        }
+        MainNavHost(
+            navController = navController,
+            pageNavController = pageNavController
+        )
     }
 }
 
