@@ -8,6 +8,10 @@ class NodeJSPluginConfiguration : PluginConfiguration() {
         return true
     }
 
+    override fun pluginNameId(): Int {
+        return R.string.app_name
+    }
+
     override fun descriptionId(): Int {
         return R.string.plugin_description
     }

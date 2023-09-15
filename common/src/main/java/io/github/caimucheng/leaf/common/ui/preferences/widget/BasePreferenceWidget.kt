@@ -6,8 +6,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -76,10 +78,11 @@ internal fun BasePreferenceWidget(
                             maxLines = if (preference.singleLineTitle) 1 else Int.MAX_VALUE,
                             overflow = if (preference.singleLineTitle) TextOverflow.Ellipsis else TextOverflow.Clip
                         )
+                        Spacer(modifier = Modifier.height(5.dp))
                         Text(
                             text = preference.summary,
                             fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                         )
                     }
                     Row(modifier = Modifier.constrainAs(content) {
@@ -130,6 +133,7 @@ internal fun BasePreferenceWidget(
                             text = preference.title,
                             fontSize = 16.sp,
                         )
+                        Spacer(modifier = Modifier.height(5.dp))
                         Text(
                             text = preference.summary,
                             fontSize = 14.sp,

@@ -6,7 +6,6 @@ import io.github.caimucheng.leaf.plugin.PluginMain
 import io.github.caimucheng.leaf.plugin.PluginProject
 
 data class Plugin(
-    val name: String,
     val icon: Drawable,
     val packageName: String,
     val versionName: String,
@@ -14,4 +13,9 @@ data class Plugin(
     val configuration: PluginConfiguration,
     val main: PluginMain,
     val project: PluginProject?
-)
+) {
+    val name: String
+        get() {
+            return configuration.getResources().getString(configuration.pluginNameId())
+        }
+}

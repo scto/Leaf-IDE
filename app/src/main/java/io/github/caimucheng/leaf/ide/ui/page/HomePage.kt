@@ -2,6 +2,8 @@ package io.github.caimucheng.leaf.ide.ui.page
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +20,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -27,6 +31,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,19 +43,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.component.Loading
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
 import io.github.caimucheng.leaf.plugin.application.appViewModel
-import io.github.caimucheng.leaf.plugin.manager.PluginManager
 import io.github.caimucheng.leaf.plugin.model.Project
 import io.github.caimucheng.leaf.plugin.viewmodel.AppUIIntent
 import io.github.caimucheng.leaf.plugin.viewmodel.AppUIState
@@ -123,10 +129,10 @@ fun HomePage(pageNavController: NavController) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun ProjectList(projects: List<Project>) {
-    if (projects.isNotEmpty()) {
+    if (projects.isEmpty()) {
         ConstraintLayout(
             modifier = Modifier
                 .fillMaxSize()
@@ -158,23 +164,22 @@ private fun ProjectList(projects: List<Project>) {
             }
         }
     } else {
-        if (PluginManager.getPlugins().firstOrNull() == null) {
-            return
-        }
-        val testLists = listOf(
-            Project(
-                "NodeJS Project",
-                PluginManager.getPlugins().first(),
-                emptyMap()
-            )
-        )
         Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(testLists.size) {
-                    val project = testLists[it]
+                items(projects.size) {
+                    val project = projects[it]
                     val plugin = project.plugin
                     val pluginProject = plugin.project!!
                     val resources = pluginProject.getResources()
+                    var showProjectOptionDialog by rememberSaveable {
+                        mutableStateOf(false)
+                    }
+
+                    if (showProjectOptionDialog) {
+                        ProjectOptionDialog(project = project) {
+                            showProjectOptionDialog = false
+                        }
+                    }
 
                     Card(
                         onClick = {},
@@ -187,9 +192,15 @@ private fun ProjectList(projects: List<Project>) {
                         elevation = CardDefaults.cardElevation(
                             defaultElevation = 2.dp,
                             pressedElevation = 2.dp
-                        )
+                        ),
                     ) {
-                        Column(Modifier.fillMaxWidth()) {
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .combinedClickable(onLongClick = {
+                                    showProjectOptionDialog = true
+                                }, onClick = {})
+                        ) {
                             Text(
                                 text = project.name,
                                 fontSize = 18.sp,
@@ -197,6 +208,19 @@ private fun ProjectList(projects: List<Project>) {
                                     start = 20.dp, end = 20.dp, top = 20.dp
                                 )
                             )
+                            if (project.description != null) {
+                                Text(
+                                    text = stringResource(
+                                        id = R.string.project_description,
+                                        project.description!!
+                                    ),
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(
+                                        start = 20.dp, end = 20.dp, top = 5.dp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                )
+                            }
                             Text(
                                 text = stringResource(
                                     id = R.string.plugin_support,
@@ -247,6 +271,90 @@ private fun ProjectList(projects: List<Project>) {
 
                 }
             }
+        }
+    }
+}
+
+private data class OptionItem(
+    val onClick: () -> Unit,
+    val imageVector: ImageVector,
+    val title: String
+)
+
+@Composable
+private fun ProjectOptionDialog(project: Project, onDismissRequest: () -> Unit) {
+    val optionItems = listOf(
+        OptionItem({
+            appViewModel.intent.trySend(AppUIIntent.DeleteProject(project))
+            onDismissRequest()
+        }, Icons.Outlined.Delete, stringResource(id = R.string.delete)),
+    )
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(text = stringResource(id = R.string.close))
+            }
+        },
+        title = {
+            Text(text = project.name)
+        },
+        text = {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                items(optionItems.size) { index ->
+                    val optionItem = optionItems[index]
+                    OptionItemWidget(
+                        onClick = optionItem.onClick,
+                        imageVector = optionItem.imageVector,
+                        title = optionItem.title
+                    )
+                }
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OptionItemWidget(onClick: () -> Unit, imageVector: ImageVector, title: String) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp
+        ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.background
+        )
+    ) {
+        ConstraintLayout(Modifier.fillMaxSize()) {
+            val (icon, text) = createRefs()
+            Icon(
+                imageVector = imageVector,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .constrainAs(icon) {
+                        centerVerticallyTo(parent)
+                        start.linkTo(parent.start, margin = 20.dp)
+                    }
+            )
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.constrainAs(text) {
+                    centerVerticallyTo(icon)
+                    linkTo(icon.end, parent.end, startMargin = 20.dp, endMargin = 20.dp, bias = 0f)
+                    width = Dimension.fillToConstraints
+                }
+            )
         }
     }
 }

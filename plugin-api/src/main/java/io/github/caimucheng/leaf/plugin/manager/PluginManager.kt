@@ -30,7 +30,6 @@ object PluginManager {
                     PackageManager.GET_META_DATA
                 )
                 for (application in applications) {
-                    val name = application.loadLabel(packageManager).toString()
                     val icon = application.loadIcon(packageManager)
                     val packageName = application.packageName
                     val packageInfo = packageManager.getPackageInfo(packageName, 0)
@@ -100,7 +99,6 @@ object PluginManager {
 
                     plugins.add(
                         Plugin(
-                            name,
                             icon,
                             packageName,
                             versionName,

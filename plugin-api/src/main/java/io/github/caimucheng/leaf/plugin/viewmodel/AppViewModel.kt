@@ -30,6 +30,8 @@ sealed class AppUIIntent {
 
     object Refresh : AppUIIntent()
 
+    data class DeleteProject(val project: Project) : AppUIIntent()
+
 }
 
 class AppViewModel(private val application: Application) {
@@ -52,6 +54,7 @@ class AppViewModel(private val application: Application) {
             intent.consumeAsFlow().collect {
                 when (it) {
                     AppUIIntent.Refresh -> refresh()
+                    is AppUIIntent.DeleteProject -> deleteProject(it.project)
                 }
             }
         }
@@ -71,6 +74,16 @@ class AppViewModel(private val application: Application) {
             val projects = ProjectManager.getProjects()
 
             // Update state
+            _state.value = AppUIState.Done(projects, PluginManager.getPlugins())
+        }
+    }
+
+    private fun deleteProject(project: Project) {
+        _state.value = AppUIState.Loading
+        _coroutineScope.launch {
+            ProjectManager.deleteProject(project)
+
+            val projects = ProjectManager.getProjects()
             _state.value = AppUIState.Done(projects, PluginManager.getPlugins())
         }
     }

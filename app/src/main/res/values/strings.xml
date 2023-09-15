@@ -41,4 +41,7 @@
     <string name="dark_theme">Dark Theme</string>
     <string name="dark_theme_summary">Switch the software to dark theme</string>
     <string name="plugin_support">Plugin support: %s</string>
+    <string name="project_description">Project description: %s</string>
+    <string name="close">Close</string>
+    <string name="delete">Delete</string>
 </resources>
