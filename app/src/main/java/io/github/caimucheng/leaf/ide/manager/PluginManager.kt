@@ -42,6 +42,7 @@ object PluginManager {
                         @Suppress("DEPRECATION")
                         packageInfo.versionCode.toLong()
                     }
+
                     val metaData = application.metaData ?: continue
                     val pluginConfigurationPackageName = metaData.getString("pluginConfiguration")
                     val pluginMainPackageName = metaData.getString("pluginMain")

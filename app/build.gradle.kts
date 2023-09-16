@@ -10,6 +10,12 @@ android {
         applicationId = "io.github.caimucheng.leaf.ide"
     }
 
+    buildTypes {
+        release {
+            proguardFiles("proguard-rules.pro")
+        }
+    }
+
     kotlinOptions {
         jvmTarget = Versions.JVM_TARGET_VERSION
     }

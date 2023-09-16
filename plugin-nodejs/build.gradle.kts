@@ -12,6 +12,13 @@ android {
         versionName = NodeJSPluginVersions.VERSION_NAME
     }
 
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles("proguard-rules.pro")
+        }
+    }
+
     kotlinOptions {
         jvmTarget = Versions.JVM_TARGET_VERSION
     }

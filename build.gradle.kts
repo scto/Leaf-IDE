@@ -75,7 +75,7 @@ fun Project.configureBaseExtension() {
             }
             getByName("release") {
                 signingConfig = signingConfigs.getByName("shared")
-                isMinifyEnabled = false
+                isMinifyEnabled = true
             }
         }
     }

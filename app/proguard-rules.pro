@@ -1,0 +1,2 @@
+-keep class io.github.caimucheng.leaf.plugin.** {*;}
+-keepclassmembers class io.github.caimucheng.leaf.plugin.** {*;}
