@@ -1,18 +1,20 @@
-package io.github.caimucheng.leaf.plugin.manager
+package io.github.caimucheng.leaf.ide.manager
 
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import dalvik.system.PathClassLoader
+import io.github.caimucheng.leaf.ide.model.Plugin
 import io.github.caimucheng.leaf.plugin.PluginConfiguration
 import io.github.caimucheng.leaf.plugin.PluginMain
 import io.github.caimucheng.leaf.plugin.PluginProject
-import io.github.caimucheng.leaf.plugin.model.Plugin
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 
 object PluginManager {
+
+    const val CURRENT_PLUGIN_API = 1
 
     private val mutex = Mutex()
 

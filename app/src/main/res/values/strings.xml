@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Leaf IDE</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="user_agreement">User Agreement</string>
@@ -16,15 +16,15 @@
     <string name="plugin">Plugin</string>
     <string name="create_project">Create Project</string>
     <string name="back">Back</string>
-    <string name="no_plugin_project">No Plugin Project</string>
+    <string name="no_supported_plugin_project">No Applicable Plugin Project</string>
     <string name="download_from_leaf_flow">Available for download from Leaf Flow</string>
-    <string name="no_plugin">No Plugin</string>
-    <string name="download_from_leaf_flow_or_install_from_local">Can be downloaded from Leaf Flow or installed locally</string>
-    <string name="expand">Expand</string>
-    <string name="collapse">Collapse</string>
+    <string name="no_plugin" tools:ignore="UnusedResources">No Plugin</string>
+    <string name="download_from_leaf_flow_or_install_from_local" tools:ignore="UnusedResources">Can be downloaded from Leaf Flow or installed locally</string>
+    <string name="expand" tools:ignore="UnusedResources">Expand</string>
+    <string name="collapse" tools:ignore="UnusedResources">Collapse</string>
     <string name="no_project_or_plugins_for_projects">No Project Or Plugins For Projects</string>
     <string name="click_to_create_project">Click the floating button to create a project</string>
-    <string name="uninstall">Uninstall</string>
+    <string name="uninstall" tools:ignore="UnusedResources">Uninstall</string>
     <string name="configuration">Configuration</string>
     <string name="general">General</string>
     <string name="editor">Editor</string>
@@ -44,4 +44,6 @@
     <string name="project_description">Project description: %s</string>
     <string name="close">Close</string>
     <string name="delete">Delete</string>
+    <string name="create" tools:ignore="UnusedResources">Create</string>
+    <string name="cancel" tools:ignore="UnusedResources">Cancel</string>
 </resources>

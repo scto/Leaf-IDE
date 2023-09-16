@@ -1,8 +1,8 @@
-package io.github.caimucheng.leaf.plugin.manager
+package io.github.caimucheng.leaf.ide.manager
 
 import io.github.caimucheng.leaf.common.util.Files
 import io.github.caimucheng.leaf.common.util.LeafIDEProjectPath
-import io.github.caimucheng.leaf.plugin.model.Project
+import io.github.caimucheng.leaf.ide.model.Project
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
@@ -77,7 +77,7 @@ object ProjectManager {
             return null
         }
         val actualPlugin = PluginManager.getPluginByPackageName(plugin) ?: return null
-        if (actualPlugin.project == null) {
+        if (actualPlugin.project == null || !actualPlugin.isSupported) {
             return null
         }
         return Project(

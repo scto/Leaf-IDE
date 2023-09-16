@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -42,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -76,41 +76,20 @@ class SplashActivity : ComponentActivity() {
 
                 val readPermissionKind = ContextCompat.checkSelfPermission(this, permissions[0])
                 val writePermissionKind = ContextCompat.checkSelfPermission(this, permissions[1])
-                when {
-                    readPermissionKind == writePermissionKind &&
-                            readPermissionKind == PackageManager.PERMISSION_DENIED -> {
-                        Toast.makeText(
-                            this,
-                            getString(R.string.read_and_write_permission_denied),
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
 
-                    readPermissionKind == PackageManager.PERMISSION_DENIED -> {
-                        Toast.makeText(
-                            this,
-                            getString(R.string.read_permission_denied),
-                            Toast.LENGTH_LONG
-                        ).show()
+                if (readPermissionKind == PackageManager.PERMISSION_DENIED || writePermissionKind == PackageManager.PERMISSION_DENIED) {
+                    sharedPreferences.edit {
+                        putString(LAUNCH_MODE, null)
                     }
-
-                    writePermissionKind == PackageManager.PERMISSION_DENIED -> {
-                        Toast.makeText(
-                            this,
-                            getString(R.string.write_permission_denied),
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-
-                    else -> {
-                        startActivity(Intent(this, MainActivity::class.java))
-                    }
+                } else {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    return
                 }
-                finish()
+
             } else if (isInternalLaunchMode) {
                 startActivity(Intent(this, MainActivity::class.java))
+                return
             }
-            return
         }
 
         setContent {

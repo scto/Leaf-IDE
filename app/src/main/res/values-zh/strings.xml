@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="privacy_policy">隐私政策</string>
     <string name="user_agreement">用户协议</string>
     <string name="refuse">拒绝</string>
@@ -15,15 +15,15 @@
     <string name="plugin">插件</string>
     <string name="create_project">创建工程</string>
     <string name="back">返回</string>
-    <string name="no_plugin_project">没有插件工程</string>
+    <string name="no_supported_plugin_project">没有适用的插件工程</string>
     <string name="download_from_leaf_flow">可从 Leaf Flow 中下载</string>
-    <string name="no_plugin">没有插件</string>
-    <string name="download_from_leaf_flow_or_install_from_local">可从 Leaf Flow 下载或从本地安装</string>
-    <string name="expand">展开</string>
-    <string name="collapse">收起</string>
+    <string name="no_plugin" tools:ignore="UnusedResources">没有插件</string>
+    <string name="download_from_leaf_flow_or_install_from_local" tools:ignore="UnusedResources">可从 Leaf Flow 下载或从本地安装</string>
+    <string name="expand" tools:ignore="UnusedResources">展开</string>
+    <string name="collapse" tools:ignore="UnusedResources">收起</string>
     <string name="no_project_or_plugins_for_projects">没有工程或适用于工程的插件</string>
     <string name="click_to_create_project">点击悬浮按钮以创建工程</string>
-    <string name="uninstall">卸载</string>
+    <string name="uninstall" tools:ignore="UnusedResources">卸载</string>
     <string name="configuration">配置</string>
     <string name="general">常规</string>
     <string name="editor">编辑器</string>
@@ -42,4 +42,6 @@
     <string name="project_description">工程描述: %s</string>
     <string name="close">关闭</string>
     <string name="delete">删除</string>
+    <string name="create" tools:ignore="UnusedResources">创建</string>
+    <string name="cancel" tools:ignore="UnusedResources">取消</string>
 </resources>

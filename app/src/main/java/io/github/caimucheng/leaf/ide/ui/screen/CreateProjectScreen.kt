@@ -3,7 +3,6 @@ package io.github.caimucheng.leaf.ide.ui.screen
 import android.annotation.SuppressLint
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -11,18 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,9 +45,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.ide.R
-import io.github.caimucheng.leaf.plugin.application.appViewModel
-import io.github.caimucheng.leaf.plugin.model.Plugin
-import io.github.caimucheng.leaf.plugin.viewmodel.AppUIState
+import io.github.caimucheng.leaf.ide.application.appViewModel
+import io.github.caimucheng.leaf.ide.component.Loading
+import io.github.caimucheng.leaf.ide.model.Plugin
+import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +70,7 @@ fun CreateProjectScreen(
         },
         content = { paddings ->
             var isLoading by rememberSaveable {
-                mutableStateOf(true)
+                mutableStateOf(appViewModel.state.value !is AppUIState.Done)
             }
             var plugins: List<Plugin> by remember {
                 mutableStateOf(emptyList())
@@ -89,7 +85,7 @@ fun CreateProjectScreen(
                 if (it) {
                     Loading()
                 } else {
-                    NewProjectList(plugins)
+                    NewProjectList(plugins, pageNavController)
                 }
             }
 
@@ -103,7 +99,7 @@ fun CreateProjectScreen(
 
                         is AppUIState.Done -> {
                             plugins = it.plugins
-                                .filter { plugin -> plugin.configuration.enabled() }
+                                .filter { plugin -> plugin.isSupported && plugin.configuration.enabled() }
                             isLoading = false
                         }
                     }
@@ -113,25 +109,9 @@ fun CreateProjectScreen(
     )
 }
 
-@Composable
-private fun Loading() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .size(48.dp),
-            strokeWidth = 5.dp
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NewProjectList(plugins: List<Plugin>) {
+private fun NewProjectList(plugins: List<Plugin>, pageNavController: NavHostController) {
     if (plugins.isEmpty()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (column) = createRefs()
@@ -146,7 +126,7 @@ private fun NewProjectList(plugins: List<Plugin>) {
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = stringResource(id = R.string.no_plugin_project),
+                    text = stringResource(id = R.string.no_supported_plugin_project),
                     fontSize = 16.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -170,6 +150,19 @@ private fun NewProjectList(plugins: List<Plugin>) {
                 val plugin = plugins[it]
                 val pluginProject = plugin.project!!
                 val resources = pluginProject.getResources()
+                var showCreateProjectDialog by rememberSaveable {
+                    mutableStateOf(false)
+                }
+                if (showCreateProjectDialog) {
+                    pluginProject.CreateProjectDialog(
+                        onDismissRequest = {
+                            showCreateProjectDialog = false
+                        },
+                        onNavigateHome = {
+                            pageNavController.popBackStack()
+                        }
+                    )
+                }
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -178,7 +171,9 @@ private fun NewProjectList(plugins: List<Plugin>) {
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.background
                     ),
-                    onClick = {},
+                    onClick = {
+                        showCreateProjectDialog = true
+                    },
                 ) {
                     Column(
                         modifier = Modifier

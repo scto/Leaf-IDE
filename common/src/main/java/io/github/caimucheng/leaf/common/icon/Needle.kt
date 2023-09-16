@@ -1,3 +1,5 @@
+@file:Suppress("UnusedReceiverParameter")
+
 package io.github.caimucheng.leaf.common.icon
 
 import androidx.compose.material.icons.Icons

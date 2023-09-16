@@ -1,12 +1,12 @@
-package io.github.caimucheng.leaf.plugin.application
+package io.github.caimucheng.leaf.ide.application
 
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import io.github.caimucheng.leaf.plugin.broadcast.PluginBroadcastReceiver
-import io.github.caimucheng.leaf.plugin.viewmodel.AppViewModel
+import io.github.caimucheng.leaf.ide.broadcast.PluginBroadcastReceiver
+import io.github.caimucheng.leaf.ide.viewmodel.AppViewModel
 
 class AppContext : Application() {
 

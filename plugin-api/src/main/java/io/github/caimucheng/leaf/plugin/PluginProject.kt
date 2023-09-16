@@ -1,18 +1,11 @@
+@file:Suppress("unused", "unused", "unused", "unused")
+
 package io.github.caimucheng.leaf.plugin
 
-import android.content.res.Resources
+import androidx.compose.runtime.Composable
 
-abstract class PluginProject {
-
-    private lateinit var resources: Resources
-
-    open fun setResources(resources: Resources) {
-        this.resources = resources
-    }
-
-    open fun getResources(): Resources {
-        return resources
-    }
+@Suppress("unused", "unused")
+abstract class PluginProject : PluginResource() {
 
     /**
      * @return The displayed image resource id
@@ -33,5 +26,12 @@ abstract class PluginProject {
      * @return The displayed project title resource id
      * */
     abstract fun getDisplayedProjectTitleId(): Int
+
+    /**
+     * Called when create project dialog
+     * */
+    @Composable
+    abstract fun CreateProjectDialog(onDismissRequest: () -> Unit, onNavigateHome: () -> Unit)
+
 
 }

@@ -47,10 +47,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
 
-    implementation(libs.cloudy)
     implementation(libs.libsu.core)
-    implementation(libs.libsu.service)
-    implementation(libs.libsu.nio)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

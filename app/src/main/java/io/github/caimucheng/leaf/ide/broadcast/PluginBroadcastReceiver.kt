@@ -1,11 +1,11 @@
-package io.github.caimucheng.leaf.plugin.broadcast
+package io.github.caimucheng.leaf.ide.broadcast
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import io.github.caimucheng.leaf.plugin.application.appViewModel
-import io.github.caimucheng.leaf.plugin.viewmodel.AppUIIntent
+import io.github.caimucheng.leaf.ide.application.appViewModel
+import io.github.caimucheng.leaf.ide.viewmodel.AppUIIntent
 
 class PluginBroadcastReceiver : BroadcastReceiver() {
 

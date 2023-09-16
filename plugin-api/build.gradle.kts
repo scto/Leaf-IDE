@@ -32,9 +32,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.libsu.core)
-    implementation(libs.libsu.service)
-    implementation(libs.libsu.nio)
-    implementation(libs.cloudy)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

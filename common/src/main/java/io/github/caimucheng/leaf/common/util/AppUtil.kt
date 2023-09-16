@@ -16,7 +16,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import java.io.File
 import kotlin.properties.Delegates
-import kotlin.system.exitProcess
 
 val Context.SettingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 val MaterialYouEnabledKey = booleanPreferencesKey("material_you_enabled")
@@ -56,7 +55,7 @@ inline val Context.isInternalLaunchMode: Boolean
     }
 
 fun Context.launchMode(): String {
-    return sharedPreferences.getString(LAUNCH_MODE, null) ?: exitProcess(1)
+    return sharedPreferences.getString(LAUNCH_MODE, null) ?: "unknown"
 }
 
 

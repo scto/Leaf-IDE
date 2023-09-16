@@ -54,12 +54,12 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
 import io.github.caimucheng.leaf.ide.R
+import io.github.caimucheng.leaf.ide.application.appViewModel
 import io.github.caimucheng.leaf.ide.component.Loading
+import io.github.caimucheng.leaf.ide.model.Project
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
-import io.github.caimucheng.leaf.plugin.application.appViewModel
-import io.github.caimucheng.leaf.plugin.model.Project
-import io.github.caimucheng.leaf.plugin.viewmodel.AppUIIntent
-import io.github.caimucheng.leaf.plugin.viewmodel.AppUIState
+import io.github.caimucheng.leaf.ide.viewmodel.AppUIIntent
+import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -212,7 +212,7 @@ private fun ProjectList(projects: List<Project>) {
                                 Text(
                                     text = stringResource(
                                         id = R.string.project_description,
-                                        project.description!!
+                                        project.description
                                     ),
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(

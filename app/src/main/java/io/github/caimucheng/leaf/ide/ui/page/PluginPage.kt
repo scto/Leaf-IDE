@@ -60,10 +60,10 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.core.graphics.drawable.toBitmap
 import io.github.caimucheng.leaf.common.util.uninstallAPP
 import io.github.caimucheng.leaf.ide.R
+import io.github.caimucheng.leaf.ide.application.appViewModel
 import io.github.caimucheng.leaf.ide.component.Loading
-import io.github.caimucheng.leaf.plugin.application.appViewModel
-import io.github.caimucheng.leaf.plugin.model.Plugin
-import io.github.caimucheng.leaf.plugin.viewmodel.AppUIState
+import io.github.caimucheng.leaf.ide.model.Plugin
+import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -193,7 +193,7 @@ private fun PluginList(plugins: List<Plugin>) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(20.dp)
-                                    .alpha(if (plugin.configuration.enabled()) 1f else 0.6f)
+                                    .alpha(if (plugin.configuration.enabled() && plugin.isSupported) 1f else 0.6f)
                             ) {
                                 val (icon, content) = createRefs()
                                 Icon(
@@ -206,19 +206,23 @@ private fun PluginList(plugins: List<Plugin>) {
                                         },
                                     tint = Color.Unspecified
                                 )
-                                Column(Modifier.constrainAs(content) {
+                                ConstraintLayout(Modifier.constrainAs(content) {
                                     linkTo(icon.end, parent.end, startMargin = 20.dp)
                                     centerVerticallyTo(parent)
                                     width = Dimension.fillToConstraints
                                 }) {
+                                    val (name, description, expand, unsupported) = createRefs()
                                     Text(
                                         text = plugin.name,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 16.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.constrainAs(name) {
+                                            start.linkTo(parent.start)
+                                            top.linkTo(parent.top)
+                                        }
                                     )
-                                    Spacer(modifier = Modifier.height(10.dp))
                                     var showExpandText by remember {
                                         mutableStateOf(false)
                                     }
@@ -237,10 +241,14 @@ private fun PluginList(plugins: List<Plugin>) {
                                                 }
                                             },
                                             maxLines = maxLines,
-                                            modifier = Modifier.animateContentSize()
+                                            modifier = Modifier
+                                                .animateContentSize()
+                                                .constrainAs(description) {
+                                                    start.linkTo(parent.start)
+                                                    top.linkTo(name.bottom, margin = 10.dp)
+                                                }
                                         )
                                         if (showExpandText) {
-                                            Spacer(modifier = Modifier.height(10.dp))
                                             Text(
                                                 text = if (maxLines == 2)
                                                     stringResource(id = R.string.expand)
@@ -248,14 +256,40 @@ private fun PluginList(plugins: List<Plugin>) {
                                                     stringResource(id = R.string.collapse),
                                                 fontSize = 16.sp,
                                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                                                modifier = Modifier.clickable {
-                                                    maxLines = if (maxLines == 2) {
-                                                        Int.MAX_VALUE
-                                                    } else {
-                                                        2
+                                                modifier = Modifier
+                                                    .clickable {
+                                                        maxLines = if (maxLines == 2) {
+                                                            Int.MAX_VALUE
+                                                        } else {
+                                                            2
+                                                        }
                                                     }
-                                                }
+                                                    .constrainAs(expand) {
+                                                        start.linkTo(parent.start)
+                                                        top.linkTo(description.bottom, 10.dp)
+                                                    }
                                             )
+                                            if (!plugin.isSupported) {
+                                                Text(
+                                                    text = "不支持",
+                                                    fontSize = 16.sp,
+                                                    color = MaterialTheme.colorScheme.error.copy(
+                                                        alpha = 0.8f
+                                                    ),
+                                                    modifier = Modifier.constrainAs(unsupported) {
+                                                        top.linkTo(
+                                                            description.bottom,
+                                                            margin = 10.dp
+                                                        )
+                                                        linkTo(
+                                                            expand.end,
+                                                            parent.end,
+                                                            endMargin = 5.dp,
+                                                            bias = 1f
+                                                        )
+                                                    }
+                                                )
+                                            }
                                         }
                                     }
                                 }

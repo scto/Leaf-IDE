@@ -1,18 +1,17 @@
 [versions]
 android = "8.1.1"
 activity-compose = "1.7.2"
-compose-bom = "2023.08.00"
-cloudy = "0.1.2"
+compose-bom = "2023.09.00"
 constraintlayout-compose = "1.0.1"
-core-ktx = "1.10.1"
+core-ktx = "1.12.0"
 libsu = "5.2.0"
 core-splashscreen = "1.0.1"
 datastore-preferences = "1.0.0"
 lifecycle-extensions = "2.2.0"
-lifecycle-runtime-ktx = "2.6.1"
-material-icons-extended = "1.5.0"
-navigation-compose = "2.7.1"
-org-jetbrains-kotlin-android = "1.8.10"
+lifecycle-runtime-ktx = "2.6.2"
+material-icons-extended = "1.5.1"
+navigation-compose = "2.7.2"
+org-jetbrains-kotlin-android = "1.9.20-Beta"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
@@ -31,12 +30,9 @@ androidx-lifecycle-extensions = { module = "androidx.lifecycle:lifecycle-extensi
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material-icons-extended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
-# The blur lib
-cloudy = { module = "com.github.skydoves:cloudy", version.ref = "cloudy" }
+
 # Su process and file-system
 libsu-core = { module = "com.github.topjohnwu.libsu:core", version.ref = "libsu" }
-libsu-nio = { module = "com.github.topjohnwu.libsu:nio", version.ref = "libsu" }
-libsu-service = { module = "com.github.topjohnwu.libsu:service", version.ref = "libsu" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "android" }

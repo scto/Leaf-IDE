@@ -1,10 +1,10 @@
-package io.github.caimucheng.leaf.plugin.viewmodel
+package io.github.caimucheng.leaf.ide.viewmodel
 
 import android.app.Application
-import io.github.caimucheng.leaf.plugin.manager.PluginManager
-import io.github.caimucheng.leaf.plugin.manager.ProjectManager
-import io.github.caimucheng.leaf.plugin.model.Plugin
-import io.github.caimucheng.leaf.plugin.model.Project
+import io.github.caimucheng.leaf.ide.manager.PluginManager
+import io.github.caimucheng.leaf.ide.manager.ProjectManager
+import io.github.caimucheng.leaf.ide.model.Plugin
+import io.github.caimucheng.leaf.ide.model.Project
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
@@ -15,9 +15,9 @@ import kotlinx.coroutines.launch
 
 sealed class AppUIState {
 
-    object Default : AppUIState()
+    data object Default : AppUIState()
 
-    object Loading : AppUIState()
+    data object Loading : AppUIState()
 
     data class Done(
         val projects: List<Project>,
@@ -28,7 +28,7 @@ sealed class AppUIState {
 
 sealed class AppUIIntent {
 
-    object Refresh : AppUIIntent()
+    data object Refresh : AppUIIntent()
 
     data class DeleteProject(val project: Project) : AppUIIntent()
 

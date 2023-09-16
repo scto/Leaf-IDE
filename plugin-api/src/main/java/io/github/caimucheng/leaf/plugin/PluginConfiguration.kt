@@ -1,18 +1,6 @@
 package io.github.caimucheng.leaf.plugin
 
-import android.content.res.Resources
-
-abstract class PluginConfiguration {
-
-    private lateinit var resources: Resources
-
-    open fun setResources(resources: Resources) {
-        this.resources = resources
-    }
-
-    open fun getResources(): Resources {
-        return resources
-    }
+abstract class PluginConfiguration : PluginResource() {
 
     abstract fun enabled(): Boolean
 
@@ -22,6 +10,10 @@ abstract class PluginConfiguration {
 
     open fun author(): String? {
         return null
+    }
+
+    open fun targetPluginApi(): Int {
+        return 1
     }
 
 }

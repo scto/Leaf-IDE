@@ -1,4 +1,4 @@
-package io.github.caimucheng.leaf.plugin.model
+package io.github.caimucheng.leaf.ide.model
 
 data class Project(
     val name: String,
