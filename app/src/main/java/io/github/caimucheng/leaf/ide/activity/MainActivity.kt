@@ -42,7 +42,6 @@ class MainActivity : ComponentActivity() {
         }
 
         setupMainActivity(launchMode())
-
         setContent {
             LeafIDETheme {
                 Surface(

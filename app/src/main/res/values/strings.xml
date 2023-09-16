@@ -47,4 +47,13 @@
     <string name="create" tools:ignore="UnusedResources">Create</string>
     <string name="cancel" tools:ignore="UnusedResources">Cancel</string>
     <string name="unsupported">Unsupported</string>
+    <string name="app_crashed">App Crashed</string>
+    <string name="app_crash_header">Sorry, the software crashed due to the following reasons. Please submit the exception to the developer, or write an issue on the Github project page for timely repair.</string>
+    <string name="device_info">Device Information:</string>
+    <string name="thread_group">Thread Group: %s</string>
+    <string name="thread">Thread: %s</string>
+    <string name="exception">Exception: %s</string>
+    <string name="copied_successfully">Copied Successfully</string>
+    <string name="copied_failed">"Copied Failed: "</string>
+    <string name="be_not_allowed_back">The app has crashed and is not allowed to return</string>
 </resources>

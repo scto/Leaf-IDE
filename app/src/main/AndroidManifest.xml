@@ -48,6 +48,8 @@
 
         <activity android:name="io.github.caimucheng.leaf.plugin.PluginActivity" />
 
+        <activity android:name=".activity.CrashHandlerActivity" />
+
     </application>
 
 </manifest>

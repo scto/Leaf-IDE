@@ -27,6 +27,9 @@ class AppContext : Application() {
         super.onCreate()
         context = applicationContext
 
+        // Set default crash handler
+        Thread.setDefaultUncaughtExceptionHandler(AppCrashHandler)
+
         receiver = PluginBroadcastReceiver()
         appViewModel = AppViewModel(this)
 
