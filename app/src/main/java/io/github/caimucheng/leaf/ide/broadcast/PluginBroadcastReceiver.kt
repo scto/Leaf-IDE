@@ -10,9 +10,20 @@ import io.github.caimucheng.leaf.ide.viewmodel.AppUIIntent
 class PluginBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        when (intent.action) {
-            Intent.ACTION_PACKAGE_ADDED, Intent.ACTION_PACKAGE_REPLACED, Intent.ACTION_PACKAGE_REMOVED -> {
-                Log.e("Broadcast", "App added/updated/removed")
+        val extraReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+        when {
+            !extraReplacing && intent.action == Intent.ACTION_PACKAGE_ADDED -> {
+                Log.e("Broadcast", "App added")
+                appViewModel.intent.trySend(AppUIIntent.Refresh)
+            }
+
+            !extraReplacing && intent.action == Intent.ACTION_PACKAGE_REMOVED -> {
+                Log.e("Broadcast", "App removed")
+                appViewModel.intent.trySend(AppUIIntent.Refresh)
+            }
+
+            intent.action == Intent.ACTION_PACKAGE_REPLACED -> {
+                Log.e("Broadcast", "App replaced")
                 appViewModel.intent.trySend(AppUIIntent.Refresh)
             }
         }

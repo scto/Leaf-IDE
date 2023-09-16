@@ -39,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -89,6 +90,8 @@ fun PluginPage() {
             PluginList(plugins)
         }
     }
+
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = appViewModel.state) {
         appViewModel.state.collect {
@@ -271,7 +274,7 @@ private fun PluginList(plugins: List<Plugin>) {
                                             )
                                             if (!plugin.isSupported) {
                                                 Text(
-                                                    text = "不支持",
+                                                    text = stringResource(id = R.string.unsupported),
                                                     fontSize = 16.sp,
                                                     color = MaterialTheme.colorScheme.error.copy(
                                                         alpha = 0.8f

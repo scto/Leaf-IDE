@@ -65,6 +65,7 @@ class AppViewModel(private val application: Application) {
         // Update state
         _state.value = AppUIState.Loading
         _coroutineScope.launch {
+
             // Update plugin list first.
             PluginManager.fetchPlugins(application)
 
@@ -75,6 +76,7 @@ class AppViewModel(private val application: Application) {
 
             // Update state
             _state.value = AppUIState.Done(projects, PluginManager.getPlugins())
+
         }
     }
 
@@ -85,6 +87,7 @@ class AppViewModel(private val application: Application) {
 
             val projects = ProjectManager.getProjects()
             _state.value = AppUIState.Done(projects, PluginManager.getPlugins())
+
         }
     }
 

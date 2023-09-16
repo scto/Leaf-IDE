@@ -46,4 +46,5 @@
     <string name="delete">Delete</string>
     <string name="create" tools:ignore="UnusedResources">Create</string>
     <string name="cancel" tools:ignore="UnusedResources">Cancel</string>
+    <string name="unsupported">Unsupported</string>
 </resources>
