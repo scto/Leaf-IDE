@@ -4,4 +4,12 @@
     <string name="plugin_description">支持创建、运行 nodejs 工程，且附带 npm、npx、corepack 等包管理器，以及默认的全局 node_modules</string>
     <string name="create">创建</string>
     <string name="cancel">取消</string>
+    <string name="project_name">工程名称</string>
+    <string name="project_description">工程描述</string>
+    <string name="more">更多</string>
+    <string name="version">版本</string>
+    <string name="author">作者</string>
+    <string name="project_name_cannot_be_empty">工程名称不能为空</string>
+    <string name="invalid_project_name">无效的工程名称</string>
+    <string name="project_description_cannot_be_empty">工程描述不能为空</string>
 </resources>

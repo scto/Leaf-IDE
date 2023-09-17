@@ -5,4 +5,12 @@
     <string name="displayed_project_title" translatable="false">NodeJS</string>
     <string name="create">Create</string>
     <string name="cancel">Cancel</string>
+    <string name="project_name">Project name</string>
+    <string name="project_description">Project description</string>
+    <string name="more">More</string>
+    <string name="version">Version</string>
+    <string name="author">Author</string>
+    <string name="project_name_cannot_be_empty">Project name cannot be empty</string>
+    <string name="invalid_project_name">Invalid project name</string>
+    <string name="project_description_cannot_be_empty">Project description cannot be empty</string>
 </resources>
