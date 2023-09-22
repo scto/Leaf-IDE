@@ -90,6 +90,7 @@ fun HomePage(pageNavController: NavController) {
             }
         }
 
+        // UI hot reload implementation
         LaunchedEffect(key1 = appViewModel.state) {
             appViewModel.state.collect {
                 when (it) {
@@ -113,7 +114,7 @@ fun HomePage(pageNavController: NavController) {
 
         FloatingActionButton(
             onClick = {
-                pageNavController.navigate(LeafIDEDestinations.CREATE_PROJECT_PAGE)
+                pageNavController.navigate(LeafIDEDestinations.DISPLAY_PROJECT_PAGE)
             },
             containerColor = MaterialTheme.colorScheme.primary,
             shape = RoundedCornerShape(48.dp),

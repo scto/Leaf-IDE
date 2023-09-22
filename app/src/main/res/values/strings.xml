@@ -56,4 +56,5 @@
     <string name="copied_successfully">Copied Successfully</string>
     <string name="copied_failed">"Copied Failed: "</string>
     <string name="be_not_allowed_back">The app has crashed and is not allowed to return</string>
+    <string name="unable_to_load_create_project_ui">Unable to load UI: Internal error in the plugin or the plugin has been uninstalled.</string>
 </resources>

@@ -31,7 +31,7 @@ abstract class PluginProject : PluginResource() {
      * Called when create project dialog
      * */
     @Composable
-    abstract fun CreateProjectDialog(onDismissRequest: () -> Unit, onNavigateHome: () -> Unit)
+    abstract fun CreateProjectScreen(back: () -> Unit, backHome: () -> Unit)
 
 
 }

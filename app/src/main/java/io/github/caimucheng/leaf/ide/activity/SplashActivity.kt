@@ -83,14 +83,17 @@ class SplashActivity : ComponentActivity() {
                     }
                 } else {
                     startActivity(Intent(this, MainActivity::class.java))
+                    finish()
                     return
                 }
 
             } else if (isInternalLaunchMode) {
                 startActivity(Intent(this, MainActivity::class.java))
+                finish()
                 return
             }
         }
+
 
         setContent {
             LeafIDETheme {
