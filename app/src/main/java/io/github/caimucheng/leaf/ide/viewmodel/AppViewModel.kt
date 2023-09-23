@@ -32,6 +32,8 @@ sealed class AppUIIntent {
 
     data class DeleteProject(val project: Project) : AppUIIntent()
 
+    data class RenameProject(val project: Project, val newName: String) : AppUIIntent()
+
 }
 
 class AppViewModel(private val application: Application) {
@@ -55,6 +57,7 @@ class AppViewModel(private val application: Application) {
                 when (it) {
                     AppUIIntent.Refresh -> refresh()
                     is AppUIIntent.DeleteProject -> deleteProject(it.project)
+                    is AppUIIntent.RenameProject -> renameProject(it.project, it.newName)
                 }
             }
         }
@@ -65,7 +68,6 @@ class AppViewModel(private val application: Application) {
         // Update state
         _state.value = AppUIState.Loading
         _coroutineScope.launch {
-
             // Update plugin list first.
             PluginManager.fetchPlugins(application)
 
@@ -87,7 +89,16 @@ class AppViewModel(private val application: Application) {
 
             val projects = ProjectManager.getProjects()
             _state.value = AppUIState.Done(projects, PluginManager.getPlugins())
+        }
+    }
 
+    private fun renameProject(project: Project, newName: String) {
+        _state.value = AppUIState.Loading
+        _coroutineScope.launch {
+            ProjectManager.renameProject(project, newName)
+
+            val projects = ProjectManager.getProjects()
+            _state.value = AppUIState.Done(projects, PluginManager.getPlugins())
         }
     }
 

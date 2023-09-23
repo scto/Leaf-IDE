@@ -2,17 +2,25 @@ package io.github.caimucheng.leaf.ide.ui.page
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -20,16 +28,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,16 +50,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
 import io.github.caimucheng.leaf.ide.R
@@ -60,6 +71,9 @@ import io.github.caimucheng.leaf.ide.model.Project
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIIntent
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -130,7 +144,8 @@ fun HomePage(pageNavController: NavController) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@SuppressLint("ReturnFromAwaitPointerEventScope")
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ProjectList(projects: List<Project>) {
     if (projects.isEmpty()) {
@@ -168,48 +183,61 @@ private fun ProjectList(projects: List<Project>) {
         Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(projects.size) {
-                    val project = projects[it]
-                    val plugin = project.plugin
-                    val pluginProject = plugin.project!!
-                    val resources = pluginProject.getResources()
-                    var showProjectOptionDialog by rememberSaveable {
-                        mutableStateOf(false)
-                    }
-
-                    if (showProjectOptionDialog) {
-                        ProjectOptionDialog(project = project) {
-                            showProjectOptionDialog = false
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        val project = projects[it]
+                        val plugin = project.plugin
+                        val pluginProject = plugin.project!!
+                        val resources = pluginProject.getResources()
+                        val animatedOffset = remember {
+                            Animatable(Offset.Zero, Offset.VectorConverter)
                         }
-                    }
+                        var expanded by remember {
+                            mutableStateOf(false)
+                        }
 
-                    Card(
-                        onClick = {},
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.background
-                        ),
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = 2.dp,
-                            pressedElevation = 2.dp
-                        ),
-                    ) {
-                        Column(
+                        Card(
                             Modifier
                                 .fillMaxWidth()
+                                .padding(20.dp)
                                 .combinedClickable(onLongClick = {
-                                    showProjectOptionDialog = true
-                                }, onClick = {})
+                                    expanded = true
+                                }, onClick = {
+
+                                })
+                                .pointerInput(null) {
+                                    coroutineScope {
+                                        while (true) {
+                                            //获取点击位置
+                                            val newOffset = awaitPointerEventScope {
+                                                awaitFirstDown().position
+                                            }
+                                            launch {
+                                                animatedOffset.animateTo(
+                                                    newOffset,
+                                                    animationSpec = spring(stiffness = Spring.StiffnessLow)
+                                                )
+                                            }
+                                        }
+                                    }
+                                },
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.background
+                            ),
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = 2.dp,
+                                pressedElevation = 2.dp
+                            ),
                         ) {
-                            Text(
-                                text = project.name,
-                                fontSize = 18.sp,
-                                modifier = Modifier.padding(
-                                    start = 20.dp, end = 20.dp, top = 20.dp
+                            Column(
+                                Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = project.name,
+                                    fontSize = 18.sp,
+                                    modifier = Modifier.padding(
+                                        start = 20.dp, end = 20.dp, top = 20.dp
+                                    )
                                 )
-                            )
-                            if (project.description != null) {
                                 Text(
                                     text = stringResource(
                                         id = R.string.project_description,
@@ -221,141 +249,204 @@ private fun ProjectList(projects: List<Project>) {
                                     ),
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                 )
-                            }
-                            Text(
-                                text = stringResource(
-                                    id = R.string.plugin_support,
-                                    plugin.packageName
-                                ),
-                                fontSize = 14.sp,
-                                modifier = Modifier.padding(
-                                    start = 20.dp, end = 20.dp, top = 5.dp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                            )
-                            Divider(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 20.dp, end = 20.dp, top = 15.dp)
-                                    .height(1.dp),
-                                color = DividerDefaults.color.copy(alpha = 0.4f)
-                            )
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        start = 20.dp,
-                                        end = 20.dp,
-                                        top = 15.dp,
-                                        bottom = 15.dp
-                                    ),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Icon(
-                                    bitmap = resources.getDrawable(
-                                        pluginProject.getDisplayedProjectLogoResId(),
-                                        LocalContext.current.theme
-                                    ).toBitmap().asImageBitmap(),
-                                    tint = Color.Unspecified,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
                                 Text(
-                                    text = resources.getString(pluginProject.getDisplayedProjectTitleId()),
+                                    text = stringResource(
+                                        id = R.string.plugin_support,
+                                        plugin.packageName
+                                    ),
                                     fontSize = 14.sp,
+                                    modifier = Modifier.padding(
+                                        start = 20.dp, end = 20.dp, top = 5.dp
+                                    ),
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                 )
+                                Divider(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 20.dp, end = 20.dp, top = 15.dp)
+                                        .height(1.dp),
+                                    color = DividerDefaults.color.copy(alpha = 0.4f)
+                                )
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(
+                                            start = 20.dp,
+                                            end = 20.dp,
+                                            top = 15.dp,
+                                            bottom = 15.dp
+                                        ),
+                                    horizontalArrangement = Arrangement.End
+                                ) {
+                                    Icon(
+                                        bitmap = resources.getDrawable(
+                                            pluginProject.getDisplayedProjectLogoResId(),
+                                            LocalContext.current.theme
+                                        ).toBitmap().asImageBitmap(),
+                                        tint = Color.Unspecified,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = resources.getString(pluginProject.getDisplayedProjectTitleId()),
+                                        fontSize = 14.sp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                                    )
+                                }
                             }
                         }
+                        Box(modifier = Modifier.offset {
+                            IntOffset(
+                                animatedOffset.value.x.roundToInt(),
+                                animatedOffset.value.y.roundToInt()
+                            )
+                        }) {
+                            ProjectOptionDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                                project = project
+                            )
+                        }
                     }
-
                 }
             }
         }
     }
 }
 
-private data class OptionItem(
-    val onClick: () -> Unit,
-    val imageVector: ImageVector,
-    val title: String
-)
-
 @Composable
-private fun ProjectOptionDialog(project: Project, onDismissRequest: () -> Unit) {
-    val optionItems = listOf(
-        OptionItem({
-            appViewModel.intent.trySend(AppUIIntent.DeleteProject(project))
-            onDismissRequest()
-        }, Icons.Outlined.Delete, stringResource(id = R.string.delete)),
-    )
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(text = stringResource(id = R.string.close))
-            }
-        },
-        title = {
-            Text(text = project.name)
-        },
-        text = {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                items(optionItems.size) { index ->
-                    val optionItem = optionItems[index]
-                    OptionItemWidget(
-                        onClick = optionItem.onClick,
-                        imageVector = optionItem.imageVector,
-                        title = optionItem.title
-                    )
+private fun ProjectOptionDropdownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    project: Project
+) {
+    var showDeleteDialog by remember {
+        mutableStateOf(false)
+    }
+    var showRenameDialog by remember {
+        mutableStateOf(false)
+    }
+    if (showDeleteDialog) {
+        AlertDialog(
+            title = {
+                Text(text = stringResource(id = R.string.delete_project))
+            },
+            text = {
+                Text(text = stringResource(id = R.string.delete_project_confirm, project.name))
+            },
+            onDismissRequest = {
+                showDeleteDialog = false
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    appViewModel.intent.trySend(AppUIIntent.DeleteProject(project))
+                }) {
+                    Text(text = stringResource(id = R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(text = stringResource(id = R.string.cancel))
                 }
             }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun OptionItemWidget(onClick: () -> Unit, imageVector: ImageVector, title: String) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp
-        ),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.background
         )
-    ) {
-        ConstraintLayout(Modifier.fillMaxSize()) {
-            val (icon, text) = createRefs()
-            Icon(
-                imageVector = imageVector,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(24.dp)
-                    .constrainAs(icon) {
-                        centerVerticallyTo(parent)
-                        start.linkTo(parent.start, margin = 20.dp)
-                    }
-            )
-            Text(
-                text = title,
-                fontSize = 16.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.constrainAs(text) {
-                    centerVerticallyTo(icon)
-                    linkTo(icon.end, parent.end, startMargin = 20.dp, endMargin = 20.dp, bias = 0f)
-                    width = Dimension.fillToConstraints
-                }
-            )
+    }
+    if (showRenameDialog) {
+        var name by remember {
+            mutableStateOf(project.name)
         }
+        var nameError by remember {
+            mutableStateOf("")
+        }
+        AlertDialog(
+            title = {
+                Text(text = stringResource(id = R.string.rename_project))
+            },
+            text = {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = {
+                        name = it
+                        nameError = ""
+                    },
+                    label = {
+                        Text(text = stringResource(id = R.string.project_name))
+                    },
+                    singleLine = true,
+                    isError = nameError.isNotEmpty(),
+                    supportingText = {
+                        if (nameError.isNotEmpty()) {
+                            Text(text = nameError)
+                        }
+                    },
+                )
+            },
+            onDismissRequest = {
+
+            },
+            confirmButton = {
+                val projectNameCannotBeEmpty =
+                    stringResource(id = R.string.project_name_cannot_be_empty)
+                val invalidProjectName = stringResource(id = R.string.invalid_project_name)
+                TextButton(onClick = {
+                    if (name.isEmpty()) {
+                        nameError = projectNameCannotBeEmpty
+                    }
+
+                    if ('/' in name) {
+                        nameError = invalidProjectName
+                    }
+
+                    if (nameError.isEmpty()) {
+                        showRenameDialog = false
+                        onDismissRequest()
+                        appViewModel.intent.trySend(AppUIIntent.RenameProject(project, name))
+                    }
+                }) {
+                    Text(text = stringResource(id = R.string.rename))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRenameDialog = false }) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            }
+        )
+    }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier
+            .sizeIn(maxWidth = 240.dp)
+    ) {
+        Text(
+            text = project.name,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        DropdownMenuItem(
+            text = {
+                Text(text = stringResource(id = R.string.rename))
+            },
+            onClick = {
+                showRenameDialog = true
+            }
+        )
+        DropdownMenuItem(
+            text = {
+                Text(text = stringResource(id = R.string.delete))
+            },
+            onClick = {
+                showDeleteDialog = true
+            }
+        )
     }
 }

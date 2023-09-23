@@ -5,7 +5,7 @@ package io.github.caimucheng.leaf.plugin
 import androidx.compose.runtime.Composable
 
 @Suppress("unused", "unused")
-abstract class PluginProject : PluginResource() {
+abstract class PluginProject : PluginBase() {
 
     /**
      * @return The displayed image resource id

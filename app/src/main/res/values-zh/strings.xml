@@ -54,5 +54,12 @@
     <string name="copied_successfully">复制成功</string>
     <string name="copied_failed">复制失败：</string>
     <string name="be_not_allowed_back">应用已崩溃，不允许返回</string>
-    <string name="unable_to_load_create_project_ui">无法加载 UI：插件内部错误或插件已被卸载。</string>
+    <string name="unable_to_load_create_project_ui">无法加载 UI：插件已被卸载。</string>
+    <string name="rename">重命名</string>
+    <string name="delete_project">删除工程</string>
+    <string name="delete_project_confirm">你确定要删除工程: %s 吗?</string>
+    <string name="rename_project">重命名工程</string>
+    <string name="project_name">工程名称</string>
+    <string name="project_name_cannot_be_empty">工程名称不能为空</string>
+    <string name="invalid_project_name">无效的工程名称</string>
 </resources>

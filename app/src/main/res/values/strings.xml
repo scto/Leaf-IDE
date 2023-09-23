@@ -56,5 +56,12 @@
     <string name="copied_successfully">Copied Successfully</string>
     <string name="copied_failed">"Copied Failed: "</string>
     <string name="be_not_allowed_back">The app has crashed and is not allowed to return</string>
-    <string name="unable_to_load_create_project_ui">Unable to load UI: Internal error in the plugin or the plugin has been uninstalled.</string>
+    <string name="unable_to_load_create_project_ui">Unable to load UI: The plugin has been uninstalled.</string>
+    <string name="rename">Rename</string>
+    <string name="delete_project">Delete Project</string>
+    <string name="delete_project_confirm">Are you sure you want to delete the project: %s?</string>
+    <string name="rename_project">Rename Project</string>
+    <string name="project_name">Project name</string>
+    <string name="project_name_cannot_be_empty">Project name cannot be empty</string>
+    <string name="invalid_project_name">Invalid project name</string>
 </resources>

@@ -13,4 +13,5 @@
     <string name="project_description_cannot_be_empty">工程描述不能为空</string>
     <string name="exists_project">工程已存在</string>
     <string name="back">返回</string>
+    <string name="create_project_failed">创建工程失败：%s</string>
 </resources>

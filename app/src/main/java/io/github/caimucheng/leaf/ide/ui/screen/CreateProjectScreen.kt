@@ -87,10 +87,10 @@ fun CreateProjectScreen(pageNavController: NavController, packageName: String) {
                     AppUIState.Default -> {}
                     AppUIState.Loading -> {
                         isLoading = true
-                        plugin = null
                     }
 
                     is AppUIState.Done -> {
+                        plugin = null
                         val plugins = it.plugins
                         for (currentPlugin in plugins) {
                             if (currentPlugin.configuration.enabled() && currentPlugin.packageName == packageName) {

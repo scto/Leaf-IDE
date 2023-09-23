@@ -1,6 +1,5 @@
 package io.github.caimucheng.leaf.common.util
 
-import com.topjohnwu.superuser.Shell
 import java.io.File
 
 object Files {
@@ -15,10 +14,35 @@ object Files {
         }
 
         return if (file.isFile) {
-            Shell.cmd("rm", file.absolutePath)
+            file.delete()
         } else {
-            Shell.cmd("rm", "-r", file.absolutePath)
-        }.exec().isSuccess
+            var isSucessful = true
+            for (child in (file.listFiles() ?: emptyArray())) {
+                if (!isSucessful) {
+                    delete(child)
+                } else {
+                    isSucessful = delete(child)
+                }
+            }
+            if (isSucessful) {
+                isSucessful = file.delete()
+            } else {
+                file.delete()
+            }
+            isSucessful
+        }
+    }
+
+    fun rename(fromPath: String, toPath: String): Boolean {
+        return rename(File(fromPath), File(toPath))
+    }
+
+    fun rename(fromFile: File, toFile: File): Boolean {
+        if (!fromFile.exists()) {
+            return false
+        }
+
+        return fromFile.renameTo(toFile)
     }
 
 }

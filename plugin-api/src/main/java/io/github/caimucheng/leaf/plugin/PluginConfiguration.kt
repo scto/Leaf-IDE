@@ -1,6 +1,6 @@
 package io.github.caimucheng.leaf.plugin
 
-abstract class PluginConfiguration : PluginResource() {
+abstract class PluginConfiguration : PluginBase() {
 
     abstract fun enabled(): Boolean
 

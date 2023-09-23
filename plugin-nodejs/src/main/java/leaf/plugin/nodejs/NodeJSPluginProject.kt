@@ -24,21 +24,44 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import io.github.caimucheng.leaf.common.component.LeafApp
+import io.github.caimucheng.leaf.common.component.LoadingDialog
+import io.github.caimucheng.leaf.common.model.Workspace
 import io.github.caimucheng.leaf.common.util.LeafIDEProjectPath
 import io.github.caimucheng.leaf.plugin.PluginProject
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
+import java.io.FileWriter
 
 class NodeJSPluginProject : PluginProject() {
+
+    private val coroutineScope =
+        CoroutineScope(Dispatchers.Main + CoroutineName("NodeJSPluginCoroutine"))
+
+    private val lock = Mutex()
 
     override fun getDisplayedPictureResId(): Int {
         return R.mipmap.displayed_nodejs_picture
@@ -65,17 +88,33 @@ class NodeJSPluginProject : PluginProject() {
         var description by rememberSaveable {
             mutableStateOf("My NodeJS Project")
         }
+        var version by rememberSaveable {
+            mutableStateOf("1.0")
+        }
+        var author by rememberSaveable {
+            mutableStateOf("User")
+        }
         var nameError by rememberSaveable {
             mutableStateOf("")
         }
         var descriptionError by rememberSaveable {
             mutableStateOf("")
         }
+        val loadingTitle: MutableState<String?> = remember {
+            mutableStateOf(null)
+        }
+        val showLoading = remember {
+            mutableStateOf(false)
+        }
 
         val projectNameCannotBeEmpty = stringResource(R.string.project_name_cannot_be_empty)
         val invalidProjectName = stringResource(R.string.invalid_project_name)
         val existsProject = stringResource(R.string.exists_project)
         val descriptionCannotBeEmpty = stringResource(R.string.project_description_cannot_be_empty)
+        val createProjectFailed = stringResource(R.string.create_project_failed)
+
+        val snackbarHostState = remember { SnackbarHostState() }
+        val coroutineScope = rememberCoroutineScope()
 
         val onClick = {
             if (name.isEmpty()) {
@@ -95,12 +134,35 @@ class NodeJSPluginProject : PluginProject() {
             }
 
             if (nameError.isEmpty() && descriptionError.isEmpty()) {
-                backHome()
+                showLoading.value = true
+                launchCreateProjectCoroutine(
+                    showLoading,
+                    loadingTitle,
+                    name,
+                    description,
+                    version,
+                    author,
+                    onError = { exception ->
+                        exception.printStackTrace()
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                String.format(
+                                    createProjectFailed,
+                                    exception.message
+                                ),
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Long
+                            )
+                        }
+                    },
+                    backHome = backHome
+                )
             }
         }
 
         LeafApp(
             title = stringResource(R.string.displayed_nodejs_title),
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             navigationIcon = {
                 IconButton(onClick = {
                     back()
@@ -112,18 +174,15 @@ class NodeJSPluginProject : PluginProject() {
                 }
             },
             content = {
+                if (showLoading.value) {
+                    LoadingDialog(title = loadingTitle.value)
+                }
                 Column(
                     Modifier
                         .fillMaxSize()
                         .padding(it)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    var version by rememberSaveable {
-                        mutableStateOf("1.0")
-                    }
-                    var author by rememberSaveable {
-                        mutableStateOf("User")
-                    }
 
                     Column(
                         Modifier
@@ -272,6 +331,86 @@ class NodeJSPluginProject : PluginProject() {
                 }
             }
         )
+    }
+
+    private fun launchCreateProjectCoroutine(
+        showLoading: MutableState<Boolean>,
+        loadingTitle: MutableState<String?>,
+        name: String,
+        description: String,
+        version: String,
+        author: String,
+        onError: (e: Exception) -> Unit,
+        backHome: () -> Unit
+    ) {
+        coroutineScope.launch {
+            lock.lock()
+            try {
+                createProject(
+                    loadingTitle,
+                    name,
+                    description,
+                    version,
+                    author
+                )
+                refresh()
+                backHome()
+            } catch (e: Exception) {
+                onError(e)
+            } finally {
+                showLoading.value = false
+                lock.unlock()
+            }
+        }
+    }
+
+    private suspend fun createProject(
+        loadingTitle: MutableState<String?>,
+        name: String,
+        description: String,
+        version: String,
+        author: String
+    ) {
+        return withContext(Dispatchers.IO) {
+            val rootFile = File(LeafIDEProjectPath, name)
+            rootFile.mkdirs()
+
+            val configurationDirectory = File(rootFile, ".LeafIDE")
+            configurationDirectory.mkdirs()
+
+            val workspaceFile = File(configurationDirectory, "workspace.xml")
+            Workspace(
+                name,
+                description,
+                getPackageName(),
+                emptyMap()
+            ).storeToXML(FileOutputStream(workspaceFile))
+
+            val packageFile = File(rootFile, "package.json")
+            val jsonObject = JSONObject()
+            jsonObject.put("name", name)
+            jsonObject.put("version", version)
+            jsonObject.put("description", description)
+            jsonObject.put("main", "index.js")
+            jsonObject.put("scripts", JSONObject().apply {
+                put("start", "node index.js")
+            })
+            jsonObject.put("keywords", JSONArray())
+            jsonObject.put("author", author)
+            jsonObject.put("license", "ISU")
+            FileWriter(packageFile).use {
+                it.write(jsonObject.toString(2))
+                it.flush()
+            }
+
+            File(rootFile, "index.js").createNewFile()
+        }
+    }
+
+    private suspend fun MutableState<String?>.setValue(value: String?) {
+        return withContext(Dispatchers.Main) {
+            this@setValue.value = value
+        }
     }
 
 }

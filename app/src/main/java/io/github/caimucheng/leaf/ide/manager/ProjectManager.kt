@@ -1,50 +1,42 @@
 package io.github.caimucheng.leaf.ide.manager
 
+import io.github.caimucheng.leaf.common.model.Workspace
 import io.github.caimucheng.leaf.common.util.Files
 import io.github.caimucheng.leaf.common.util.LeafIDEProjectPath
 import io.github.caimucheng.leaf.ide.model.Project
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.util.Properties
 
 object ProjectManager {
 
     private val projects = ArrayList<Project>()
 
-    private val mutex = Mutex()
-
-    private const val NAME = "name"
-
-    private const val DESCRIPTION = "description"
-
-    private const val PLUGIN = "plugin"
-
     suspend fun fetchProjects() {
         return withContext(Dispatchers.IO) {
-            mutex.lock()
-            try {
-                // Clear list
-                projects.clear()
+            // Clear list
+            projects.clear()
 
-                val listFiles = LeafIDEProjectPath.listFiles() ?: emptyArray()
-                for (file in listFiles) {
-                    if (file.isFile) {
-                        continue
-                    }
-                    val configurationDirectory = File(file, ".LeafIDE")
-                    if (!configurationDirectory.exists() || configurationDirectory.isFile) {
-                        continue
-                    }
-                    val workspaceFile = File(configurationDirectory, "workspace.xml")
-                    if (!workspaceFile.exists() || workspaceFile.isDirectory) {
-                        continue
-                    }
-                    parseWorkspace(file, workspaceFile)?.also { projects.add(it) }
+            val listFiles = LeafIDEProjectPath.listFiles() ?: emptyArray()
+            listFiles.sortWith { first, second ->
+                (second.lastModified() - first.lastModified()).toInt()
+            }
+            for (file in listFiles) {
+                if (file.isFile) {
+                    continue
                 }
-            } finally {
-                mutex.unlock()
+                val configurationDirectory = File(file, ".LeafIDE")
+                if (!configurationDirectory.exists() || configurationDirectory.isFile) {
+                    continue
+                }
+                val workspaceFile = File(configurationDirectory, "workspace.xml")
+                if (!workspaceFile.exists() || workspaceFile.isDirectory) {
+                    continue
+                }
+                parseWorkspace(file, workspaceFile)?.also { projects.add(it) }
             }
         }
     }
@@ -64,16 +56,16 @@ object ProjectManager {
         var name: String? = null
         var description: String? = null
         var plugin: String? = null
-        val extraData = HashMap<String, Any?>()
+        val extraData = HashMap<String, String>()
         for (propertyName in propertyNames) {
             when (propertyName) {
-                NAME -> name = properties.getProperty(propertyName)
-                DESCRIPTION -> description = properties.getProperty(description, null)
-                PLUGIN -> plugin = properties.getProperty(propertyName)
+                Workspace.NAME -> name = properties.getProperty(propertyName)
+                Workspace.DESCRIPTION -> description = properties.getProperty(propertyName, "")
+                Workspace.PLUGIN -> plugin = properties.getProperty(propertyName)
                 else -> extraData[propertyName] = properties.getProperty(propertyName)
             }
         }
-        if (name == null || plugin == null) {
+        if (name == null || description == null || plugin == null) {
             return null
         }
         val actualPlugin = PluginManager.getPluginByPackageName(plugin) ?: return null
@@ -95,16 +87,26 @@ object ProjectManager {
 
     suspend fun deleteProject(project: Project) {
         return withContext(Dispatchers.IO) {
-            mutex.lock()
-            try {
-                val rootFile = File(project.path)
-                val configurationDirectory = File(project.path, ".LeafIDE")
-                val workspaceFile = File(configurationDirectory, "workspace.xml")
-                parseWorkspace(rootFile, workspaceFile) ?: return@withContext
-                Files.delete(project.path)
-            } finally {
-                mutex.unlock()
+            Files.delete(project.path)
+            fetchProjects()
+        }
+    }
+
+    suspend fun renameProject(project: Project, newName: String) {
+        return withContext(Dispatchers.IO) {
+            val fromPath = project.path
+            val toPath = File(LeafIDEProjectPath, newName).absolutePath
+            Files.rename(fromPath, toPath)
+
+            val configurationFile = File(toPath, ".LeafIDE")
+            if (configurationFile.exists() && configurationFile.isDirectory) {
+                val workspaceFile = File(configurationFile, "workspace.xml")
+                val workspace =
+                    Workspace.loadFromXML(FileInputStream(workspaceFile)) ?: return@withContext
+                workspace.name = newName
+                workspace.storeToXML(FileOutputStream(workspaceFile))
             }
+            fetchProjects()
         }
     }
 

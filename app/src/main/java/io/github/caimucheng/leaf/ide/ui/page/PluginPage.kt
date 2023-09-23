@@ -39,7 +39,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -90,8 +89,6 @@ fun PluginPage() {
             PluginList(plugins)
         }
     }
-
-    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = appViewModel.state) {
         appViewModel.state.collect {
