@@ -100,7 +100,7 @@ fun HomePage(pageNavController: NavController) {
             if (it) {
                 Loading()
             } else {
-                ProjectList(projects)
+                ProjectList(pageNavController, projects)
             }
         }
 
@@ -147,7 +147,7 @@ fun HomePage(pageNavController: NavController) {
 @SuppressLint("ReturnFromAwaitPointerEventScope")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ProjectList(projects: List<Project>) {
+private fun ProjectList(pageNavController: NavController, projects: List<Project>) {
     if (projects.isEmpty()) {
         ConstraintLayout(
             modifier = Modifier
@@ -202,7 +202,7 @@ private fun ProjectList(projects: List<Project>) {
                                 .combinedClickable(onLongClick = {
                                     expanded = true
                                 }, onClick = {
-
+                                    pageNavController.navigate("${LeafIDEDestinations.EDITOR_PAGE}?packageName=${plugin.packageName}&path=${project.path}")
                                 })
                                 .pointerInput(null) {
                                     coroutineScope {
