@@ -93,7 +93,7 @@ fun CreateProjectScreen(pageNavController: NavController, packageName: String) {
                         plugin = null
                         val plugins = it.plugins
                         for (currentPlugin in plugins) {
-                            if (currentPlugin.configuration.enabled() && currentPlugin.packageName == packageName) {
+                            if (currentPlugin.isSupported && currentPlugin.configuration.enabled() && currentPlugin.packageName == packageName) {
                                 plugin = currentPlugin
                                 break
                             }

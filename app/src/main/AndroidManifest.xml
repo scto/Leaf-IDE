@@ -46,8 +46,6 @@
 
         <activity android:name=".activity.MainActivity" />
 
-        <activity android:name="io.github.caimucheng.leaf.plugin.PluginActivity" />
-
         <activity android:name=".activity.CrashHandlerActivity" />
 
     </application>

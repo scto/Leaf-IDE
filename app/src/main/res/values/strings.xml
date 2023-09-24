@@ -64,4 +64,5 @@
     <string name="project_name">Project name</string>
     <string name="project_name_cannot_be_empty">Project name cannot be empty</string>
     <string name="invalid_project_name">Invalid project name</string>
+    <string name="unable_to_load_editor_ui">Unable to load UI: plugin has been removed or project does not exist.</string>
 </resources>

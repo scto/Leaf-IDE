@@ -62,4 +62,5 @@
     <string name="project_name">工程名称</string>
     <string name="project_name_cannot_be_empty">工程名称不能为空</string>
     <string name="invalid_project_name">无效的工程名称</string>
+    <string name="unable_to_load_editor_ui">无法加载 UI：插件已被删除或工程不存在。</string>
 </resources>

@@ -20,8 +20,12 @@ data class Workspace(
 
         fun loadFromXML(inputStream: InputStream): Workspace? {
             val properties = Properties()
-            inputStream.use {
-                properties.loadFromXML(inputStream)
+            try {
+                inputStream.use {
+                    properties.loadFromXML(inputStream)
+                }
+            } catch (e: Exception) {
+                return null
             }
 
             val propertyNames = properties.stringPropertyNames()

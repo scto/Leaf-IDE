@@ -41,7 +41,7 @@ object ProjectManager {
         }
     }
 
-    private fun parseWorkspace(rootFile: File, workspaceFile: File): Project? {
+    fun parseWorkspace(rootFile: File, workspaceFile: File): Project? {
         if (!rootFile.exists() || rootFile.isFile) {
             return null
         }
@@ -49,8 +49,13 @@ object ProjectManager {
             return null
         }
         val properties = Properties()
-        workspaceFile.inputStream().use {
-            properties.loadFromXML(it)
+        try {
+            workspaceFile.inputStream().use {
+                properties.loadFromXML(it)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return null
         }
         val propertyNames = properties.stringPropertyNames()
         var name: String? = null
