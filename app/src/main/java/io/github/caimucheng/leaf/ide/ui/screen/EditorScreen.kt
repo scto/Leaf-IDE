@@ -15,8 +15,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
@@ -49,17 +47,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import io.github.caimucheng.leaf.common.component.Breadcrumb
 import io.github.caimucheng.leaf.common.component.FileList
+import io.github.caimucheng.leaf.common.component.FileTab
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
 import io.github.caimucheng.leaf.ide.component.Loading
+import io.github.caimucheng.leaf.ide.manager.IconManager
 import io.github.caimucheng.leaf.ide.manager.ProjectManager
 import io.github.caimucheng.leaf.ide.model.Plugin
 import io.github.caimucheng.leaf.ide.model.Project
@@ -259,12 +261,22 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                 .background(MaterialTheme.colorScheme.background),
                         ) {
                             val scrollState = rememberLazyListState()
-                            Column(
+                            ConstraintLayout(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(start = 10.dp, end = 10.dp)
                             ) {
+                                val (breadcrumb, more) = createRefs()
                                 Breadcrumb(
+                                    modifier = Modifier.constrainAs(breadcrumb) {
+                                        linkTo(
+                                            parent.start,
+                                            more.start,
+                                            endMargin = 10.dp,
+                                            bias = 0f
+                                        )
+                                        width = Dimension.fillToConstraints
+                                    },
                                     items = viewModel.breadcrumbItems,
                                     selectedIndex = viewModel.selectedIndex,
                                     state = scrollState,
@@ -285,6 +297,16 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         viewModel.intent.trySend(EditorUIIntent.Refresh(currentPath))
                                     }
                                 )
+                                IconButton(onClick = {
+
+                                }, modifier = Modifier.constrainAs(more) {
+                                    linkTo(parent.start, parent.end, bias = 1f)
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Filled.MoreVert,
+                                        contentDescription = null
+                                    )
+                                }
                             }
                             FileList(
                                 items = viewModel.children,
@@ -303,11 +325,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                     }
                                 },
                                 fileIcon = { file ->
-                                    if (file.isFile) {
-                                        Icons.Filled.InsertDriveFile
-                                    } else {
-                                        Icons.Filled.Folder
-                                    }
+                                    pluginProject.getFileIcon(file) ?: IconManager.getFileIcon(file)
                                 }
                             )
                         }
@@ -318,7 +336,12 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     .fillMaxSize()
                     .padding(it)
             ) {
-
+                Column(modifier = Modifier.fillMaxSize()) {
+                    FileTab(modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 5.dp))
+                    Spacer(modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.DarkGray))
+                }
             }
             BackHandler(enabled = drawerState.isOpen) {
                 coroutineScope.launch {
@@ -334,6 +357,18 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
             if (event === Lifecycle.Event.ON_RESUME) {
                 if (viewModel.breadcrumbItems.isEmpty()) {
                     viewModel.breadcrumbItems.add(BreadcrumbItem(File(currentPath)))
+                }
+                var currentFile = File(currentPath)
+                while (!currentFile.exists()) {
+                    if (currentFile.absolutePath == project.path) {
+                        break
+                    }
+                    viewModel.breadcrumbItems.removeLastOrNull()
+                    viewModel.selectedIndex--
+                    currentFile = currentFile.parentFile ?: break
+                }
+                if (currentPath != currentFile.absolutePath) {
+                    currentPath = currentFile.absolutePath
                 }
                 viewModel.intent.trySend(EditorUIIntent.Refresh(currentPath))
             }

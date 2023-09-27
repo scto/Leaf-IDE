@@ -3,6 +3,8 @@
 package io.github.caimucheng.leaf.plugin
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
+import java.io.File
 
 @Suppress("unused", "unused")
 abstract class PluginProject : PluginBase() {
@@ -32,6 +34,10 @@ abstract class PluginProject : PluginBase() {
      * */
     @Composable
     abstract fun CreateProjectScreen(back: () -> Unit, backHome: () -> Unit)
+
+    open fun getFileIcon(file: File): ImageVector? {
+        return null
+    }
 
 
 }

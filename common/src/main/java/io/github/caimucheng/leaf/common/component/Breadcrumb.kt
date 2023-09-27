@@ -1,7 +1,6 @@
 package io.github.caimucheng.leaf.common.component
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
@@ -29,15 +28,16 @@ import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Breadcrumb(
+    modifier: Modifier = Modifier,
     items: List<BreadcrumbItem>,
     selectedIndex: Int,
     onItemClick: (index: Int) -> Unit,
     state: LazyListState = rememberLazyListState()
 ) {
     LazyRow(
-        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        state = state
+        state = state,
+        modifier = modifier
     ) {
         items(items.size) { index ->
             val item = items[index]

@@ -37,10 +37,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.common.component.LoadingDialog
+import io.github.caimucheng.leaf.common.icon.NodeFile
 import io.github.caimucheng.leaf.common.model.Workspace
 import io.github.caimucheng.leaf.common.util.LeafIDEProjectPath
 import io.github.caimucheng.leaf.plugin.PluginProject
@@ -77,6 +79,13 @@ class NodeJSPluginProject : PluginProject() {
 
     override fun getDisplayedProjectTitleId(): Int {
         return R.string.displayed_project_title
+    }
+
+    override fun getFileIcon(file: File): ImageVector? {
+        if (file.name == "package.json" && file.isFile) {
+            return Icons.Filled.NodeFile
+        }
+        return super.getFileIcon(file)
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
