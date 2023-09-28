@@ -1,5 +1,6 @@
 package io.github.caimucheng.leaf.ide.ui.screen
 
+import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -66,6 +67,7 @@ import io.github.caimucheng.leaf.common.component.CodeEditor
 import io.github.caimucheng.leaf.common.component.FileList
 import io.github.caimucheng.leaf.common.component.FileTabs
 import io.github.caimucheng.leaf.common.component.LeafApp
+import io.github.caimucheng.leaf.common.component.LoadingDialog
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
@@ -79,6 +81,7 @@ import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import io.github.caimucheng.leaf.ide.viewmodel.EditorUIIntent
 import io.github.caimucheng.leaf.ide.viewmodel.EditorViewModel
 import io.github.caimucheng.leaf.plugin.PluginProject
+import io.github.rosemoe.sora.text.Content
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -187,6 +190,7 @@ fun EditorScreen(
     }
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Project) {
@@ -340,6 +344,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                         }
                     }
                 },
+                gesturesEnabled = false,
                 drawerState = drawerState,
                 modifier = Modifier
                     .fillMaxSize()
@@ -356,7 +361,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                             onSelected = { selectedIndex ->
                                 val target = viewModel.fileTabItems[selectedIndex]
                                 if (lastSelectedPath != target.file.absolutePath) {
-
+                                    viewModel.intent.trySend(EditorUIIntent.EditingFile(target.file))
                                     viewModel.selectedFileTabIndex =
                                         viewModel.selectedFileTabIndex.copy(selectedIndex)
                                     lastSelectedPath = target.file.absolutePath
@@ -373,13 +378,17 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                             }
                         )
                     }
-
+                    if (viewModel.loading) {
+                        LoadingDialog()
+                    }
                     AnimatedContent(
-                        targetState = viewModel.fileTabItems.isNotEmpty(),
+                        targetState = viewModel.editingFile != null,
                         label = "AnimatedContentEditor"
                     ) { showEditor ->
                         if (showEditor) {
-                            MainEditor()
+                            MainEditor(
+                                viewModel.content
+                            )
                         } else {
                             Column(
                                 modifier = Modifier.fillMaxSize(),
@@ -448,6 +457,9 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                 if (currentPath != currentFile.absolutePath) {
                     currentPath = currentFile.absolutePath
                 }
+                if (viewModel.editingFile?.exists() == false) {
+                    viewModel.intent.trySend(EditorUIIntent.EditingFile(null))
+                }
                 viewModel.intent.trySend(EditorUIIntent.Refresh(currentPath))
             }
         }
@@ -459,10 +471,16 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
 }
 
 @Composable
-private fun MainEditor() {
+private fun MainEditor(
+    content: Content
+) {
     Column(modifier = Modifier.fillMaxSize()) {
         CodeEditor(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            content = content,
+            onUpdate = {
+
+            }
         )
     }
 }

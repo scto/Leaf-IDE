@@ -10,10 +10,16 @@ import androidx.lifecycle.viewModelScope
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.common.model.FileTabItem
 import io.github.caimucheng.leaf.common.model.Value
+import io.github.rosemoe.sora.text.Content
+import io.github.rosemoe.sora.text.ContentIO
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
+import java.nio.charset.Charset
 
 sealed class EditorUIIntent {
 
@@ -26,6 +32,8 @@ sealed class EditorUIIntent {
     data class CloseOthers(val currentFile: File) : EditorUIIntent()
 
     data object CloseAll : EditorUIIntent()
+
+    data class EditingFile(val file: File?) : EditorUIIntent()
 
 }
 
@@ -41,6 +49,12 @@ class EditorViewModel : ViewModel() {
 
     val children: MutableList<File> = mutableStateListOf()
 
+    var editingFile: File? by mutableStateOf(null)
+
+    var content: Content by mutableStateOf(Content())
+
+    var loading: Boolean by mutableStateOf(false)
+
     val intent: Channel<EditorUIIntent> = Channel(Channel.UNLIMITED)
 
     init {
@@ -51,9 +65,23 @@ class EditorViewModel : ViewModel() {
                     is EditorUIIntent.OpenFile -> openFile(it.file)
                     is EditorUIIntent.CloseFile -> closeFile(it.file)
                     is EditorUIIntent.CloseOthers -> closeOthers(it.currentFile)
+                    is EditorUIIntent.EditingFile -> editingFile(it.file)
                     EditorUIIntent.CloseAll -> closeAll()
                 }
             }
+        }
+    }
+
+    private fun editingFile(file: File?) {
+        loading = true
+        viewModelScope.launch {
+            file?.let {
+                content = withContext(Dispatchers.IO) {
+                    ContentIO.createFrom(FileInputStream(it), Charset.forName("UTF-8"))
+                }
+            }
+            editingFile = file
+            loading = false
         }
     }
 
@@ -61,6 +89,7 @@ class EditorViewModel : ViewModel() {
         viewModelScope.launch {
             fileTabItems.clear()
             selectedFileTabIndex = Value(0)
+            editingFile(null)
         }
     }
 
@@ -89,6 +118,11 @@ class EditorViewModel : ViewModel() {
                         selectedFileTabIndex.copy()
                     }
                     fileTabItems.removeAt(index)
+                    if (selectedFileTabIndex.value < fileTabItems.size) {
+                        editingFile(fileTabItems[selectedFileTabIndex.value].file)
+                    } else {
+                        editingFile(null)
+                    }
                     break
                 }
             }
@@ -145,7 +179,8 @@ class EditorViewModel : ViewModel() {
                 }
             }
             if (selectedFileTabIndex.value >= fileTabItems.size - removedList.size) {
-                selectedFileTabIndex = selectedFileTabIndex.copy(fileTabItems.size - removedList.size - 1)
+                selectedFileTabIndex =
+                    selectedFileTabIndex.copy(fileTabItems.size - removedList.size - 1)
             }
             fileTabItems.removeAll(removedList)
 
