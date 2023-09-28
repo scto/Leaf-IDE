@@ -9,4 +9,7 @@
     <string name="launch_mode_introduction" tools:ignore="UnusedResources">Launch Mode Introduction</string>
     <string name="no_implementation">Not implemented here yet</string>
     <string name="shared_user_label" tools:ignore="UnusedResources">Leaf IDE Shared User</string>
+    <string name="close_current">Close Current</string>
+    <string name="close_others">Close Others</string>
+    <string name="close_all">Close All</string>
 </resources>

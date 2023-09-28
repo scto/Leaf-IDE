@@ -12,6 +12,7 @@ lifecycle-runtime-ktx = "2.6.2"
 material-icons-extended = "1.5.1"
 navigation-compose = "2.7.3"
 org-jetbrains-kotlin-android = "1.9.20-Beta"
+io-github-Rosemoe-sora-editor = "0.22.1"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
@@ -34,6 +35,9 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "org-jetbrains-kotlin-android" }
 # Su process and file-system
 libsu-core = { module = "com.github.topjohnwu.libsu:core", version.ref = "libsu" }
+# Sora Editor Library
+sora-editor-bom = { module = "io.github.Rosemoe.sora-editor:bom", version.ref = "io-github-Rosemoe-sora-editor" }
+sora-editor-editor = { module = "io.github.Rosemoe.sora-editor:editor" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "android" }

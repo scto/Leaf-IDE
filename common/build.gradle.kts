@@ -31,6 +31,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
 
     implementation(libs.libsu.core)
+    implementation(libs.sora.editor.bom)
+    implementation(libs.sora.editor.editor)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

@@ -44,7 +44,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.MainActivity" />
+        <activity
+            android:name=".activity.MainActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity android:name=".activity.CrashHandlerActivity" />
 

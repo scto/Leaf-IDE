@@ -10,4 +10,7 @@
     <string name="launch_mode_introduction" tools:ignore="UnusedResources">启动模式介绍</string>
     <string name="no_implementation">此处还没有实现</string>
     <string name="shared_user_label" tools:ignore="UnusedResources">Leaf IDE 共享用户</string>
+    <string name="close_current">关闭当前</string>
+    <string name="close_others">关闭其他</string>
+    <string name="close_all">关闭全部</string>
 </resources>

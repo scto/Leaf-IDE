@@ -1,16 +1,22 @@
 package io.github.caimucheng.leaf.ide.ui.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -46,7 +52,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.Lifecycle
@@ -54,8 +62,9 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import io.github.caimucheng.leaf.common.component.Breadcrumb
+import io.github.caimucheng.leaf.common.component.CodeEditor
 import io.github.caimucheng.leaf.common.component.FileList
-import io.github.caimucheng.leaf.common.component.FileTab
+import io.github.caimucheng.leaf.common.component.FileTabs
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.ide.R
@@ -278,10 +287,10 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         width = Dimension.fillToConstraints
                                     },
                                     items = viewModel.breadcrumbItems,
-                                    selectedIndex = viewModel.selectedIndex,
+                                    selectedIndex = viewModel.selectedBreadcrumbIndex,
                                     state = scrollState,
                                     onItemClick = { index ->
-                                        val currentIndex = viewModel.selectedIndex
+                                        val currentIndex = viewModel.selectedBreadcrumbIndex
 
                                         if (index <= currentIndex) {
                                             var workIndex = viewModel.breadcrumbItems.lastIndex
@@ -292,7 +301,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         }
 
                                         val item = viewModel.breadcrumbItems[index]
-                                        viewModel.selectedIndex = index
+                                        viewModel.selectedBreadcrumbIndex = index
                                         currentPath = item.file.absolutePath
                                         viewModel.intent.trySend(EditorUIIntent.Refresh(currentPath))
                                     }
@@ -314,14 +323,14 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                     if (child.isDirectory) {
                                         currentPath = child.absolutePath
                                         viewModel.breadcrumbItems.add(BreadcrumbItem(child))
-                                        viewModel.selectedIndex =
+                                        viewModel.selectedBreadcrumbIndex =
                                             viewModel.breadcrumbItems.lastIndex
                                         viewModel.intent.trySend(EditorUIIntent.Refresh(currentPath))
                                         coroutineScope.launch {
                                             scrollState.scrollToItem(viewModel.breadcrumbItems.lastIndex)
                                         }
                                     } else {
-
+                                        viewModel.intent.trySend(EditorUIIntent.OpenFile(child))
                                     }
                                 },
                                 fileIcon = { file ->
@@ -337,10 +346,79 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     .padding(it)
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    FileTab(modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 5.dp))
-                    Spacer(modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.DarkGray))
+                    var lastSelectedPath: String? by rememberSaveable {
+                        mutableStateOf(null)
+                    }
+                    AnimatedVisibility(visible = viewModel.fileTabItems.isNotEmpty()) {
+                        FileTabs(
+                            items = viewModel.fileTabItems,
+                            selectedIndex = viewModel.selectedFileTabIndex,
+                            onSelected = { selectedIndex ->
+                                val target = viewModel.fileTabItems[selectedIndex]
+                                if (lastSelectedPath != target.file.absolutePath) {
+
+                                    viewModel.selectedFileTabIndex =
+                                        viewModel.selectedFileTabIndex.copy(selectedIndex)
+                                    lastSelectedPath = target.file.absolutePath
+                                }
+                            },
+                            onCloseCurrent = { closedIndex ->
+                                viewModel.intent.trySend(EditorUIIntent.CloseFile(viewModel.fileTabItems[closedIndex].file))
+                            },
+                            onCloseOthers = { currentIndex ->
+                                viewModel.intent.trySend(EditorUIIntent.CloseOthers(viewModel.fileTabItems[currentIndex].file))
+                            },
+                            onCloseAll = {
+                                viewModel.intent.trySend(EditorUIIntent.CloseAll)
+                            }
+                        )
+                    }
+
+                    AnimatedContent(
+                        targetState = viewModel.fileTabItems.isNotEmpty(),
+                        label = "AnimatedContentEditor"
+                    ) { showEditor ->
+                        if (showEditor) {
+                            MainEditor()
+                        } else {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(
+                                        text = stringResource(id = R.string.app_name),
+                                        fontSize = 18.sp
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Row {
+                                        Text(
+                                            text = stringResource(id = R.string.swipe_left_to_open),
+                                            fontSize = 14.sp
+                                        )
+                                        Spacer(modifier = Modifier.width(2.dp))
+                                        Text(
+                                            text = "文件列表",
+                                            fontSize = 14.sp,
+                                            textDecoration = TextDecoration.Underline,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.clickable(
+                                                remember {
+                                                    MutableInteractionSource()
+                                                },
+                                                indication = null
+                                            ) {
+                                                coroutineScope.launch {
+                                                    drawerState.open()
+                                                }
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             BackHandler(enabled = drawerState.isOpen) {
@@ -364,7 +442,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                         break
                     }
                     viewModel.breadcrumbItems.removeLastOrNull()
-                    viewModel.selectedIndex--
+                    viewModel.selectedBreadcrumbIndex = viewModel.breadcrumbItems.lastIndex
                     currentFile = currentFile.parentFile ?: break
                 }
                 if (currentPath != currentFile.absolutePath) {
@@ -377,5 +455,14 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
+    }
+}
+
+@Composable
+private fun MainEditor() {
+    Column(modifier = Modifier.fillMaxSize()) {
+        CodeEditor(
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
