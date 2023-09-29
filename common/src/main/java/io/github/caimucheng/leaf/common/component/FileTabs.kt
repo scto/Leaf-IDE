@@ -134,12 +134,12 @@ fun FileTabs(
                         targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
                             alpha = 0.8f
                         ), label = "AnimateTextColor",
-                        animationSpec = tween(400)
+                        animationSpec = tween(320)
                     )
                     val animatedSpacerColor by animateColorAsState(
                         targetValue = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
                         label = "AnimatedSpacerColor",
-                        animationSpec = tween(400)
+                        animationSpec = tween(320)
                     )
                     Text(
                         text = item.name,

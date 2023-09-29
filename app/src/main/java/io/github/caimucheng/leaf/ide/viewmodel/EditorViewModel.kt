@@ -10,8 +10,11 @@ import androidx.lifecycle.viewModelScope
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.common.model.FileTabItem
 import io.github.caimucheng.leaf.common.model.Value
+import io.github.caimucheng.leaf.common.util.LeafIDEProjectPath
+import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.text.ContentIO
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -19,6 +22,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.nio.charset.Charset
 
 sealed class EditorUIIntent {
@@ -34,6 +38,8 @@ sealed class EditorUIIntent {
     data object CloseAll : EditorUIIntent()
 
     data class EditingFile(val file: File?) : EditorUIIntent()
+
+    data class SaveFile(val file: File?) : EditorUIIntent()
 
 }
 
@@ -57,6 +63,8 @@ class EditorViewModel : ViewModel() {
 
     val intent: Channel<EditorUIIntent> = Channel(Channel.UNLIMITED)
 
+    var selection: CharPosition = CharPosition()
+
     init {
         viewModelScope.launch {
             intent.consumeAsFlow().collect {
@@ -66,7 +74,25 @@ class EditorViewModel : ViewModel() {
                     is EditorUIIntent.CloseFile -> closeFile(it.file)
                     is EditorUIIntent.CloseOthers -> closeOthers(it.currentFile)
                     is EditorUIIntent.EditingFile -> editingFile(it.file)
+                    is EditorUIIntent.SaveFile -> saveFile(it.file)
                     EditorUIIntent.CloseAll -> closeAll()
+                }
+            }
+        }
+    }
+
+    private fun saveFile(file: File?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            file?.let {
+                try {
+                    FileOutputStream(it).use { fileOutputStream ->
+                        ContentIO.writeTo(content, fileOutputStream, Charset.forName("UTF-8"), true)
+                    }
+                } catch (e: Exception) {
+                    if (e is CancellationException) {
+                        throw e
+                    }
+                    e.printStackTrace()
                 }
             }
         }
@@ -77,7 +103,17 @@ class EditorViewModel : ViewModel() {
         viewModelScope.launch {
             file?.let {
                 content = withContext(Dispatchers.IO) {
-                    ContentIO.createFrom(FileInputStream(it), Charset.forName("UTF-8"))
+                    try {
+                        FileInputStream(it).use {
+                            ContentIO.createFrom(it, Charset.forName("UTF-8"))
+                        }
+                    } catch (e: Exception) {
+                        if (e is CancellationException) {
+                            throw e
+                        }
+                        e.printStackTrace()
+                        Content()
+                    }
                 }
             }
             editingFile = file
@@ -138,21 +174,23 @@ class EditorViewModel : ViewModel() {
                 }
             }
 
-            var openFileName: String = openFile.name
             for ((index, fileTab) in fileTabItems.withIndex()) {
                 if (fileTab.file.absolutePath == openFile.absolutePath) {
                     selectedFileTabIndex = selectedFileTabIndex.copy(index)
                     return@launch
                 }
-                if (fileTab.name == openFile.name) {
-                    fileTab.name = (fileTab.file.parentFile?.name ?: "") + "/${fileTab.file.name}"
-                    openFileName = (openFile.parentFile?.name ?: "") + "/${openFileName}"
-                }
             }
 
-            fileTabItems.add(FileTabItem(openFile, openFileName))
+            fileTabItems.add(FileTabItem(openFile, toRelativePath(openFile)))
             selectedFileTabIndex = selectedFileTabIndex.copy(fileTabItems.lastIndex)
         }
+    }
+
+    private fun toRelativePath(file: File): String {
+        val trimPath = file.absolutePath.replace("${LeafIDEProjectPath.absolutePath}/", "")
+        val index = trimPath.indexOf("/")
+        if (index == -1) return file.name
+        return trimPath.substring(index + 1)
     }
 
     private fun refresh(path: String) {
@@ -183,32 +221,6 @@ class EditorViewModel : ViewModel() {
                     selectedFileTabIndex.copy(fileTabItems.size - removedList.size - 1)
             }
             fileTabItems.removeAll(removedList)
-
-            loop@ for (removedFileTabItem in removedList) {
-                val removedName = removedFileTabItem.name
-                val removedIndex = removedFileTabItem.name.lastIndexOf('/')
-
-                for (fileTabItem in fileTabItems) {
-                    val fileName = fileTabItem.name
-                    val currentIndex = fileTabItem.name.lastIndexOf('/')
-
-                    if (removedIndex == -1 || currentIndex == -1) {
-                        continue@loop
-                    }
-
-                    if (removedName.substring(
-                            removedIndex + 1,
-                            removedName.length
-                        ) == fileName.substring(
-                            currentIndex + 1,
-                            fileName.length
-                        )
-                    ) {
-                        fileTabItem.name =
-                            fileName.substring(currentIndex + 1, fileName.length)
-                    }
-                }
-            }
         }
     }
 

@@ -81,6 +81,8 @@ import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import io.github.caimucheng.leaf.ide.viewmodel.EditorUIIntent
 import io.github.caimucheng.leaf.ide.viewmodel.EditorViewModel
 import io.github.caimucheng.leaf.plugin.PluginProject
+import io.github.rosemoe.sora.event.ContentChangeEvent
+import io.github.rosemoe.sora.event.EventReceiver
 import io.github.rosemoe.sora.text.Content
 import kotlinx.coroutines.launch
 import java.io.File
@@ -200,6 +202,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
     var currentPath by rememberSaveable {
         mutableStateOf(project.path)
     }
+
     LeafApp(
         title = project.name,
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
@@ -334,7 +337,11 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                             scrollState.scrollToItem(viewModel.breadcrumbItems.lastIndex)
                                         }
                                     } else {
-                                        viewModel.intent.trySend(EditorUIIntent.OpenFile(child))
+                                        viewModel.intent.trySend(
+                                            EditorUIIntent.OpenFile(
+                                                child
+                                            )
+                                        )
                                     }
                                 },
                                 fileIcon = { file ->
@@ -351,20 +358,17 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     .padding(it)
             ) {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    var lastSelectedPath: String? by rememberSaveable {
-                        mutableStateOf(null)
-                    }
                     AnimatedVisibility(visible = viewModel.fileTabItems.isNotEmpty()) {
                         FileTabs(
                             items = viewModel.fileTabItems,
                             selectedIndex = viewModel.selectedFileTabIndex,
                             onSelected = { selectedIndex ->
                                 val target = viewModel.fileTabItems[selectedIndex]
-                                if (lastSelectedPath != target.file.absolutePath) {
+                                if (viewModel.editingFile?.absolutePath != target.file.absolutePath) {
                                     viewModel.intent.trySend(EditorUIIntent.EditingFile(target.file))
                                     viewModel.selectedFileTabIndex =
                                         viewModel.selectedFileTabIndex.copy(selectedIndex)
-                                    lastSelectedPath = target.file.absolutePath
+                                    viewModel.editingFile = target.file
                                 }
                             },
                             onCloseCurrent = { closedIndex ->
@@ -387,7 +391,10 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     ) { showEditor ->
                         if (showEditor) {
                             MainEditor(
-                                viewModel.content
+                                viewModel.content,
+                                contentChange = { _, _ ->
+                                    viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
+                                }
                             )
                         } else {
                             Column(
@@ -472,13 +479,19 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
 
 @Composable
 private fun MainEditor(
-    content: Content
+    content: Content,
+    cursorLine: Int = 0,
+    cursorColumn: Int = 0,
+    contentChange: EventReceiver<ContentChangeEvent>? = null
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         CodeEditor(
             modifier = Modifier.fillMaxSize(),
             content = content,
-            onUpdate = {
+            cursorLine = cursorLine,
+            cursorColumn = cursorColumn,
+            contentChange = contentChange,
+            update = {
 
             }
         )
