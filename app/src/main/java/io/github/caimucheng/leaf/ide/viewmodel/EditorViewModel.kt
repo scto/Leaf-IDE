@@ -7,10 +7,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.caimucheng.leaf.common.manager.DataStoreManager
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.common.model.FileTabItem
+import io.github.caimucheng.leaf.common.model.PreferenceRequest
 import io.github.caimucheng.leaf.common.model.Value
+import io.github.caimucheng.leaf.common.util.DisplayConfigurationDirKey
 import io.github.caimucheng.leaf.common.util.LeafIDEProjectPath
+import io.github.caimucheng.leaf.common.util.SettingsDataStore
+import io.github.caimucheng.leaf.ide.application.AppContext
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.text.ContentIO
@@ -195,9 +200,25 @@ class EditorViewModel : ViewModel() {
 
     private fun refresh(path: String) {
         children.clear()
+        val dataStoreManager = DataStoreManager(AppContext.context.SettingsDataStore)
+        val displayConfigurationDirRequest = PreferenceRequest(
+            key = DisplayConfigurationDirKey,
+            defaultValue = false
+        )
         viewModelScope.launch {
+            val displayConfigurationDir = dataStoreManager.getPreference(
+                displayConfigurationDirRequest
+            )
+            val configurationFile = File(path, ".LeafIDE")
             val file = File(path)
-            val files = file.listFiles() ?: emptyArray()
+            val files = (file.listFiles() ?: emptyArray()).let {
+                if (!displayConfigurationDir && configurationFile.exists() && configurationFile.isDirectory) {
+                    it.filter { theFile -> theFile.absolutePath != configurationFile.absolutePath }
+                        .toTypedArray()
+                } else {
+                    it
+                }
+            }
             files.sortWith { first, second ->
                 if (first.isDirectory && second.isFile) {
                     return@sortWith -1

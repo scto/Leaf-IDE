@@ -63,7 +63,7 @@
     <string name="project_name_cannot_be_empty">工程名称不能为空</string>
     <string name="invalid_project_name">无效的工程名称</string>
     <string name="unable_to_load_editor_ui">无法加载 UI：插件已被删除或工程不存在。</string>
-    <string name="swipe_left_to_open">左滑打开</string>
+    <string name="click_button_to_open">点击按钮打开</string>
     <string name="options">选项</string>
     <string name="create_file">创建文件</string>
     <string name="display">显示</string>

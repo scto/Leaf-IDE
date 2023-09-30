@@ -5,7 +5,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowRight
@@ -29,9 +27,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Undo
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,10 +35,9 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -55,8 +50,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -82,6 +75,7 @@ import io.github.caimucheng.leaf.common.model.PreferenceRequest
 import io.github.caimucheng.leaf.common.util.DisplayConfigurationDirKey
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import io.github.caimucheng.leaf.ide.R
+import io.github.caimucheng.leaf.ide.application.AppContext
 import io.github.caimucheng.leaf.ide.application.appViewModel
 import io.github.caimucheng.leaf.ide.component.Loading
 import io.github.caimucheng.leaf.ide.manager.IconManager
@@ -213,9 +207,11 @@ fun EditorScreen(
 private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Project) {
     val viewModel: EditorViewModel = viewModel()
     val coroutineScope = rememberCoroutineScope()
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var currentPath by rememberSaveable {
         mutableStateOf(project.path)
+    }
+    var showBottomSheet by rememberSaveable {
+        mutableStateOf(false)
     }
 
     LeafApp(
@@ -224,15 +220,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
         isLarge = false,
         navigationIcon = {
             IconButton(onClick = {
-                if (drawerState.isOpen) {
-                    coroutineScope.launch {
-                        drawerState.close()
-                    }
-                } else {
-                    coroutineScope.launch {
-                        drawerState.open()
-                    }
-                }
+                showBottomSheet = !showBottomSheet
             }) {
                 Icon(
                     imageVector = Icons.Filled.Menu,
@@ -272,24 +260,101 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
             }
         },
         content = {
-            ModalNavigationDrawer(
-                drawerContent = {
-                    Card(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(end = 60.dp),
-                        shape = RoundedCornerShape(0.dp),
-                        elevation = CardDefaults.cardElevation(
-                            defaultElevation = 16.dp
-                        ),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Transparent
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) {
+                AnimatedVisibility(visible = viewModel.fileTabItems.isNotEmpty()) {
+                    FileTabs(
+                        items = viewModel.fileTabItems,
+                        selectedIndex = viewModel.selectedFileTabIndex,
+                        onSelected = { selectedIndex ->
+                            val target = viewModel.fileTabItems[selectedIndex]
+                            if (viewModel.editingFile?.absolutePath != target.file.absolutePath) {
+                                viewModel.intent.trySend(EditorUIIntent.EditingFile(target.file))
+                                viewModel.selectedFileTabIndex =
+                                    viewModel.selectedFileTabIndex.copy(selectedIndex)
+                                viewModel.editingFile = target.file
+                            }
+                        },
+                        onCloseCurrent = { closedIndex ->
+                            viewModel.intent.trySend(EditorUIIntent.CloseFile(viewModel.fileTabItems[closedIndex].file))
+                        },
+                        onCloseOthers = { currentIndex ->
+                            viewModel.intent.trySend(EditorUIIntent.CloseOthers(viewModel.fileTabItems[currentIndex].file))
+                        },
+                        onCloseAll = {
+                            viewModel.intent.trySend(EditorUIIntent.CloseAll)
+                        }
+                    )
+                }
+                if (viewModel.loading) {
+                    LoadingDialog()
+                }
+                AnimatedContent(
+                    targetState = viewModel.editingFile != null,
+                    label = "AnimatedContentEditor"
+                ) { showEditor ->
+                    if (showEditor) {
+                        MainEditor(
+                            viewModel.content,
+                            contentChange = { _, _ ->
+                                viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
+                            }
                         )
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = stringResource(id = R.string.app_name),
+                                    fontSize = 18.sp
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Row {
+                                    Text(
+                                        text = stringResource(id = R.string.click_button_to_open),
+                                        fontSize = 14.sp
+                                    )
+                                    Spacer(modifier = Modifier.width(2.dp))
+                                    Text(
+                                        text = "文件列表",
+                                        fontSize = 14.sp,
+                                        textDecoration = TextDecoration.Underline,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.clickable(
+                                            remember {
+                                                MutableInteractionSource()
+                                            },
+                                            indication = null
+                                        ) {
+                                            showBottomSheet = true
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (showBottomSheet) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showBottomSheet = false },
+                        tonalElevation = 8.dp,
+                        containerColor = MaterialTheme.colorScheme.background,
+                        dragHandle = {
+                            BottomSheetDefaults.DragHandle(
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     ) {
                         Column(
                             modifier = Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.background),
+                                .fillMaxWidth()
                         ) {
                             val scrollState = rememberLazyListState()
                             ConstraintLayout(
@@ -328,7 +393,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         viewModel.intent.trySend(EditorUIIntent.Refresh(currentPath))
                                     }
                                 )
-                                var expanded by remember {
+                                var expanded by rememberSaveable {
                                     mutableStateOf(false)
                                 }
                                 IconButton(onClick = {
@@ -341,10 +406,14 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         contentDescription = null
                                     )
                                     OptionDropdownPopup(
-                                        currentPath,
                                         expanded = expanded,
-                                        onDismissRequest = {
-                                            expanded = false
+                                        onDismissRequest = { expanded = false },
+                                        update = {
+                                            viewModel.intent.trySend(
+                                                EditorUIIntent.Refresh(
+                                                    currentPath
+                                                )
+                                            )
                                         }
                                     )
                                 }
@@ -375,97 +444,11 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                             )
                         }
                     }
-                },
-                gesturesEnabled = false,
-                drawerState = drawerState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-            ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    AnimatedVisibility(visible = viewModel.fileTabItems.isNotEmpty()) {
-                        FileTabs(
-                            items = viewModel.fileTabItems,
-                            selectedIndex = viewModel.selectedFileTabIndex,
-                            onSelected = { selectedIndex ->
-                                val target = viewModel.fileTabItems[selectedIndex]
-                                if (viewModel.editingFile?.absolutePath != target.file.absolutePath) {
-                                    viewModel.intent.trySend(EditorUIIntent.EditingFile(target.file))
-                                    viewModel.selectedFileTabIndex =
-                                        viewModel.selectedFileTabIndex.copy(selectedIndex)
-                                    viewModel.editingFile = target.file
-                                }
-                            },
-                            onCloseCurrent = { closedIndex ->
-                                viewModel.intent.trySend(EditorUIIntent.CloseFile(viewModel.fileTabItems[closedIndex].file))
-                            },
-                            onCloseOthers = { currentIndex ->
-                                viewModel.intent.trySend(EditorUIIntent.CloseOthers(viewModel.fileTabItems[currentIndex].file))
-                            },
-                            onCloseAll = {
-                                viewModel.intent.trySend(EditorUIIntent.CloseAll)
-                            }
-                        )
-                    }
-                    if (viewModel.loading) {
-                        LoadingDialog()
-                    }
-                    AnimatedContent(
-                        targetState = viewModel.editingFile != null,
-                        label = "AnimatedContentEditor"
-                    ) { showEditor ->
-                        if (showEditor) {
-                            MainEditor(
-                                viewModel.content,
-                                contentChange = { _, _ ->
-                                    viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
-                                }
-                            )
-                        } else {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(
-                                        text = stringResource(id = R.string.app_name),
-                                        fontSize = 18.sp
-                                    )
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    Row {
-                                        Text(
-                                            text = stringResource(id = R.string.swipe_left_to_open),
-                                            fontSize = 14.sp
-                                        )
-                                        Spacer(modifier = Modifier.width(2.dp))
-                                        Text(
-                                            text = "文件列表",
-                                            fontSize = 14.sp,
-                                            textDecoration = TextDecoration.Underline,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.clickable(
-                                                remember {
-                                                    MutableInteractionSource()
-                                                },
-                                                indication = null
-                                            ) {
-                                                coroutineScope.launch {
-                                                    drawerState.open()
-                                                }
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
+
             }
-            BackHandler(enabled = drawerState.isOpen) {
-                coroutineScope.launch {
-                    drawerState.close()
-                }
+            BackHandler(enabled = showBottomSheet) {
+                showBottomSheet = false
             }
         }
     )
@@ -505,9 +488,9 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 private fun OptionDropdownPopup(
-    currentPath: String,
     expanded: Boolean,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    update: () -> Unit
 ) {
     DropdownMenu(
         expanded = expanded,
@@ -515,7 +498,7 @@ private fun OptionDropdownPopup(
         modifier = Modifier
             .sizeIn(maxWidth = 240.dp)
     ) {
-        var optionTitleId by remember {
+        var optionTitleId by rememberSaveable {
             mutableIntStateOf(R.string.options)
         }
         Text(
@@ -529,7 +512,7 @@ private fun OptionDropdownPopup(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        val dataStoreManager = DataStoreManager(LocalContext.current.SettingsDataStore)
+        val dataStoreManager = DataStoreManager(AppContext.context.SettingsDataStore)
         val displayConfigurationDirRequest = PreferenceRequest(
             key = DisplayConfigurationDirKey,
             defaultValue = false
@@ -541,7 +524,7 @@ private fun OptionDropdownPopup(
                 )
             })
         }
-        var popupUi by remember {
+        var popupUi by rememberSaveable {
             mutableStateOf("default")
         }
         val coroutineScope = rememberCoroutineScope()
@@ -594,6 +577,7 @@ private fun OptionDropdownPopup(
                                         displayConfigurationDirRequest.key,
                                         !displayConfigurationDir
                                     )
+                                    update()
                                 }
                             }
                         )
@@ -614,16 +598,12 @@ private fun OptionDropdownPopup(
 @Composable
 private fun MainEditor(
     content: Content,
-    cursorLine: Int = 0,
-    cursorColumn: Int = 0,
     contentChange: EventReceiver<ContentChangeEvent>? = null
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         CodeEditor(
             modifier = Modifier.fillMaxSize(),
             content = content,
-            cursorLine = cursorLine,
-            cursorColumn = cursorColumn,
             contentChange = contentChange,
             update = {
 

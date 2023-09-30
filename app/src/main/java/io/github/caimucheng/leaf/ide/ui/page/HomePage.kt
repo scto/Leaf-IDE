@@ -321,10 +321,10 @@ private fun ProjectOptionDropdownMenu(
     onDismissRequest: () -> Unit,
     project: Project
 ) {
-    var showDeleteDialog by remember {
+    var showDeleteDialog by rememberSaveable {
         mutableStateOf(false)
     }
-    var showRenameDialog by remember {
+    var showRenameDialog by rememberSaveable {
         mutableStateOf(false)
     }
     if (showDeleteDialog) {
@@ -354,10 +354,10 @@ private fun ProjectOptionDropdownMenu(
         )
     }
     if (showRenameDialog) {
-        var name by remember {
+        var name by rememberSaveable {
             mutableStateOf(project.name)
         }
-        var nameError by remember {
+        var nameError by rememberSaveable {
             mutableStateOf("")
         }
         AlertDialog(

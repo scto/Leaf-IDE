@@ -16,11 +16,10 @@ fun CodeEditor(
     modifier: Modifier = Modifier,
     content: Content = Content(),
     contentChange: EventReceiver<ContentChangeEvent>? = null,
-    cursorLine: Int = 0,
-    cursorColumn: Int = 0,
     update: CodeEditor.() -> Unit = {}
 ) {
     val codeEditorData = rememberCodeEditorData()
+
     AndroidView(
         factory = {
             CodeEditor(it)
@@ -33,21 +32,6 @@ fun CodeEditor(
         if (contentChange != null && !codeEditorData.isReceivedContentChange) {
             it.subscribeEvent(contentChange)
             codeEditorData.isReceivedContentChange = true
-        }
-        val leftLine = it.cursor.leftLine
-        val leftColumn = it.cursor.leftColumn
-        if (cursorLine < it.lineCount) {
-            if (cursorLine != leftLine && cursorColumn != leftColumn) {
-                if (cursorColumn < it.text.getColumnCount(cursorLine)) {
-                    it.setSelection(cursorLine, cursorColumn)
-                }
-            } else if (cursorLine != leftLine) {
-                it.setSelection(cursorLine, leftColumn)
-            } else if (cursorColumn != leftColumn) {
-                if (cursorColumn < it.text.getColumnCount(cursorLine)) {
-                    it.setSelection(leftLine, cursorColumn)
-                }
-            }
         }
         it.update()
     }
