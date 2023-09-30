@@ -19,8 +19,9 @@ import kotlin.properties.Delegates
 
 val Context.SettingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 val MaterialYouEnabledKey = booleanPreferencesKey("material_you_enabled")
-val AutoDarkLightTheme = booleanPreferencesKey("auto_dark_light_theme")
-val AppBrightness = booleanPreferencesKey("app_brightness")
+val AutoDarkLightThemeKey = booleanPreferencesKey("auto_dark_light_theme")
+val AppBrightnessKey = booleanPreferencesKey("app_brightness")
+val DisplayConfigurationDirKey = booleanPreferencesKey("display_configuration_dir")
 
 const val LAUNCH_MODE = "launch_mode"
 

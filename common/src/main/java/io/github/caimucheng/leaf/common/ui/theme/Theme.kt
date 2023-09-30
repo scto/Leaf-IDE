@@ -22,8 +22,8 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import io.github.caimucheng.leaf.common.manager.DataStoreManager
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
-import io.github.caimucheng.leaf.common.util.AppBrightness
-import io.github.caimucheng.leaf.common.util.AutoDarkLightTheme
+import io.github.caimucheng.leaf.common.util.AppBrightnessKey
+import io.github.caimucheng.leaf.common.util.AutoDarkLightThemeKey
 import io.github.caimucheng.leaf.common.util.MaterialYouEnabledKey
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -108,11 +108,11 @@ fun LeafIDETheme(
         defaultValue = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     )
     val autoDarkLightThemeRequest = PreferenceRequest(
-        key = AutoDarkLightTheme,
+        key = AutoDarkLightThemeKey,
         defaultValue = true
     )
     val appBrightnessRequest = PreferenceRequest(
-        key = AppBrightness,
+        key = AppBrightnessKey,
         defaultValue = false
     )
     var materialYouEnabled by remember {

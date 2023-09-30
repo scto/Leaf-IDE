@@ -66,4 +66,9 @@
     <string name="invalid_project_name">Invalid project name</string>
     <string name="unable_to_load_editor_ui">Unable to load UI: plugin has been removed or project does not exist.</string>
     <string name="swipe_left_to_open">Swipe left to open</string>
+    <string name="options">Options</string>
+    <string name="create_file">Create File</string>
+    <string name="display">Display</string>
+    <string name="display_configuration_dir">Display Configuration Directory</string>
+    <string name="hide_configuration_dir">Hide Configuration Directory</string>
 </resources>

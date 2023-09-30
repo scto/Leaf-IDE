@@ -28,8 +28,8 @@ import io.github.caimucheng.leaf.common.manager.DataStoreManager
 import io.github.caimucheng.leaf.common.model.Preference
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
 import io.github.caimucheng.leaf.common.ui.preferences.PreferenceScreen
-import io.github.caimucheng.leaf.common.util.AppBrightness
-import io.github.caimucheng.leaf.common.util.AutoDarkLightTheme
+import io.github.caimucheng.leaf.common.util.AppBrightnessKey
+import io.github.caimucheng.leaf.common.util.AutoDarkLightThemeKey
 import io.github.caimucheng.leaf.common.util.MaterialYouEnabledKey
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import io.github.caimucheng.leaf.ide.R
@@ -78,11 +78,11 @@ private fun MineUI() {
         defaultValue = isSupportedMaterialYou
     )
     val autoThemeRequest = PreferenceRequest(
-        key = AutoDarkLightTheme,
+        key = AutoDarkLightThemeKey,
         defaultValue = true
     )
     val appBrightnessRequest = PreferenceRequest(
-        key = AppBrightness,
+        key = AppBrightnessKey,
         defaultValue = false
     )
     var appBrightnessVisible by rememberSaveable {

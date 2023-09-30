@@ -17,11 +17,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowRight
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
@@ -30,6 +32,8 @@ import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -43,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,9 +56,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -68,7 +76,11 @@ import io.github.caimucheng.leaf.common.component.FileList
 import io.github.caimucheng.leaf.common.component.FileTabs
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.common.component.LoadingDialog
+import io.github.caimucheng.leaf.common.manager.DataStoreManager
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
+import io.github.caimucheng.leaf.common.model.PreferenceRequest
+import io.github.caimucheng.leaf.common.util.DisplayConfigurationDirKey
+import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
 import io.github.caimucheng.leaf.ide.component.Loading
@@ -84,7 +96,10 @@ import io.github.caimucheng.leaf.plugin.PluginProject
 import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.EventReceiver
 import io.github.rosemoe.sora.text.Content
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 
 @Composable
@@ -313,14 +328,24 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         viewModel.intent.trySend(EditorUIIntent.Refresh(currentPath))
                                     }
                                 )
+                                var expanded by remember {
+                                    mutableStateOf(false)
+                                }
                                 IconButton(onClick = {
-
+                                    expanded = true
                                 }, modifier = Modifier.constrainAs(more) {
                                     linkTo(parent.start, parent.end, bias = 1f)
                                 }) {
                                     Icon(
                                         imageVector = Icons.Filled.MoreVert,
                                         contentDescription = null
+                                    )
+                                    OptionDropdownPopup(
+                                        currentPath,
+                                        expanded = expanded,
+                                        onDismissRequest = {
+                                            expanded = false
+                                        }
                                     )
                                 }
                             }
@@ -473,6 +498,115 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+}
+
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+private fun OptionDropdownPopup(
+    currentPath: String,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier
+            .sizeIn(maxWidth = 240.dp)
+    ) {
+        var optionTitleId by remember {
+            mutableIntStateOf(R.string.options)
+        }
+        Text(
+            text = stringResource(id = optionTitleId),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        val dataStoreManager = DataStoreManager(LocalContext.current.SettingsDataStore)
+        val displayConfigurationDirRequest = PreferenceRequest(
+            key = DisplayConfigurationDirKey,
+            defaultValue = false
+        )
+        var displayConfigurationDir by rememberSaveable {
+            mutableStateOf(runBlocking {
+                dataStoreManager.getPreference(
+                    displayConfigurationDirRequest
+                )
+            })
+        }
+        var popupUi by remember {
+            mutableStateOf("default")
+        }
+        val coroutineScope = rememberCoroutineScope()
+        AnimatedContent(
+            targetState = popupUi,
+            label = "AnimatedDisplayExpanded"
+        ) { ui ->
+            Column {
+                when (ui) {
+                    "default" -> {
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = stringResource(id = R.string.create_file))
+                            },
+                            onClick = {
+                                onDismissRequest()
+
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = stringResource(id = R.string.display))
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            onClick = {
+                                popupUi = "display"
+                                optionTitleId = R.string.display
+                            }
+                        )
+                    }
+
+                    "display" -> {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(
+                                        id = if (displayConfigurationDir) R.string.hide_configuration_dir else R.string.display_configuration_dir
+                                    )
+                                )
+                            },
+                            onClick = {
+                                coroutineScope.launch {
+                                    dataStoreManager.editPreference(
+                                        displayConfigurationDirRequest.key,
+                                        !displayConfigurationDir
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+        coroutineScope.launch {
+            dataStoreManager.getPreferenceFlow(displayConfigurationDirRequest)
+                .onEach {
+                    displayConfigurationDir = it
+                }
+                .launchIn(this)
         }
     }
 }
