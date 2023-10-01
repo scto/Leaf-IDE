@@ -71,4 +71,5 @@
     <string name="display">Display</string>
     <string name="display_configuration_dir">Display Configuration Directory</string>
     <string name="hide_configuration_dir">Hide Configuration Directory</string>
+    <string name="file_name">File name</string>
 </resources>

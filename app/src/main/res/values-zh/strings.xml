@@ -69,4 +69,5 @@
     <string name="display">显示</string>
     <string name="display_configuration_dir">显示配置目录</string>
     <string name="hide_configuration_dir">隐藏配置目录</string>
+    <string name="file_name">文件名称</string>
 </resources>

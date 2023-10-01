@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -36,7 +37,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -517,6 +520,9 @@ private fun OptionDropdownPopup(
             key = DisplayConfigurationDirKey,
             defaultValue = false
         )
+        var createFileDialog by rememberSaveable {
+            mutableStateOf(false)
+        }
         var displayConfigurationDir by rememberSaveable {
             mutableStateOf(runBlocking {
                 dataStoreManager.getPreference(
@@ -540,8 +546,7 @@ private fun OptionDropdownPopup(
                                 Text(text = stringResource(id = R.string.create_file))
                             },
                             onClick = {
-                                onDismissRequest()
-
+                                createFileDialog = true
                             }
                         )
                         DropdownMenuItem(
@@ -584,6 +589,49 @@ private fun OptionDropdownPopup(
                     }
                 }
             }
+        }
+        if (createFileDialog) {
+            var name by rememberSaveable {
+                mutableStateOf("")
+            }
+            var nameError by rememberSaveable {
+                mutableStateOf("")
+            }
+            AlertDialog(
+                onDismissRequest = {},
+                title = {
+                    Text(text = stringResource(id = R.string.create_file))
+                },
+                text = {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = {
+                            name = it
+                            nameError = ""
+                        },
+                        label = {
+                            Text(text = stringResource(id = R.string.file_name))
+                        },
+                        singleLine = true,
+                        isError = nameError.isNotEmpty(),
+                        supportingText = {
+                            if (nameError.isNotEmpty()) {
+                                Text(text = nameError)
+                            }
+                        },
+                    )
+                },
+                dismissButton = {
+                    TextButton(onClick = { createFileDialog = false }) {
+                        Text(text = stringResource(id = R.string.cancel))
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { }) {
+                        Text(text = stringResource(id = R.string.create))
+                    }
+                }
+            )
         }
         coroutineScope.launch {
             dataStoreManager.getPreferenceFlow(displayConfigurationDirRequest)
