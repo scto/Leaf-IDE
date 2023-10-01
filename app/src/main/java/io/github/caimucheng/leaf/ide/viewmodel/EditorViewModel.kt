@@ -13,6 +13,7 @@ import io.github.caimucheng.leaf.common.model.FileTabItem
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
 import io.github.caimucheng.leaf.common.model.Value
 import io.github.caimucheng.leaf.common.util.DisplayConfigurationDirKey
+import io.github.caimucheng.leaf.common.util.Files
 import io.github.caimucheng.leaf.common.util.LeafIDEProjectPath
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import io.github.caimucheng.leaf.ide.application.AppContext
@@ -21,6 +22,7 @@ import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.text.ContentIO
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
@@ -45,6 +47,13 @@ sealed class EditorUIIntent {
     data class EditingFile(val file: File?) : EditorUIIntent()
 
     data class SaveFile(val file: File?) : EditorUIIntent()
+
+    data class CreateFile(val currentPath: String, val name: String, val isDirectory: Boolean) :
+        EditorUIIntent()
+
+    data class DeleteFile(val currentPath: String, val child: File) : EditorUIIntent()
+    data class RenameFile(val currentPath: String, val file: File, val newName: String) :
+        EditorUIIntent()
 
 }
 
@@ -80,9 +89,44 @@ class EditorViewModel : ViewModel() {
                     is EditorUIIntent.CloseOthers -> closeOthers(it.currentFile)
                     is EditorUIIntent.EditingFile -> editingFile(it.file)
                     is EditorUIIntent.SaveFile -> saveFile(it.file)
+                    is EditorUIIntent.CreateFile -> createFile(
+                        it.currentPath,
+                        it.name,
+                        it.isDirectory
+                    )
+
+                    is EditorUIIntent.RenameFile -> renameFile(it.currentPath, it.file, it.newName)
+
+                    is EditorUIIntent.DeleteFile -> deleteFile(it.currentPath, it.child)
                     EditorUIIntent.CloseAll -> closeAll()
                 }
             }
+        }
+    }
+
+    private fun renameFile(currentPath: String, file: File, newName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            Files.rename(file, File(currentPath, newName))
+            refresh(currentPath).join()
+        }
+    }
+
+    private fun deleteFile(currentPath: String, child: File) {
+        viewModelScope.launch(Dispatchers.IO) {
+            Files.delete(child)
+            refresh(currentPath).join()
+        }
+    }
+
+    private fun createFile(currentPath: String, name: String, isDirectory: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val file = File(currentPath, name)
+            if (isDirectory) {
+                file.mkdir()
+            } else {
+                file.createNewFile()
+            }
+            refresh(currentPath).join()
         }
     }
 
@@ -198,14 +242,14 @@ class EditorViewModel : ViewModel() {
         return trimPath.substring(index + 1)
     }
 
-    private fun refresh(path: String) {
+    private fun refresh(path: String): Job {
         children.clear()
         val dataStoreManager = DataStoreManager(AppContext.context.SettingsDataStore)
         val displayConfigurationDirRequest = PreferenceRequest(
             key = DisplayConfigurationDirKey,
             defaultValue = false
         )
-        viewModelScope.launch {
+        return viewModelScope.launch {
             val displayConfigurationDir = dataStoreManager.getPreference(
                 displayConfigurationDirRequest
             )

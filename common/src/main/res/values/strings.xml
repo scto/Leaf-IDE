@@ -12,4 +12,13 @@
     <string name="close_current">Close Current</string>
     <string name="close_others">Close Others</string>
     <string name="close_all">Close All</string>
+    <string name="rename">Rename</string>
+    <string name="delete">Delete</string>
+    <string name="delete_file">Delete File</string>
+    <string name="delete_file_confirm">Are you sure you want to delete the file: %s?</string>
+    <string name="cancel">Cancel</string>
+    <string name="rename_file">Rename File</string>
+    <string name="file_name">File name</string>
+    <string name="file_name_cannot_be_empty">File name cannot be empty</string>
+    <string name="invalid_file_name">Invalid file name</string>
 </resources>

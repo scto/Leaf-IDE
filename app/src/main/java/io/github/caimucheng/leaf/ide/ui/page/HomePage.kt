@@ -339,16 +339,27 @@ private fun ProjectOptionDropdownMenu(
                 showDeleteDialog = false
             },
             confirmButton = {
-                TextButton(onClick = {
-                    showDeleteDialog = false
-                    appViewModel.intent.trySend(AppUIIntent.DeleteProject(project))
-                }) {
-                    Text(text = stringResource(id = R.string.delete))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text(text = stringResource(id = R.string.cancel))
+                ConstraintLayout(Modifier.fillMaxWidth()) {
+                    val (cancel, delete) = createRefs()
+                    TextButton(
+                        onClick = { showDeleteDialog = false },
+                        modifier = Modifier.constrainAs(cancel) {
+                            linkTo(parent.start, parent.end, bias = 0f)
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.cancel))
+                    }
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog = false
+                            appViewModel.intent.trySend(AppUIIntent.DeleteProject(project))
+                        },
+                        modifier = Modifier.constrainAs(delete) {
+                            linkTo(cancel.end, parent.end, bias = 1f)
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.delete))
+                    }
                 }
             }
         )
@@ -387,30 +398,38 @@ private fun ProjectOptionDropdownMenu(
 
             },
             confirmButton = {
-                val projectNameCannotBeEmpty =
-                    stringResource(id = R.string.project_name_cannot_be_empty)
-                val invalidProjectName = stringResource(id = R.string.invalid_project_name)
-                TextButton(onClick = {
-                    if (name.isEmpty()) {
-                        nameError = projectNameCannotBeEmpty
+                ConstraintLayout(Modifier.fillMaxWidth()) {
+                    val (cancel, projectName) = createRefs()
+                    val projectNameCannotBeEmpty =
+                        stringResource(id = R.string.project_name_cannot_be_empty)
+                    val invalidProjectName = stringResource(id = R.string.invalid_project_name)
+                    TextButton(
+                        onClick = { showRenameDialog = false },
+                        modifier = Modifier.constrainAs(cancel) {
+                            linkTo(parent.start, parent.end, bias = 0f)
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.cancel))
                     }
+                    TextButton(onClick = {
+                        if (name.isEmpty()) {
+                            nameError = projectNameCannotBeEmpty
+                        }
 
-                    if ('/' in name) {
-                        nameError = invalidProjectName
-                    }
+                        if ('/' in name) {
+                            nameError = invalidProjectName
+                        }
 
-                    if (nameError.isEmpty()) {
-                        showRenameDialog = false
-                        onDismissRequest()
-                        appViewModel.intent.trySend(AppUIIntent.RenameProject(project, name))
+                        if (nameError.isEmpty()) {
+                            showRenameDialog = false
+                            onDismissRequest()
+                            appViewModel.intent.trySend(AppUIIntent.RenameProject(project, name))
+                        }
+                    }, modifier = Modifier.constrainAs(projectName) {
+                        linkTo(cancel.end, parent.end, bias = 1f)
+                    }) {
+                        Text(text = stringResource(id = R.string.rename))
                     }
-                }) {
-                    Text(text = stringResource(id = R.string.rename))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showRenameDialog = false }) {
-                    Text(text = stringResource(id = R.string.cancel))
                 }
             }
         )

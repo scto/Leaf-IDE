@@ -19,7 +19,7 @@ object IconManager {
     }
 
     private fun getFileTypeIcon(file: File): ImageVector {
-        return when (file.name.substringAfterLast(".")) {
+        return when (file.extension) {
             "js" -> Icons.Filled.JavaScriptFile
             "ts" -> Icons.Filled.TypeScriptFile
             "tsx" -> Icons.Filled.TypeScriptExtensionFile

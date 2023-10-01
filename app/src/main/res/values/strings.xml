@@ -72,4 +72,8 @@
     <string name="display_configuration_dir">Display Configuration Directory</string>
     <string name="hide_configuration_dir">Hide Configuration Directory</string>
     <string name="file_name">File name</string>
+    <string name="file">File</string>
+    <string name="directory">Directory</string>
+    <string name="file_name_cannot_be_empty">File name cannot be empty</string>
+    <string name="invalid_file_name">Invalid file name</string>
 </resources>

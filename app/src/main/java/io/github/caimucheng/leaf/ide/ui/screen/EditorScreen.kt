@@ -351,7 +351,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                         containerColor = MaterialTheme.colorScheme.background,
                         dragHandle = {
                             BottomSheetDefaults.DragHandle(
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
                     ) {
@@ -409,15 +409,10 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         contentDescription = null
                                     )
                                     OptionDropdownPopup(
+                                        currentPath = currentPath,
                                         expanded = expanded,
-                                        onDismissRequest = { expanded = false },
-                                        update = {
-                                            viewModel.intent.trySend(
-                                                EditorUIIntent.Refresh(
-                                                    currentPath
-                                                )
-                                            )
-                                        }
+                                        viewModel = viewModel,
+                                        onDismissRequest = { expanded = false }
                                     )
                                 }
                             }
@@ -440,6 +435,23 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                             )
                                         )
                                     }
+                                },
+                                onRename = { file, newName ->
+                                    viewModel.intent.trySend(
+                                        EditorUIIntent.RenameFile(
+                                            currentPath,
+                                            file,
+                                            newName
+                                        )
+                                    )
+                                },
+                                onDelete = { file ->
+                                    viewModel.intent.trySend(
+                                        EditorUIIntent.DeleteFile(
+                                            currentPath,
+                                            file
+                                        )
+                                    )
                                 },
                                 fileIcon = { file ->
                                     pluginProject.getFileIcon(file) ?: IconManager.getFileIcon(file)
@@ -491,9 +503,10 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 private fun OptionDropdownPopup(
+    currentPath: String,
     expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    update: () -> Unit
+    viewModel: EditorViewModel,
+    onDismissRequest: () -> Unit
 ) {
     DropdownMenu(
         expanded = expanded,
@@ -582,7 +595,7 @@ private fun OptionDropdownPopup(
                                         displayConfigurationDirRequest.key,
                                         !displayConfigurationDir
                                     )
-                                    update()
+                                    viewModel.intent.trySend(EditorUIIntent.Refresh(currentPath))
                                 }
                             }
                         )
@@ -621,14 +634,76 @@ private fun OptionDropdownPopup(
                         },
                     )
                 },
-                dismissButton = {
-                    TextButton(onClick = { createFileDialog = false }) {
-                        Text(text = stringResource(id = R.string.cancel))
-                    }
-                },
                 confirmButton = {
-                    TextButton(onClick = { }) {
-                        Text(text = stringResource(id = R.string.create))
+                    ConstraintLayout(Modifier.fillMaxWidth()) {
+                        val (cancel, directory, file) = createRefs()
+                        val fileNameCannotBeEmpty =
+                            stringResource(id = R.string.file_name_cannot_be_empty)
+                        val invalidFileName = stringResource(id = R.string.invalid_file_name)
+                        TextButton(
+                            onClick = { createFileDialog = false },
+                            modifier = Modifier.constrainAs(cancel) {
+                                linkTo(parent.start, parent.end, bias = 0f)
+                            }
+                        ) {
+                            Text(text = stringResource(id = R.string.cancel))
+                        }
+                        TextButton(
+                            onClick = {
+                                if (name.isEmpty()) {
+                                    nameError = fileNameCannotBeEmpty
+                                }
+
+                                if ('/' in name) {
+                                    nameError = invalidFileName
+                                }
+
+                                if (nameError.isEmpty()) {
+                                    createFileDialog = false
+                                    onDismissRequest()
+                                    viewModel.intent.trySend(
+                                        EditorUIIntent.CreateFile(
+                                            currentPath,
+                                            name,
+                                            isDirectory = true
+                                        )
+                                    )
+                                }
+                            },
+                            modifier = Modifier.constrainAs(directory) {
+                                linkTo(cancel.end, file.start, endMargin = 8.dp, bias = 1f)
+                            }
+                        ) {
+                            Text(text = stringResource(id = R.string.directory))
+                        }
+                        TextButton(
+                            onClick = {
+                                if (name.isEmpty()) {
+                                    nameError = fileNameCannotBeEmpty
+                                }
+
+                                if ('/' in name) {
+                                    nameError = invalidFileName
+                                }
+
+                                if (nameError.isEmpty()) {
+                                    createFileDialog = false
+                                    onDismissRequest()
+                                    viewModel.intent.trySend(
+                                        EditorUIIntent.CreateFile(
+                                            currentPath,
+                                            name,
+                                            isDirectory = false
+                                        )
+                                    )
+                                }
+                            },
+                            modifier = Modifier.constrainAs(file) {
+                                linkTo(cancel.end, parent.end, bias = 1f)
+                            }
+                        ) {
+                            Text(text = stringResource(id = R.string.file))
+                        }
                     }
                 }
             )

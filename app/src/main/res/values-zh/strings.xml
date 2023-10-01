@@ -70,4 +70,8 @@
     <string name="display_configuration_dir">显示配置目录</string>
     <string name="hide_configuration_dir">隐藏配置目录</string>
     <string name="file_name">文件名称</string>
+    <string name="file">文件</string>
+    <string name="directory">目录</string>
+    <string name="file_name_cannot_be_empty">文件名不能为空</string>
+    <string name="invalid_file_name">无效的文件名</string>
 </resources>
