@@ -54,3 +54,18 @@ fun CodeEditor(
         }
     }
 }
+
+class CodeEditorController(
+    private val editor: CodeEditor
+) {
+
+    val content = editor.text
+
+    fun undo() = editor.undo()
+
+    fun canUndo() = editor.canUndo()
+
+    fun canRedo() = editor.canRedo()
+
+    fun redo() = editor.redo()
+}
