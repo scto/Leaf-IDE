@@ -12,7 +12,7 @@ val Icons.Filled.Needle: ImageVector
         if (_needle != null) {
             return _needle!!
         }
-        _needle = materialIcon(name = "Filled.Needle") {
+        _needle = materialIcon(name = "Needle") {
             materialPath {
                 moveTo(11.15f, 15.18f)
                 lineTo(9.73f, 13.77f)
