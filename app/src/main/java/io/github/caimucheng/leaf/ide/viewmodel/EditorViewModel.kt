@@ -1,5 +1,6 @@
 package io.github.caimucheng.leaf.ide.viewmodel
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -47,6 +48,8 @@ sealed class EditorUIIntent {
     data class EditingFile(val file: File?, val cursorPosition: CharPosition = CharPosition()) :
         EditorUIIntent()
 
+    data class ReopenFile(val file: File?) : EditorUIIntent()
+
     data class SaveFile(val file: File?) : EditorUIIntent()
 
     data class CreateFile(val currentPath: String, val name: String, val isDirectory: Boolean) :
@@ -57,9 +60,13 @@ sealed class EditorUIIntent {
         EditorUIIntent()
 
     data class SaveCursorState(val cursorPosition: CharPosition) : EditorUIIntent()
+    data class StatisticsProject(val path: String) : EditorUIIntent()
+
+    data class StatisticsFile(val file: File?) : EditorUIIntent()
 
 }
 
+@SuppressLint("MutableCollectionMutableState")
 class EditorViewModel : ViewModel() {
 
     val breadcrumbItems: MutableList<BreadcrumbItem> = mutableStateListOf()
@@ -82,15 +89,21 @@ class EditorViewModel : ViewModel() {
 
     var cursorPosition by mutableStateOf(CharPosition())
 
+    var statisticsFileContent: Map<String, String> by mutableStateOf(emptyMap())
+
+    var statisticsProjectContent: Map<String, String> by mutableStateOf(emptyMap())
+
     init {
         viewModelScope.launch {
             intent.consumeAsFlow().collect {
                 when (it) {
+                    EditorUIIntent.CloseAll -> closeAll()
                     is EditorUIIntent.Refresh -> refresh(it.path)
                     is EditorUIIntent.OpenFile -> openFile(it.file)
                     is EditorUIIntent.CloseFile -> closeFile(it.file)
                     is EditorUIIntent.CloseOthers -> closeOthers(it.currentFile)
                     is EditorUIIntent.EditingFile -> editingFile(it.file, it.cursorPosition)
+                    is EditorUIIntent.ReopenFile -> reopenFile(it.file)
                     is EditorUIIntent.SaveFile -> saveFile(it.file)
                     is EditorUIIntent.CreateFile -> createFile(
                         it.currentPath,
@@ -101,9 +114,64 @@ class EditorViewModel : ViewModel() {
                     is EditorUIIntent.SaveCursorState -> saveCursorState(it.cursorPosition)
                     is EditorUIIntent.RenameFile -> renameFile(it.currentPath, it.file, it.newName)
                     is EditorUIIntent.DeleteFile -> deleteFile(it.currentPath, it.child)
-                    EditorUIIntent.CloseAll -> closeAll()
+                    is EditorUIIntent.StatisticsProject -> statisticsProject(it.path)
+                    is EditorUIIntent.StatisticsFile -> statisticsFile(it.file)
                 }
             }
+        }
+    }
+
+    private fun statisticsFile(file: File?) {
+        loading = true
+        viewModelScope.launch {
+            file?.let { file ->
+                statisticsFileContent = buildMap {
+                    val bytes = Files.getTotalBytes(file)
+                    put("fileName", file.name)
+                    put("diskUsage", Files.formatBytes(bytes))
+                    put("diskUsageNotFormatted", "$bytes Bytes")
+                }
+                loading = false
+            } ?: run { loading = false }
+        }
+    }
+
+    private fun statisticsProject(path: String) {
+        loading = true
+        viewModelScope.launch {
+            statisticsProjectContent = buildMap {
+                val bytes = Files.getTotalBytes(path)
+                put("fileTotalCount", Files.getFileTotalCount(path).toString())
+                put("fileCount", Files.getFileCount(path).toString())
+                put("folderCount", Files.getFolderCount(path).toString())
+                put("diskUsage", Files.formatBytes(bytes))
+                put("diskUsageNotFormatted", "$bytes Bytes")
+            }
+            loading = false
+        }
+    }
+
+    private fun reopenFile(file: File?) {
+        loading = true
+        viewModelScope.launch {
+            file?.let {
+                content = withContext(Dispatchers.IO) {
+                    try {
+                        FileInputStream(it).use {
+                            ContentIO.createFrom(it, Charset.forName("UTF-8"))
+                        }
+                    } catch (e: Exception) {
+                        if (e is CancellationException) {
+                            throw e
+                        }
+                        e.printStackTrace()
+                        Content()
+                    }
+                }
+                this@EditorViewModel.cursorPosition = CharPosition()
+            }
+            editingFile = file
+            loading = false
         }
     }
 

@@ -93,6 +93,7 @@ import io.github.caimucheng.leaf.ide.viewmodel.EditorViewModel
 import io.github.caimucheng.leaf.plugin.PluginProject
 import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
+import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.subscribeEvent
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -179,7 +180,6 @@ fun EditorScreen(
                         isLoading = false
                     }
 
-                    else -> {}
                 }
             }
         }
@@ -219,7 +219,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
     var showBottomSheet by rememberSaveable {
         mutableStateOf(false)
     }
-    var optionDropdownMenuExpanded by remember {
+    var optionsDropdownMenuExpanded by remember {
         mutableStateOf(false)
     }
 
@@ -269,21 +269,47 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                 )
             }
             IconButton(onClick = {
-                optionDropdownMenuExpanded = true
+                optionsDropdownMenuExpanded = true
             }) {
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface
                 )
-                if (optionDropdownMenuExpanded) {
+                if (optionsDropdownMenuExpanded) {
                     OptionDropdownMenu(
                         projectName = project.name,
                         currentPath = currentPath,
                         editingFile = viewModel.editingFile,
-                        expanded = optionDropdownMenuExpanded
-                    ) {
-                        optionDropdownMenuExpanded = false
+                        expanded = optionsDropdownMenuExpanded,
+                        onReopenFile = {
+                            viewModel.intent.trySend(EditorUIIntent.ReopenFile(viewModel.editingFile))
+                        },
+                        onStatisticsFile = {
+                            viewModel.intent.trySend(EditorUIIntent.StatisticsFile(viewModel.editingFile))
+                        },
+                        onStatisticsProject = {
+                            viewModel.intent.trySend(EditorUIIntent.StatisticsProject(project.path))
+                        },
+                        onDismissRequest = { optionsDropdownMenuExpanded = false }
+                    )
+                    if (viewModel.statisticsFileContent.isNotEmpty() && !viewModel.loading) {
+                        StatisticsFileDialog(
+                            content = viewModel.content,
+                            statisticsFileContent = viewModel.statisticsFileContent,
+                            onDismissRequest = {
+                                viewModel.statisticsFileContent = emptyMap()
+                            }
+                        )
+                    }
+                    if (viewModel.statisticsProjectContent.isNotEmpty() && !viewModel.loading) {
+                        StatisticsProjectDialog(
+                            project = project,
+                            statisticsProjectContent = viewModel.statisticsProjectContent,
+                            onDismissRequest = {
+                                viewModel.statisticsProjectContent = emptyMap()
+                            }
+                        )
                     }
                 }
             }
@@ -364,12 +390,12 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Row {
                                     Text(
-                                        text = stringResource(id = R.string.click_button_to_open),
+                                        text = stringResource(id = R.string.click_navigation_button_to_open),
                                         fontSize = 14.sp
                                     )
                                     Spacer(modifier = Modifier.width(2.dp))
                                     Text(
-                                        text = "文件列表",
+                                        text = stringResource(id = R.string.file_list),
                                         fontSize = 14.sp,
                                         textDecoration = TextDecoration.Underline,
                                         color = MaterialTheme.colorScheme.primary,
@@ -380,6 +406,28 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                             indication = null
                                         ) {
                                             showBottomSheet = true
+                                        }
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Row {
+                                    Text(
+                                        text = stringResource(id = R.string.click_menu_button_to_open),
+                                        fontSize = 14.sp
+                                    )
+                                    Spacer(modifier = Modifier.width(2.dp))
+                                    Text(
+                                        text = stringResource(id = R.string.options_menu),
+                                        fontSize = 14.sp,
+                                        textDecoration = TextDecoration.Underline,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.clickable(
+                                            remember {
+                                                MutableInteractionSource()
+                                            },
+                                            indication = null
+                                        ) {
+                                            optionsDropdownMenuExpanded = true
                                         }
                                     )
                                 }
@@ -545,11 +593,126 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
 }
 
 @Composable
+private fun StatisticsFileDialog(
+    content: Content,
+    statisticsFileContent: Map<String, String>,
+    onDismissRequest: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = stringResource(id = R.string.statistical_results))
+        },
+        text = {
+            Text(text = buildString {
+                appendLine(
+                    stringResource(
+                        id = R.string.file_name_statistics,
+                        statisticsFileContent["fileName"] ?: "unknown"
+                    )
+                )
+                appendLine(
+                    stringResource(
+                        id = R.string.disk_usage,
+                        statisticsFileContent["diskUsage"] ?: "unknown"
+                    )
+                )
+                appendLine(
+                    stringResource(
+                        id = R.string.disk_usage_not_formatted,
+                        statisticsFileContent["diskUsageNotFormatted"] ?: "unknown"
+                    )
+                )
+                appendLine(
+                    stringResource(
+                        id = R.string.total_line_count,
+                        content.lineCount
+                    )
+                )
+                appendLine(
+                    stringResource(
+                        id = R.string.total_length,
+                        content.length
+                    )
+                )
+            })
+        },
+        confirmButton = {
+            TextButton(onClick = { onDismissRequest() }) {
+                Text(text = stringResource(id = R.string.close))
+            }
+        }
+    )
+}
+
+@Composable
+private fun StatisticsProjectDialog(
+    project: Project,
+    statisticsProjectContent: Map<String, String>,
+    onDismissRequest: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = {
+            Text(text = stringResource(id = R.string.statistical_results))
+        },
+        text = {
+            Text(text = buildString {
+                appendLine(
+                    stringResource(
+                        id = R.string.project_name_statistics,
+                        project.name
+                    )
+                )
+                appendLine(
+                    stringResource(
+                        id = R.string.file_total_count,
+                        statisticsProjectContent["fileTotalCount"] ?: "unknown"
+                    )
+                )
+                appendLine(
+                    stringResource(
+                        id = R.string.file_count,
+                        statisticsProjectContent["fileCount"] ?: "unknown"
+                    )
+                )
+                appendLine(
+                    stringResource(
+                        id = R.string.folder_count,
+                        statisticsProjectContent["folderCount"] ?: "unknown"
+                    )
+                )
+                appendLine(
+                    stringResource(
+                        id = R.string.disk_usage,
+                        statisticsProjectContent["diskUsage"] ?: "unknown"
+                    )
+                )
+                appendLine(
+                    stringResource(
+                        id = R.string.disk_usage_not_formatted,
+                        statisticsProjectContent["diskUsageNotFormatted"] ?: "unknown"
+                    )
+                )
+            })
+        },
+        confirmButton = {
+            TextButton(onClick = { onDismissRequest() }) {
+                Text(text = stringResource(id = R.string.close))
+            }
+        }
+    )
+}
+
+@Composable
 private fun OptionDropdownMenu(
     projectName: String,
     currentPath: String,
     editingFile: File?,
     expanded: Boolean,
+    onReopenFile: () -> Unit,
+    onStatisticsFile: () -> Unit,
+    onStatisticsProject: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
     var optionTitle by remember {
@@ -588,19 +751,21 @@ private fun OptionDropdownMenu(
                     "default" -> {
                         DropdownMenuItem(
                             text = {
-                                Text(text = stringFile)
+                                Text(
+                                    text = stringFile,
+                                )
                             },
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowRight,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
+                                    contentDescription = null
                                 )
                             },
                             onClick = {
                                 popupUi = "file"
                                 optionTitle = stringFile
-                            }
+                            },
+                            enabled = editingFile != null
                         )
                         DropdownMenuItem(
                             text = {
@@ -609,8 +774,7 @@ private fun OptionDropdownMenu(
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowRight,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
+                                    contentDescription = null
                                 )
                             },
                             onClick = {
@@ -625,14 +789,14 @@ private fun OptionDropdownMenu(
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowRight,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
+                                    contentDescription = null
                                 )
                             },
                             onClick = {
                                 popupUi = "code"
                                 optionTitle = stringCode
-                            }
+                            },
+                            enabled = editingFile != null
                         )
                         DropdownMenuItem(
                             text = {
@@ -641,8 +805,7 @@ private fun OptionDropdownMenu(
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowRight,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
+                                    contentDescription = null
                                 )
                             },
                             onClick = {
@@ -655,7 +818,29 @@ private fun OptionDropdownMenu(
                     "file" -> {
                         DropdownMenuItem(
                             text = {
-                                Text(text = stringResource(id = R.string.reopen))
+                                Text(text = stringResource(id = R.string.statistics_file))
+                            },
+                            onClick = {
+                                onStatisticsFile()
+                            }
+                        )
+                    }
+
+                    "project" -> {
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = stringResource(id = R.string.statistics_project))
+                            },
+                            onClick = {
+                                onStatisticsProject()
+                            }
+                        )
+                    }
+
+                    "code" -> {
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = "Placeholder")
                             },
                             onClick = {
 
@@ -663,16 +848,15 @@ private fun OptionDropdownMenu(
                         )
                     }
 
-                    "project" -> {
-
-                    }
-
-                    "code" -> {
-
-                    }
-
                     "tool" -> {
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = "Placeholder")
+                            },
+                            onClick = {
 
+                            }
+                        )
                     }
                 }
             }
@@ -749,8 +933,7 @@ private fun OptionDropdownPopup(
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.Filled.ArrowRight,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface
+                                    contentDescription = null
                                 )
                             },
                             onClick = {

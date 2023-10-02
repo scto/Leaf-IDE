@@ -63,7 +63,7 @@
     <string name="project_name_cannot_be_empty">工程名称不能为空</string>
     <string name="invalid_project_name">无效的工程名称</string>
     <string name="unable_to_load_editor_ui">无法加载 UI：插件已被删除或工程不存在。</string>
-    <string name="click_button_to_open">点击按钮打开</string>
+    <string name="click_navigation_button_to_open">点击导航按钮打开</string>
     <string name="options">选项</string>
     <string name="create_file">创建文件</string>
     <string name="display">显示</string>
@@ -78,4 +78,19 @@
     <string name="code">代码</string>
     <string name="tool">工具</string>
     <string name="reopen">重新打开</string>
+    <string name="statistics_project">统计工程</string>
+    <string name="statistical_results">统计结果</string>
+    <string name="file_total_count">文件总数：%s</string>
+    <string name="file_count">文件数：%s</string>
+    <string name="folder_count">目录数：%s</string>
+    <string name="disk_usage">磁盘占用：%s</string>
+    <string name="statistics_file">统计文件</string>
+    <string name="disk_usage_not_formatted">磁盘占用（未格式化）：%s</string>
+    <string name="project_name_statistics">工程名称：%s</string>
+    <string name="file_name_statistics">文件名称：%s</string>
+    <string name="total_line_count">总行数：%s</string>
+    <string name="total_length">总长度：%s</string>
+    <string name="click_menu_button_to_open">点击菜单按钮打开</string>
+    <string name="file_list">文件列表</string>
+    <string name="options_menu">选项菜单</string>
 </resources>

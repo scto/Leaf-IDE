@@ -46,8 +46,9 @@
 
         <activity
             android:name=".activity.MainActivity"
-            android:screenOrientation="fullSensor"
-            android:windowSoftInputMode="adjustResize" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="LockedOrientationActivity" />
 
         <activity android:name=".activity.CrashHandlerActivity" />
 

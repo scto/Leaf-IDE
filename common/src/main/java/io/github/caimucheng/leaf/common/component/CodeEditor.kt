@@ -44,12 +44,17 @@ fun CodeEditor(
         codeEditor.setText(content)
     }
     LaunchedEffect(key1 = cursorPosition) {
+        val text = codeEditor.text
         val cursor = codeEditor.cursor
         val line = cursor.leftLine
         val column = cursor.leftColumn
         if (cursor.isSelected || line != cursorPosition.line || column != cursorPosition.column) {
             codeEditor.isCursorAnimationEnabled = false
-            codeEditor.setSelection(cursorPosition.line, cursorPosition.column)
+            if (cursorPosition.line < text.lineCount && cursorPosition.column <= text.getColumnCount(cursorPosition.line)) {
+                codeEditor.setSelection(cursorPosition.line, cursorPosition.column)
+            } else {
+                codeEditor.setSelection(0, 0)
+            }
             codeEditor.isCursorAnimationEnabled = true
         }
     }
@@ -59,13 +64,11 @@ class CodeEditorController(
     private val editor: CodeEditor
 ) {
 
-    val content = editor.text
-
-    fun undo() = editor.undo()
-
     fun canUndo() = editor.canUndo()
 
     fun canRedo() = editor.canRedo()
+
+    fun undo() = editor.undo()
 
     fun redo() = editor.redo()
 }

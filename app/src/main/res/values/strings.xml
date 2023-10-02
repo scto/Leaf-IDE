@@ -65,7 +65,7 @@
     <string name="project_name_cannot_be_empty">Project name cannot be empty</string>
     <string name="invalid_project_name">Invalid project name</string>
     <string name="unable_to_load_editor_ui">Unable to load UI: plugin has been removed or project does not exist.</string>
-    <string name="click_button_to_open">Click button to open</string>
+    <string name="click_navigation_button_to_open">Click navigation button to open</string>
     <string name="options">Options</string>
     <string name="create_file">Create File</string>
     <string name="display">Display</string>
@@ -80,4 +80,19 @@
     <string name="code">Code</string>
     <string name="tool">Tool</string>
     <string name="reopen">Reopen</string>
+    <string name="statistics_project">Statistics Project</string>
+    <string name="statistical_results">Statistical Results</string>
+    <string name="file_total_count">File Total Count: %s</string>
+    <string name="file_count">File Count: %s</string>
+    <string name="folder_count">Folder Count: %s</string>
+    <string name="disk_usage">Disk Usage: %s</string>
+    <string name="statistics_file">Statistics File</string>
+    <string name="disk_usage_not_formatted">Disk usage (not formatted) : %s</string>
+    <string name="project_name_statistics">Project Name: %s</string>
+    <string name="file_name_statistics">File Name: %s</string>
+    <string name="total_line_count">Total Line Count: %s</string>
+    <string name="total_length">Total Length: %s</string>
+    <string name="click_menu_button_to_open">Click menu button to open</string>
+    <string name="file_list">File List</string>
+    <string name="options_menu">Options Menu</string>
 </resources>
