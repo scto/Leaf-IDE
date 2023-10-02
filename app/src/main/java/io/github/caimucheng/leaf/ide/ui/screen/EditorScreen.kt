@@ -90,9 +90,6 @@ import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import io.github.caimucheng.leaf.ide.viewmodel.EditorUIIntent
 import io.github.caimucheng.leaf.ide.viewmodel.EditorViewModel
 import io.github.caimucheng.leaf.plugin.PluginProject
-import io.github.rosemoe.sora.event.ContentChangeEvent
-import io.github.rosemoe.sora.event.EventReceiver
-import io.github.rosemoe.sora.text.Content
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -300,12 +297,15 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     label = "AnimatedContentEditor"
                 ) { showEditor ->
                     if (showEditor) {
-                        MainEditor(
-                            viewModel.content,
-                            contentChange = { _, _ ->
-                                viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
-                            }
-                        )
+                        Column(Modifier.fillMaxSize()){
+                            CodeEditor()
+                        }
+//                        MainEditor(
+//                            viewModel.content,
+//                            contentChange = { _, _ ->
+//                                viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
+//                            }
+//                        )
                     } else {
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -715,22 +715,5 @@ private fun OptionDropdownPopup(
                 }
                 .launchIn(this)
         }
-    }
-}
-
-@Composable
-private fun MainEditor(
-    content: Content,
-    contentChange: EventReceiver<ContentChangeEvent>? = null
-) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        CodeEditor(
-            modifier = Modifier.fillMaxSize(),
-            content = content,
-            contentChange = contentChange,
-            update = {
-
-            }
-        )
     }
 }
