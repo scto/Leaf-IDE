@@ -74,4 +74,8 @@
     <string name="directory">目录</string>
     <string name="file_name_cannot_be_empty">文件名不能为空</string>
     <string name="invalid_file_name">无效的文件名</string>
+    <string name="project">工程</string>
+    <string name="code">代码</string>
+    <string name="tool">工具</string>
+    <string name="reopen">重新打开</string>
 </resources>

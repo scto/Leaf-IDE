@@ -178,6 +178,8 @@ fun EditorScreen(
 
                         isLoading = false
                     }
+
+                    else -> {}
                 }
             }
         }
@@ -215,6 +217,9 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
         mutableStateOf(project.path)
     }
     var showBottomSheet by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var optionDropdownMenuExpanded by remember {
         mutableStateOf(false)
     }
 
@@ -263,12 +268,24 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
-            IconButton(onClick = { }) {
+            IconButton(onClick = {
+                optionDropdownMenuExpanded = true
+            }) {
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface
                 )
+                if (optionDropdownMenuExpanded) {
+                    OptionDropdownMenu(
+                        projectName = project.name,
+                        currentPath = currentPath,
+                        editingFile = viewModel.editingFile,
+                        expanded = optionDropdownMenuExpanded
+                    ) {
+                        optionDropdownMenuExpanded = false
+                    }
+                }
             }
         },
         content = {
@@ -523,6 +540,142 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+}
+
+@Composable
+private fun OptionDropdownMenu(
+    projectName: String,
+    currentPath: String,
+    editingFile: File?,
+    expanded: Boolean,
+    onDismissRequest: () -> Unit
+) {
+    var optionTitle by remember {
+        mutableStateOf(projectName)
+    }
+    var popupUi by remember {
+        mutableStateOf("default")
+    }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = Modifier
+            .sizeIn(maxWidth = 240.dp)
+    ) {
+        val stringFile = stringResource(id = R.string.file)
+        val stringProject = stringResource(id = R.string.project)
+        val stringCode = stringResource(id = R.string.code)
+        val stringTool = stringResource(id = R.string.tool)
+        Text(
+            text = optionTitle,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        AnimatedContent(
+            targetState = popupUi,
+            label = "AnimatedOptionAExpanded"
+        ) { ui ->
+            Column {
+                when (ui) {
+                    "default" -> {
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = stringFile)
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            onClick = {
+                                popupUi = "file"
+                                optionTitle = stringFile
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = stringProject)
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            onClick = {
+                                popupUi = "project"
+                                optionTitle = stringProject
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = stringCode)
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            onClick = {
+                                popupUi = "code"
+                                optionTitle = stringCode
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = stringTool)
+                            },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowRight,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            onClick = {
+                                popupUi = "tool"
+                                optionTitle = stringTool
+                            }
+                        )
+                    }
+
+                    "file" -> {
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = stringResource(id = R.string.reopen))
+                            },
+                            onClick = {
+
+                            }
+                        )
+                    }
+
+                    "project" -> {
+
+                    }
+
+                    "code" -> {
+
+                    }
+
+                    "tool" -> {
+
+                    }
+                }
+            }
         }
     }
 }

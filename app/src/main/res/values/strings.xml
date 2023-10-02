@@ -76,4 +76,8 @@
     <string name="directory">Directory</string>
     <string name="file_name_cannot_be_empty">File name cannot be empty</string>
     <string name="invalid_file_name">Invalid file name</string>
+    <string name="project">Project</string>
+    <string name="code">Code</string>
+    <string name="tool">Tool</string>
+    <string name="reopen">Reopen</string>
 </resources>

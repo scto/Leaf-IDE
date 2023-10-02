@@ -2,7 +2,7 @@
     There are two launch modes: launch from external storage and launch from internal storage.
 
     Currently, it is not possible to change the launch mode after configuring the software. Therefore, please read and choose carefully.
-<The Difference Between The Three Launch Modes>
+<The Difference Between The Two Launch Modes>
     First of all, it must be clear: the launch mode is added to provide users with personalized services.
 
     If you choose to launch from external storage, the project will be stored in the /sdcard {that is, /storage/emulated/0} directory. This directory is the memory card directory, user can access. But at the same time, this directory is public for reading and writing, which means that your project files may be freely read and written by third-party software, which may be risky. In addition, the cleaning software that comes with the system will scan this directory, and your project may be deleted. The files in this directory do not have executable permissions, which means that some plugins that depend on executable files may not be able to run in this directory. Use this launch mode if you want to keep your project after the software is removed.
