@@ -44,7 +44,8 @@ sealed class EditorUIIntent {
 
     data object CloseAll : EditorUIIntent()
 
-    data class EditingFile(val file: File?) : EditorUIIntent()
+    data class EditingFile(val file: File?, val cursorPosition: CharPosition = CharPosition()) :
+        EditorUIIntent()
 
     data class SaveFile(val file: File?) : EditorUIIntent()
 
@@ -54,6 +55,8 @@ sealed class EditorUIIntent {
     data class DeleteFile(val currentPath: String, val child: File) : EditorUIIntent()
     data class RenameFile(val currentPath: String, val file: File, val newName: String) :
         EditorUIIntent()
+
+    data class SaveCursorState(val cursorPosition: CharPosition) : EditorUIIntent()
 
 }
 
@@ -71,13 +74,13 @@ class EditorViewModel : ViewModel() {
 
     var editingFile: File? by mutableStateOf(null)
 
-    var content: Content by mutableStateOf(Content())
-
     var loading: Boolean by mutableStateOf(false)
 
     val intent: Channel<EditorUIIntent> = Channel(Channel.UNLIMITED)
 
-    var selection: CharPosition = CharPosition()
+    var content by mutableStateOf(Content())
+
+    var cursorPosition by mutableStateOf(CharPosition())
 
     init {
         viewModelScope.launch {
@@ -87,7 +90,7 @@ class EditorViewModel : ViewModel() {
                     is EditorUIIntent.OpenFile -> openFile(it.file)
                     is EditorUIIntent.CloseFile -> closeFile(it.file)
                     is EditorUIIntent.CloseOthers -> closeOthers(it.currentFile)
-                    is EditorUIIntent.EditingFile -> editingFile(it.file)
+                    is EditorUIIntent.EditingFile -> editingFile(it.file, it.cursorPosition)
                     is EditorUIIntent.SaveFile -> saveFile(it.file)
                     is EditorUIIntent.CreateFile -> createFile(
                         it.currentPath,
@@ -95,11 +98,21 @@ class EditorViewModel : ViewModel() {
                         it.isDirectory
                     )
 
+                    is EditorUIIntent.SaveCursorState -> saveCursorState(it.cursorPosition)
                     is EditorUIIntent.RenameFile -> renameFile(it.currentPath, it.file, it.newName)
-
                     is EditorUIIntent.DeleteFile -> deleteFile(it.currentPath, it.child)
                     EditorUIIntent.CloseAll -> closeAll()
                 }
+            }
+        }
+    }
+
+    private fun saveCursorState(cursorPosition: CharPosition) {
+        viewModelScope.launch {
+            editingFile?.let { file ->
+                val fileTabItem =
+                    fileTabItems.find { fileTabItem -> fileTabItem.file.absolutePath == file.absolutePath }
+                fileTabItem?.cursorPosition?.set(cursorPosition)
             }
         }
     }
@@ -147,7 +160,7 @@ class EditorViewModel : ViewModel() {
         }
     }
 
-    private fun editingFile(file: File?) {
+    private fun editingFile(file: File?, cursorPosition: CharPosition = CharPosition()) {
         loading = true
         viewModelScope.launch {
             file?.let {
@@ -164,6 +177,7 @@ class EditorViewModel : ViewModel() {
                         Content()
                     }
                 }
+                this@EditorViewModel.cursorPosition = cursorPosition
             }
             editingFile = file
             loading = false
@@ -204,7 +218,10 @@ class EditorViewModel : ViewModel() {
                     }
                     fileTabItems.removeAt(index)
                     if (selectedFileTabIndex.value < fileTabItems.size) {
-                        editingFile(fileTabItems[selectedFileTabIndex.value].file)
+                        editingFile(
+                            fileTabItems[selectedFileTabIndex.value].file,
+                            fileTabItems[selectedFileTabIndex.value].cursorPosition
+                        )
                     } else {
                         editingFile(null)
                     }
@@ -230,7 +247,7 @@ class EditorViewModel : ViewModel() {
                 }
             }
 
-            fileTabItems.add(FileTabItem(openFile, toRelativePath(openFile)))
+            fileTabItems.add(FileTabItem(openFile, toRelativePath(openFile), CharPosition()))
             selectedFileTabIndex = selectedFileTabIndex.copy(fileTabItems.lastIndex)
         }
     }

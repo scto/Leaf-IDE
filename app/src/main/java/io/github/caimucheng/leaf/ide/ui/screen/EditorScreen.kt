@@ -90,6 +90,9 @@ import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import io.github.caimucheng.leaf.ide.viewmodel.EditorUIIntent
 import io.github.caimucheng.leaf.ide.viewmodel.EditorViewModel
 import io.github.caimucheng.leaf.plugin.PluginProject
+import io.github.rosemoe.sora.event.ContentChangeEvent
+import io.github.rosemoe.sora.event.SelectionChangeEvent
+import io.github.rosemoe.sora.widget.subscribeEvent
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -272,7 +275,11 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                         onSelected = { selectedIndex ->
                             val target = viewModel.fileTabItems[selectedIndex]
                             if (viewModel.editingFile?.absolutePath != target.file.absolutePath) {
-                                viewModel.intent.trySend(EditorUIIntent.EditingFile(target.file))
+                                viewModel.intent.trySend(
+                                    EditorUIIntent.EditingFile(
+                                        target.file, target.cursorPosition
+                                    )
+                                )
                                 viewModel.selectedFileTabIndex =
                                     viewModel.selectedFileTabIndex.copy(selectedIndex)
                                 viewModel.editingFile = target.file
@@ -297,15 +304,21 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     label = "AnimatedContentEditor"
                 ) { showEditor ->
                     if (showEditor) {
-                        Column(Modifier.fillMaxSize()){
-                            CodeEditor()
+                        Column(Modifier.fillMaxSize()) {
+                            CodeEditor(
+                                modifier = Modifier.fillMaxSize(),
+                                content = viewModel.content,
+                                cursorPosition = viewModel.cursorPosition,
+                                init = { editor ->
+                                    editor.subscribeEvent<ContentChangeEvent> { _, _ ->
+                                        viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
+                                    }
+                                    editor.subscribeEvent<SelectionChangeEvent> { event, _ ->
+                                        viewModel.intent.trySend(EditorUIIntent.SaveCursorState(event.left))
+                                    }
+                                }
+                            )
                         }
-//                        MainEditor(
-//                            viewModel.content,
-//                            contentChange = { _, _ ->
-//                                viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
-//                            }
-//                        )
                     } else {
                         Column(
                             modifier = Modifier.fillMaxSize(),
