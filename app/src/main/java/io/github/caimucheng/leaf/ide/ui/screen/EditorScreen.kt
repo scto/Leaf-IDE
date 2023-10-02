@@ -68,6 +68,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import io.github.caimucheng.leaf.common.component.Breadcrumb
 import io.github.caimucheng.leaf.common.component.CodeEditor
+import io.github.caimucheng.leaf.common.component.CodeEditorController
 import io.github.caimucheng.leaf.common.component.FileList
 import io.github.caimucheng.leaf.common.component.FileTabs
 import io.github.caimucheng.leaf.common.component.LeafApp
@@ -222,6 +223,10 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
         mutableStateOf(false)
     }
 
+    var codeEditorController: CodeEditorController? by remember {
+        mutableStateOf(null)
+    }
+
     LeafApp(
         title = project.name,
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
@@ -238,14 +243,18 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
             }
         },
         actions = {
-            IconButton(onClick = { }) {
+            IconButton(onClick = {
+                codeEditorController?.undo()
+            }) {
                 Icon(
                     imageVector = Icons.Filled.Undo,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
-            IconButton(onClick = { }) {
+            IconButton(onClick = {
+                codeEditorController?.redo()
+            }) {
                 Icon(
                     imageVector = Icons.Filled.Redo,
                     contentDescription = null,
@@ -337,6 +346,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                             )
                                         )
                                     }
+                                    codeEditorController = CodeEditorController(editor)
                                 }
                             )
                         }
