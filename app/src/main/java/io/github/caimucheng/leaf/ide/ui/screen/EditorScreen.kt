@@ -5,9 +5,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowRight
@@ -29,6 +32,8 @@ import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,8 +58,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,6 +75,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.github.skydoves.colorpicker.compose.AlphaSlider
+import com.github.skydoves.colorpicker.compose.BrightnessSlider
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import io.github.caimucheng.leaf.common.component.Breadcrumb
 import io.github.caimucheng.leaf.common.component.CodeEditor
 import io.github.caimucheng.leaf.common.component.CodeEditorController
@@ -73,6 +86,7 @@ import io.github.caimucheng.leaf.common.component.FileList
 import io.github.caimucheng.leaf.common.component.FileTabs
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.common.component.LoadingDialog
+import io.github.caimucheng.leaf.common.component.SymbolTabLayout
 import io.github.caimucheng.leaf.common.manager.DataStoreManager
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
@@ -237,35 +251,37 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
             }) {
                 Icon(
                     imageVector = Icons.Filled.Menu,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    contentDescription = null
                 )
             }
         },
         actions = {
-            IconButton(onClick = {
-                codeEditorController?.undo()
-            }) {
+            IconButton(
+                onClick = {
+                    codeEditorController?.undo()
+                },
+                enabled = viewModel.editingFile != null
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Undo,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    contentDescription = null
                 )
             }
-            IconButton(onClick = {
-                codeEditorController?.redo()
-            }) {
+            IconButton(
+                onClick = {
+                    codeEditorController?.redo()
+                },
+                enabled = viewModel.editingFile != null
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Redo,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    contentDescription = null
                 )
             }
             IconButton(onClick = { }) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    contentDescription = null
                 )
             }
             IconButton(onClick = {
@@ -273,13 +289,14 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
             }) {
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
+                    contentDescription = null
                 )
                 if (optionsDropdownMenuExpanded) {
+                    var showColorPickerDialog by remember {
+                        mutableStateOf(false)
+                    }
                     OptionDropdownMenu(
                         projectName = project.name,
-                        currentPath = currentPath,
                         editingFile = viewModel.editingFile,
                         expanded = optionsDropdownMenuExpanded,
                         onReopenFile = {
@@ -291,8 +308,13 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                         onStatisticsProject = {
                             viewModel.intent.trySend(EditorUIIntent.StatisticsProject(project.path))
                         },
-                        onDismissRequest = { optionsDropdownMenuExpanded = false }
-                    )
+                        onSearch = {
+
+                        },
+                        onColorPick = {
+                            showColorPickerDialog = true
+                        }
+                    ) { optionsDropdownMenuExpanded = false }
                     if (viewModel.statisticsFileContent.isNotEmpty() && !viewModel.loading) {
                         StatisticsFileDialog(
                             content = viewModel.content,
@@ -308,6 +330,13 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                             statisticsProjectContent = viewModel.statisticsProjectContent,
                             onDismissRequest = {
                                 viewModel.statisticsProjectContent = emptyMap()
+                            }
+                        )
+                    }
+                    if (showColorPickerDialog) {
+                        ColorPickerDialog(
+                            onDismissRequest = {
+                                showColorPickerDialog = false
                             }
                         )
                     }
@@ -356,24 +385,50 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     label = "AnimatedContentEditor"
                 ) { showEditor ->
                     if (showEditor) {
-                        Column(Modifier.fillMaxSize()) {
+                        ConstraintLayout(Modifier.fillMaxSize()) {
+                            val (codeEditor, spacer, symbolTabLayout) = createRefs()
                             CodeEditor(
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .constrainAs(codeEditor) {
+                                        linkTo(parent.start, parent.end)
+                                        linkTo(parent.top, spacer.top)
+                                        height = Dimension.fillToConstraints
+                                    },
                                 content = viewModel.content,
-                                cursorPosition = viewModel.cursorPosition,
-                                init = { editor ->
-                                    editor.subscribeEvent<ContentChangeEvent> { _, _ ->
-                                        viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
-                                    }
-                                    editor.subscribeEvent<SelectionChangeEvent> { event, _ ->
-                                        viewModel.intent.trySend(
-                                            EditorUIIntent.SaveCursorState(
-                                                event.left
-                                            )
-                                        )
-                                    }
-                                    codeEditorController = CodeEditorController(editor)
+                                cursorPosition = viewModel.cursorPosition
+                            ) { editor ->
+                                editor.subscribeEvent<ContentChangeEvent> { _, _ ->
+                                    viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
                                 }
+                                editor.subscribeEvent<SelectionChangeEvent> { event, _ ->
+                                    viewModel.intent.trySend(
+                                        EditorUIIntent.SaveCursorState(
+                                            event.left
+                                        )
+                                    )
+                                }
+                                codeEditorController = CodeEditorController(editor)
+                            }
+                            Divider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(1.dp)
+                                    .constrainAs(spacer) {
+                                        linkTo(parent.start, parent.end)
+                                        linkTo(parent.top, symbolTabLayout.top, bias = 1f)
+                                    },
+                                color = DividerDefaults.color.copy(alpha = 0.4f)
+                            )
+                            SymbolTabLayout(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp)
+                                    .background(MaterialTheme.colorScheme.background)
+                                    .constrainAs(symbolTabLayout) {
+                                        linkTo(parent.start, parent.end)
+                                        linkTo(parent.top, parent.bottom, bias = 1f)
+                                    }
                             )
                         }
                     } else {
@@ -593,6 +648,96 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
 }
 
 @Composable
+private fun ColorPickerDialog(
+    onDismissRequest: () -> Unit
+) {
+    val controller = rememberColorPickerController()
+    var hexCode: String by remember {
+        mutableStateOf("#FFFFFFFF")
+    }
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        text = {
+            Column {
+                HsvColorPicker(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(240.dp),
+                    controller = controller,
+                    onColorChanged = { colorEnvelope ->
+                        hexCode = "#${colorEnvelope.hexCode}"
+                    }
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                AlphaSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp),
+                    borderSize = 0.dp,
+                    borderColor = Color.Transparent,
+                    borderRadius = 16.dp,
+                    controller = controller,
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                BrightnessSlider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(30.dp),
+                    borderSize = 0.dp,
+                    borderColor = Color.Transparent,
+                    borderRadius = 16.dp,
+                    controller = controller,
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                Column(
+                    Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(30.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(controller.selectedColor.value),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = hexCode,
+                            color = MaterialTheme.colorScheme.background
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            val clipboardManager = LocalClipboardManager.current
+            ConstraintLayout(Modifier.fillMaxWidth()) {
+                val (cancel, copy) = createRefs()
+                TextButton(
+                    onClick = { onDismissRequest() },
+                    modifier = Modifier.constrainAs(cancel) {
+                        linkTo(parent.start, parent.end, bias = 0f)
+                    }
+                ) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+                TextButton(
+                    onClick = {
+                        onDismissRequest()
+                        clipboardManager.setText(AnnotatedString(hexCode))
+                    },
+                    modifier = Modifier.constrainAs(copy) {
+                        linkTo(cancel.end, parent.end, bias = 1f)
+                    }
+                ) {
+                    Text(text = stringResource(id = R.string.copy))
+                }
+            }
+        }
+    )
+}
+
+@Composable
 private fun StatisticsFileDialog(
     content: Content,
     statisticsFileContent: Map<String, String>,
@@ -707,12 +852,13 @@ private fun StatisticsProjectDialog(
 @Composable
 private fun OptionDropdownMenu(
     projectName: String,
-    currentPath: String,
     editingFile: File?,
     expanded: Boolean,
     onReopenFile: () -> Unit,
     onStatisticsFile: () -> Unit,
     onStatisticsProject: () -> Unit,
+    onSearch: () -> Unit,
+    onColorPick: () -> Unit,
     onDismissRequest: () -> Unit
 ) {
     var optionTitle by remember {
@@ -818,6 +964,14 @@ private fun OptionDropdownMenu(
                     "file" -> {
                         DropdownMenuItem(
                             text = {
+                                Text(text = stringResource(id = R.string.reopen))
+                            },
+                            onClick = {
+                                onReopenFile()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
                                 Text(text = stringResource(id = R.string.statistics_file))
                             },
                             onClick = {
@@ -840,10 +994,10 @@ private fun OptionDropdownMenu(
                     "code" -> {
                         DropdownMenuItem(
                             text = {
-                                Text(text = "Placeholder")
+                                Text(text = stringResource(id = R.string.search))
                             },
                             onClick = {
-
+                                onSearch()
                             }
                         )
                     }
@@ -851,10 +1005,10 @@ private fun OptionDropdownMenu(
                     "tool" -> {
                         DropdownMenuItem(
                             text = {
-                                Text(text = "Placeholder")
+                                Text(text = stringResource(id = R.string.color_picker))
                             },
                             onClick = {
-
+                                onColorPick()
                             }
                         )
                     }

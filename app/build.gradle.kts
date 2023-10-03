@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlin.reflect)
+    implementation(libs.colorpicker.compose)
 
     implementation(libs.libsu.core)
     implementation(libs.sora.editor.bom)

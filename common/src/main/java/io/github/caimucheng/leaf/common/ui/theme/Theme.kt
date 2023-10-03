@@ -96,7 +96,12 @@ val ModernDarkColorScheme = darkColorScheme(
     scrim = md_theme_dark_scrim
 )
 
-var appTotalDarkBrightness = false
+private var _isDark = false
+
+val isDark: Boolean
+    get() {
+        return _isDark
+    }
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
@@ -163,20 +168,20 @@ fun LeafIDETheme(
         materialYouEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (autoDarkLightThemeEnabled) {
-                appTotalDarkBrightness = darkTheme
+                _isDark = darkTheme
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             } else {
-                appTotalDarkBrightness = appBrightnessEnabled
+                _isDark = appBrightnessEnabled
                 if (appBrightnessEnabled) ModernDarkColorScheme else ModernLightColorScheme
             }
         }
 
         else -> {
             if (autoDarkLightThemeEnabled) {
-                appTotalDarkBrightness = darkTheme
+                _isDark = darkTheme
                 if (darkTheme) ModernDarkColorScheme else ModernLightColorScheme
             } else {
-                appTotalDarkBrightness = appBrightnessEnabled
+                _isDark = appBrightnessEnabled
                 if (appBrightnessEnabled) ModernDarkColorScheme else ModernLightColorScheme
             }
         }

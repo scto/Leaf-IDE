@@ -1,17 +1,23 @@
 package io.github.caimucheng.leaf.common.component
 
+import android.annotation.SuppressLint
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import io.github.caimucheng.leaf.common.scheme.DynamicEditorColorScheme
+import io.github.caimucheng.leaf.common.ui.theme.isDark
+import io.github.caimucheng.leaf.common.util.unwrapColorScheme
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.CodeEditor
 import io.github.rosemoe.sora.widget.subscribeEvent
 
+@SuppressLint("UnrememberedMutableState")
 @Composable
 fun CodeEditor(
     modifier: Modifier = Modifier,
@@ -20,8 +26,12 @@ fun CodeEditor(
     init: (CodeEditor) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val colorScheme = MaterialTheme.colorScheme
     val codeEditor = remember {
         CodeEditor(context)
+            .also {
+                it.colorScheme = DynamicEditorColorScheme(isDark, unwrapColorScheme(colorScheme))
+            }
             .also(init)
             .also {
                 it.subscribeEvent<SelectionChangeEvent> { event, _ ->
@@ -30,6 +40,7 @@ fun CodeEditor(
                     cursorPosition.index = event.left.index
                 }
             }
+
     }
     AndroidView(
         factory = {
@@ -50,7 +61,10 @@ fun CodeEditor(
         val column = cursor.leftColumn
         if (cursor.isSelected || line != cursorPosition.line || column != cursorPosition.column) {
             codeEditor.isCursorAnimationEnabled = false
-            if (cursorPosition.line < text.lineCount && cursorPosition.column <= text.getColumnCount(cursorPosition.line)) {
+            if (cursorPosition.line < text.lineCount && cursorPosition.column <= text.getColumnCount(
+                    cursorPosition.line
+                )
+            ) {
                 codeEditor.setSelection(cursorPosition.line, cursorPosition.column)
             } else {
                 codeEditor.setSelection(0, 0)
@@ -58,6 +72,7 @@ fun CodeEditor(
             codeEditor.isCursorAnimationEnabled = true
         }
     }
+
 }
 
 class CodeEditorController(
@@ -71,4 +86,5 @@ class CodeEditorController(
     fun undo() = editor.undo()
 
     fun redo() = editor.redo()
+
 }

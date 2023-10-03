@@ -95,4 +95,7 @@
     <string name="click_menu_button_to_open">Click menu button to open</string>
     <string name="file_list">File List</string>
     <string name="options_menu">Options Menu</string>
+    <string name="color_picker">Color Picker</string>
+    <string name="copy">Copy</string>
+    <string name="search">Search</string>
 </resources>

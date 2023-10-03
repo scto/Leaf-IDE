@@ -93,4 +93,7 @@
     <string name="click_menu_button_to_open">点击菜单按钮打开</string>
     <string name="file_list">文件列表</string>
     <string name="options_menu">选项菜单</string>
+    <string name="color_picker">取色器</string>
+    <string name="copy">复制</string>
+    <string name="search">搜索</string>
 </resources>

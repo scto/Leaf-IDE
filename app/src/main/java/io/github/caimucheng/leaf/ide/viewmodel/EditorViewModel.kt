@@ -43,7 +43,7 @@ sealed class EditorUIIntent {
 
     data class CloseOthers(val currentFile: File) : EditorUIIntent()
 
-    data object CloseAll : EditorUIIntent()
+    object CloseAll : EditorUIIntent()
 
     data class EditingFile(val file: File?, val cursorPosition: CharPosition = CharPosition()) :
         EditorUIIntent()
@@ -245,7 +245,9 @@ class EditorViewModel : ViewModel() {
                         Content()
                     }
                 }
-                this@EditorViewModel.cursorPosition = cursorPosition
+                if (cursorPosition.line != this@EditorViewModel.cursorPosition.line && cursorPosition.column != this@EditorViewModel.cursorPosition.column) {
+                    this@EditorViewModel.cursorPosition = cursorPosition
+                }
             }
             editingFile = file
             loading = false

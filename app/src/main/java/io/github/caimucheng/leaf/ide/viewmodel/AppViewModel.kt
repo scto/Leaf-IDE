@@ -15,9 +15,9 @@ import kotlinx.coroutines.launch
 
 sealed class AppUIState {
 
-    data object Default : AppUIState()
+    object Default : AppUIState()
 
-    data object Loading : AppUIState()
+    object Loading : AppUIState()
 
     data class Done(
         val projects: List<Project>,
@@ -28,7 +28,7 @@ sealed class AppUIState {
 
 sealed class AppUIIntent {
 
-    data object Refresh : AppUIIntent()
+    object Refresh : AppUIIntent()
 
     data class DeleteProject(val project: Project) : AppUIIntent()
 
