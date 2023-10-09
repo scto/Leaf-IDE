@@ -46,7 +46,7 @@ import androidx.navigation.NavHostController
 import io.github.caimucheng.leaf.common.component.LeafApp
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
-import io.github.caimucheng.leaf.ide.component.Loading
+import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.model.Plugin
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIState

@@ -61,7 +61,7 @@ import androidx.core.graphics.drawable.toBitmap
 import io.github.caimucheng.leaf.common.util.uninstallAPP
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
-import io.github.caimucheng.leaf.ide.component.Loading
+import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.model.Plugin
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import kotlinx.coroutines.coroutineScope

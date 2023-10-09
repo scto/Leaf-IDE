@@ -1,4 +1,4 @@
-package io.github.caimucheng.leaf.ide.component
+package io.github.caimucheng.leaf.common.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

@@ -95,7 +95,7 @@ import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.AppContext
 import io.github.caimucheng.leaf.ide.application.appViewModel
-import io.github.caimucheng.leaf.ide.component.Loading
+import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.manager.IconManager
 import io.github.caimucheng.leaf.ide.manager.ProjectManager
 import io.github.caimucheng.leaf.ide.model.Plugin

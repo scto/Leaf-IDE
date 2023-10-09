@@ -66,7 +66,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
-import io.github.caimucheng.leaf.ide.component.Loading
+import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.model.Project
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIIntent

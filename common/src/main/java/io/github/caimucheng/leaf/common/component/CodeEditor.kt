@@ -1,6 +1,7 @@
 package io.github.caimucheng.leaf.common.component
 
 import android.annotation.SuppressLint
+import android.graphics.Typeface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +24,7 @@ fun CodeEditor(
     modifier: Modifier = Modifier,
     content: Content = Content(),
     cursorPosition: CharPosition = CharPosition(),
+    typefacePath: String = "font/JetBrainsMono-Regular.ttf",
     init: (CodeEditor) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -40,7 +42,10 @@ fun CodeEditor(
                     cursorPosition.index = event.left.index
                 }
             }
-
+            .also {
+                val typeface = Typeface.createFromAsset(context.assets, typefacePath)
+                it.typefaceText = typeface
+            }
     }
     AndroidView(
         factory = {
