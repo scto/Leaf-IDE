@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.LeafIDE" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:background">@color/white</item>
+        <item name="android:background">@color/black</item>
     </style>
 
     <style name="Theme.LeafIDE.Splash" parent="Theme.SplashScreen">
