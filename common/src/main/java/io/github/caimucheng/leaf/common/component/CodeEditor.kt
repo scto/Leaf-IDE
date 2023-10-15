@@ -2,7 +2,6 @@ package io.github.caimucheng.leaf.common.component
 
 import android.annotation.SuppressLint
 import android.graphics.Typeface
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -28,12 +27,8 @@ fun CodeEditor(
     init: (CodeEditor) -> Unit = {}
 ) {
     val context = LocalContext.current
-    val colorScheme = MaterialTheme.colorScheme
     val codeEditor = remember {
         CodeEditor(context)
-            .also {
-                it.colorScheme = DynamicEditorColorScheme(isDark, unwrapColorScheme(colorScheme))
-            }
             .also(init)
             .also {
                 it.subscribeEvent<SelectionChangeEvent> { event, _ ->
@@ -56,6 +51,9 @@ fun CodeEditor(
             it.release()
         }
     )
+    LaunchedEffect(key1 = isDark) {
+        codeEditor.colorScheme = DynamicEditorColorScheme(isDark, unwrapColorScheme(isDark))
+    }
     LaunchedEffect(key1 = content) {
         codeEditor.setText(content)
     }

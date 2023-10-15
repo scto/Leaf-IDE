@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.LeafIDE" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:background">@color/white</item>
-    </style>
+    <style name="Theme.LeafIDE" parent="android:Theme.Material.Light.NoActionBar" />
 
     <style name="Theme.LeafIDE.Splash" parent="Theme.SplashScreen">
         <item name="postSplashScreenTheme">@style/Theme.LeafIDE</item>
