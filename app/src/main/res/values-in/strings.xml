@@ -1,0 +1,101 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name" translatable="false">Leaf IDE</string>
+    <string name="privacy_policy">Kebijakan Pribadi</string>
+    <string name="user_agreement">Perjanjian Pengguna</string>
+    <string name="launch_mode">Mode Peluncuran</string>
+    <string name="refuse">Menolak</string>
+    <string name="allow">Mengizinkan</string>
+    <string name="next">Berikutnya</string>
+    <string name="previous">Sebelumnya</string>
+    <string name="read_and_write_permission_denied">Izin membaca dan menulis ditolak</string>
+    <string name="read_permission_denied">Izin membaca ditolak</string>
+    <string name="write_permission_denied">Izin menulis ditolak</string>
+    <string name="home">Home</string>
+    <string name="settings">Pengaturan</string>
+    <string name="leaf_flow" translatable="false">Leaf Flow</string>
+    <string name="plugin">Plugin</string>
+    <string name="create_project">Buat proyek</string>
+    <string name="back">Kembali</string>
+    <string name="no_supported_plugin_project">Tidak ada proyek plugin yang berlaku</string>
+    <string name="download_from_leaf_flow">Tersedia untuk diunduh dari Leaf Flow</string>
+    <string name="no_plugin" tools:ignore="UnusedResources">Tidak ada plugin</string>
+    <string name="download_from_leaf_flow_or_install_from_local" tools:ignore="UnusedResources">Dapat diunduh dari Leaf Flow atau diinstal secara lokal</string>
+    <string name="expand" tools:ignore="UnusedResources">Memperluas</string>
+    <string name="collapse" tools:ignore="UnusedResources">Mempersempit</string>
+    <string name="no_project_or_plugins_for_projects">Tidak ada proyek atau plugin untuk proyek</string>
+    <string name="click_to_create_project">Klik tombol mengambang untuk membuat proyek</string>
+    <string name="uninstall" tools:ignore="UnusedResources">Uninstall</string>
+    <string name="configuration">Konfigurasi</string>
+    <string name="general">Umum</string>
+    <string name="editor">Editor</string>
+    <string name="build_and_run">Build &amp; Run</string>
+    <string name="general_summary">Konfigurasi umum IDE</string>
+    <string name="editor_summary">Konfigurasikan editornya</string>
+    <string name="build_and_run_summary">Konfigurasikan build</string>
+    <string name="general_configuration">Konfigurasi umum</string>
+    <string name="material_you" translatable="false">Material You</string>
+    <string name="material_you_summary_supported">Tentukan tema aplikasi berdasarkan wallpaper perangkat Anda saat ini</string>
+    <string name="material_you_summary_unsupported">Tentukan tema aplikasi berdasarkan wallpaper perangkat Anda saat ini (tidak didukung, memerlukan perangkat Android 12+)</string>
+    <string name="auto_light_and_dark_theme">Secara otomatis mengaktifkan tema terang dan gelap</string>
+    <string name="auto_light_and_dark_theme_summary">Secara otomatis beralih ke tema yang sama ketika sistem berada dalam tema gelap atau terang</string>
+    <string name="dark_theme">Tema Gelap</string>
+    <string name="dark_theme_summary">Alihkan perangkat lunak ke tema gelap</string>
+    <string name="plugin_support">Dukungan plugin: %s</string>
+    <string name="project_description">Deskripsi proyek: %s</string>
+    <string name="close">Tutup</string>
+    <string name="delete">Hapus</string>
+    <string name="create" tools:ignore="UnusedResources">Buat</string>
+    <string name="cancel" tools:ignore="UnusedResources">Batal</string>
+    <string name="unsupported">Tidak didukung</string>
+    <string name="app_crashed">Aplikasi mogok</string>
+    <string name="app_crash_header">Maaf, perangkat lunak mogok karena alasan berikut.  Silakan kirimkan pengecualian kepada pengembang, atau tulis masalah di halaman proyek Github untuk perbaikan tepat waktu.</string>
+    <string name="device_info">Informasi perangkat:</string>
+    <string name="thread_group">Grup Thread: %s</string>
+    <string name="thread">Thread: %s</string>
+    <string name="exception">Exception: %s</string>
+    <string name="copied_successfully">Berhasil disalin</string>
+    <string name="copied_failed">"Gagal disalin: "</string>
+    <string name="be_not_allowed_back">Aplikasi mogok dan tidak diizinkan untuk kembali</string>
+    <string name="unable_to_load_create_project_ui">Tidak dapat memuat UI: Plugin telah dihapus instalasinya.</string>
+    <string name="rename">Ganti nama</string>
+    <string name="delete_project">Hapus proyek</string>
+    <string name="delete_project_confirm">Apakah Anda yakin ingin menghapus proyek: %s?</string>
+    <string name="rename_project">Ganti nama proyek</string>
+    <string name="project_name">Nama proyek</string>
+    <string name="project_name_cannot_be_empty">Nama proyek tidak boleh kosong</string>
+    <string name="invalid_project_name">Nama proyek tidak valid</string>
+    <string name="unable_to_load_editor_ui">Tidak dapat memuat UI: plugin telah dihapus atau proyek tidak ada.</string>
+    <string name="click_navigation_button_to_open">Klik tombol navigasi untuk membuka</string>
+    <string name="options">Pilihan</string>
+    <string name="create_file">Buat file</string>
+    <string name="display">Tampilan</string>
+    <string name="display_configuration_dir">Tampilkan direktori konfigurasi</string>
+    <string name="hide_configuration_dir">Sembunyikan direktori konfigurasi</string>
+    <string name="file_name">Nama file</string>
+    <string name="file">File</string>
+    <string name="directory">Direktori</string>
+    <string name="file_name_cannot_be_empty">Nama file tidak boleh kosong</string>
+    <string name="invalid_file_name">Nama file tidak sah</string>
+    <string name="project">Proyek</string>
+    <string name="code">Kode</string>
+    <string name="tool">Alat</string>
+    <string name="reopen">Buka kembali</string>
+    <string name="statistics_project">Proyek statistik</string>
+    <string name="statistical_results">Hasil statistik</string>
+    <string name="file_total_count">Jumlah total file: %s</string>
+    <string name="file_count">Jumlah file: %s</string>
+    <string name="folder_count">Jumlah folder: %s</string>
+    <string name="disk_usage">Penggunaan disk: %s</string>
+    <string name="statistics_file">File statistik</string>
+    <string name="disk_usage_not_formatted">Penggunaan disk (tidak diformat) : %s</string>
+    <string name="project_name_statistics">Nama proyek: %s</string>
+    <string name="file_name_statistics">Nama file: %s</string>
+    <string name="total_line_count">Jumlah total baris: %s</string>
+    <string name="total_length">Panjang total: %s</string>
+    <string name="click_menu_button_to_open">Klik tombol menu untuk membuka</string>
+    <string name="file_list">Daftar file</string>
+    <string name="options_menu">Menu pilihan</string>
+    <string name="color_picker">Pemilih warna</string>
+    <string name="copy">Salin</string>
+    <string name="search">Cari</string>
+</resources>

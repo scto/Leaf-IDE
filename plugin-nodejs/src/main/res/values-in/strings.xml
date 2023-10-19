@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Plugin NodeJS untuk Leaf IDE</string>
+    <string name="displayed_nodejs_title">Proyek NodeJS</string>
+    <string name="plugin_description">Mendukung pembuatan dan menjalankan proyek nodejs, dan dilengkapi dengan manajer paket seperti npm, npx, corepack, dan node_modules global default</string>
+    <string name="displayed_project_title" translatable="false">NodeJS</string>
+    <string name="create">Buat</string>
+    <string name="project_name">Nama proyek</string>
+    <string name="project_description">Deskripsi proyek</string>
+    <string name="more">Lagi</string>
+    <string name="version">Versi</string>
+    <string name="author">Pengarang</string>
+    <string name="project_name_cannot_be_empty">Nama proyek tidak boleh kosong</string>
+    <string name="invalid_project_name">Nama proyek tidak valid</string>
+    <string name="project_description_cannot_be_empty">Deskripsi proyek wajib diisi</string>
+    <string name="exists_project">Proyek sudah ada</string>
+    <string name="back">Kembali</string>
+    <string name="create_project_failed">Gagal membuat proyek: %s</string>
+</resources>
