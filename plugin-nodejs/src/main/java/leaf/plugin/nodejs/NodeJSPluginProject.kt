@@ -373,6 +373,7 @@ class NodeJSPluginProject : PluginProject() {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private suspend fun createProject(
         loadingTitle: MutableState<String?>,
         name: String,
