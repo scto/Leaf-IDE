@@ -9,7 +9,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
 import io.github.caimucheng.leaf.common.ui.theme.LeafIDETheme
@@ -48,6 +50,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val colorScheme = MaterialTheme.colorScheme
+                    SideEffect {
+                        window.decorView.setBackgroundColor(colorScheme.background.toArgb())
+                    }
                     val pageNavController = rememberNavController()
                     LeafIDENavHost(
                         pageNavController = pageNavController

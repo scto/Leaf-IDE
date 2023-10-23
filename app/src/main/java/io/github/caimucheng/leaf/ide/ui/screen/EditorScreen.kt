@@ -61,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -93,6 +94,7 @@ import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
 import io.github.caimucheng.leaf.common.scheme.DynamicEditorColorScheme
 import io.github.caimucheng.leaf.common.util.DisplayConfigurationDirKey
+import io.github.caimucheng.leaf.common.util.EditorColorSchemeKey
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
 import io.github.caimucheng.leaf.common.util.invert
 import io.github.caimucheng.leaf.ide.R
@@ -389,7 +391,16 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     if (showEditor) {
                         ConstraintLayout(Modifier.fillMaxSize()) {
                             val (codeEditor, spacer, symbolTabLayout) = createRefs()
+                            val dataStoreManager =
+                                DataStoreManager(LocalContext.current.SettingsDataStore)
                             val colorScheme = MaterialTheme.colorScheme
+                            val editorColorSchemeRequest = PreferenceRequest(
+                                key = EditorColorSchemeKey,
+                                defaultValue = "dynamic"
+                            )
+                            val currentType = remember {
+                                dataStoreManager.getPreferenceBlocking(editorColorSchemeRequest)
+                            }
                             CodeEditor(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -399,8 +410,11 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         height = Dimension.fillToConstraints
                                     },
                                 content = viewModel.content,
-                                colorScheme = remember {
-                                    DynamicEditorColorScheme(colorScheme)
+                                colorScheme = remember(currentType) {
+                                    when (currentType) {
+                                        "dynamic" -> DynamicEditorColorScheme(colorScheme)
+                                        else -> throw RuntimeException("Stub!")
+                                    }
                                 },
                                 cursorPosition = viewModel.cursorPosition
                             ) { editor ->
