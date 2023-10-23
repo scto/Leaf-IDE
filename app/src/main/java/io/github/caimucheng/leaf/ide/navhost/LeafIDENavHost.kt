@@ -10,6 +10,8 @@ import io.github.caimucheng.leaf.ide.ui.screen.CreateProjectScreen
 import io.github.caimucheng.leaf.ide.ui.screen.DisplayProjectScreen
 import io.github.caimucheng.leaf.ide.ui.screen.EditorScreen
 import io.github.caimucheng.leaf.ide.ui.screen.MainScreen
+import io.github.caimucheng.leaf.ide.ui.screen.SettingsBuildAndRunScreen
+import io.github.caimucheng.leaf.ide.ui.screen.SettingsEditorScreen
 import io.github.caimucheng.leaf.ide.ui.screen.SettingsGeneralScreen
 
 object LeafIDEDestinations {
@@ -18,6 +20,8 @@ object LeafIDEDestinations {
     const val DISPLAY_PROJECT_PAGE = "/display_project"
     const val CREATE_PROJECT_PAGE = "/display_project/create_project"
     const val SETTINGS_GENERAL_PAGE = "/settings/general"
+    const val SETTINGS_EDITOR_PAGE = "/settings/editor"
+    const val SETTINGS_BUILD_AND_RUN_PAGE = "/settings/build_and_run"
 }
 
 @Composable
@@ -57,6 +61,12 @@ fun LeafIDENavHost(pageNavController: NavHostController) {
         }
         composable(LeafIDEDestinations.SETTINGS_GENERAL_PAGE) {
             SettingsGeneralScreen(pageNavController)
+        }
+        composable(LeafIDEDestinations.SETTINGS_EDITOR_PAGE) {
+            SettingsEditorScreen(pageNavController)
+        }
+        composable(LeafIDEDestinations.SETTINGS_BUILD_AND_RUN_PAGE) {
+            SettingsBuildAndRunScreen(pageNavController)
         }
     }
 }

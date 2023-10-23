@@ -4,17 +4,16 @@ import android.annotation.SuppressLint
 import android.graphics.Typeface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import io.github.caimucheng.leaf.common.scheme.DynamicEditorColorScheme
-import io.github.caimucheng.leaf.common.ui.theme.isDark
-import io.github.caimucheng.leaf.common.util.unwrapColorScheme
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 import io.github.rosemoe.sora.widget.subscribeEvent
 
 @SuppressLint("UnrememberedMutableState")
@@ -24,6 +23,7 @@ fun CodeEditor(
     content: Content = Content(),
     cursorPosition: CharPosition = CharPosition(),
     typefacePath: String = "font/JetBrainsMono-Regular.ttf",
+    colorScheme: EditorColorScheme,
     init: (CodeEditor) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -41,6 +41,9 @@ fun CodeEditor(
                 val typeface = Typeface.createFromAsset(context.assets, typefacePath)
                 it.typefaceText = typeface
             }
+            .also {
+                it.colorScheme = colorScheme
+            }
     }
     AndroidView(
         factory = {
@@ -51,8 +54,10 @@ fun CodeEditor(
             it.release()
         }
     )
-    LaunchedEffect(key1 = isDark) {
-        codeEditor.colorScheme = DynamicEditorColorScheme(isDark, unwrapColorScheme(isDark))
+    LaunchedEffect(key1 = colorScheme) {
+        if (codeEditor.colorScheme !== colorScheme) {
+            codeEditor.colorScheme = colorScheme
+        }
     }
     LaunchedEffect(key1 = content) {
         codeEditor.setText(content)
@@ -78,6 +83,7 @@ fun CodeEditor(
 
 }
 
+@Stable
 class CodeEditorController(
     private val editor: CodeEditor
 ) {

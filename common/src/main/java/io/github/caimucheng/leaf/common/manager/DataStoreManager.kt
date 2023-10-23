@@ -6,12 +6,17 @@ import androidx.datastore.preferences.core.edit
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 class DataStoreManager(val dataStore: DataStore<Preferences>) {
     val preferenceFlow = dataStore.data
 
     suspend fun <T> getPreference(preferenceEntry: PreferenceRequest<T>) =
         preferenceFlow.first()[preferenceEntry.key] ?: preferenceEntry.defaultValue
+
+    fun <T> getPreferenceBlocking(preferenceEntry: PreferenceRequest<T>) = runBlocking {
+        getPreference(preferenceEntry)
+    }
 
     fun <T> getPreferenceFlow(request: PreferenceRequest<T>) =
         preferenceFlow.map {

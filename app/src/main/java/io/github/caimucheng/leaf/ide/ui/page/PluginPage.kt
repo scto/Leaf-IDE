@@ -11,6 +11,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,10 +59,10 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.graphics.drawable.toBitmap
+import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.common.util.uninstallAPP
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
-import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.model.Plugin
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import kotlinx.coroutines.coroutineScope
@@ -257,7 +258,12 @@ private fun PluginList(plugins: List<Plugin>) {
                                                 fontSize = 16.sp,
                                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                                                 modifier = Modifier
-                                                    .clickable {
+                                                    .clickable(
+                                                        interactionSource = remember {
+                                                            MutableInteractionSource()
+                                                        },
+                                                        indication = null
+                                                    ) {
                                                         maxLines = if (maxLines == 2) {
                                                             Int.MAX_VALUE
                                                         } else {

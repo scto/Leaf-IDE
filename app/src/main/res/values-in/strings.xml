@@ -1,5 +1,4 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">Leaf IDE</string>
     <string name="privacy_policy">Kebijakan Pribadi</string>
     <string name="user_agreement">Perjanjian Pengguna</string>
     <string name="launch_mode">Mode Peluncuran</string>
@@ -12,7 +11,6 @@
     <string name="write_permission_denied">Izin menulis ditolak</string>
     <string name="home">Home</string>
     <string name="settings">Pengaturan</string>
-    <string name="leaf_flow" translatable="false">Leaf Flow</string>
     <string name="plugin">Plugin</string>
     <string name="create_project">Buat proyek</string>
     <string name="back">Kembali</string>
@@ -33,7 +31,6 @@
     <string name="editor_summary">Konfigurasikan editornya</string>
     <string name="build_and_run_summary">Konfigurasikan build</string>
     <string name="general_configuration">Konfigurasi umum</string>
-    <string name="material_you" translatable="false">Material You</string>
     <string name="material_you_summary_supported">Tentukan tema aplikasi berdasarkan wallpaper perangkat Anda saat ini</string>
     <string name="material_you_summary_unsupported">Tentukan tema aplikasi berdasarkan wallpaper perangkat Anda saat ini (tidak didukung, memerlukan perangkat Android 12+)</string>
     <string name="auto_light_and_dark_theme">Secara otomatis mengaktifkan tema terang dan gelap</string>

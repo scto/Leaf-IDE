@@ -5,6 +5,7 @@ import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -16,9 +17,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.toFontFamily
 import androidx.core.view.WindowCompat
 import io.github.caimucheng.leaf.common.manager.DataStoreManager
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
@@ -33,67 +38,67 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 val ModernLightColorScheme = lightColorScheme(
-    primary = md_theme_light_primary,
-    onPrimary = md_theme_light_onPrimary,
-    primaryContainer = md_theme_light_primaryContainer,
-    onPrimaryContainer = md_theme_light_onPrimaryContainer,
-    secondary = md_theme_light_secondary,
-    onSecondary = md_theme_light_onSecondary,
-    secondaryContainer = md_theme_light_secondaryContainer,
-    onSecondaryContainer = md_theme_light_onSecondaryContainer,
-    tertiary = md_theme_light_tertiary,
-    onTertiary = md_theme_light_onTertiary,
-    tertiaryContainer = md_theme_light_tertiaryContainer,
-    onTertiaryContainer = md_theme_light_onTertiaryContainer,
-    error = md_theme_light_error,
-    errorContainer = md_theme_light_errorContainer,
-    onError = md_theme_light_onError,
-    onErrorContainer = md_theme_light_onErrorContainer,
-    background = md_theme_light_background,
-    onBackground = md_theme_light_onBackground,
-    surface = md_theme_light_surface,
-    onSurface = md_theme_light_onSurface,
-    surfaceVariant = md_theme_light_surfaceVariant,
-    onSurfaceVariant = md_theme_light_onSurfaceVariant,
-    outline = md_theme_light_outline,
-    inverseOnSurface = md_theme_light_inverseOnSurface,
-    inverseSurface = md_theme_light_inverseSurface,
-    inversePrimary = md_theme_light_inversePrimary,
-    surfaceTint = md_theme_light_surfaceTint,
-    outlineVariant = md_theme_light_outlineVariant,
-    scrim = md_theme_light_scrim
+    Color(0xff4d5c9200000000UL),
+    Color(0xffffffff00000000UL),
+    Color(0xffdce1ff00000000UL),
+    Color(0xff03174b00000000UL),
+    Color(0xffb6c4ff00000000UL),
+    Color(0xff595d7200000000UL),
+    Color(0xffffffff00000000UL),
+    Color(0xffdee1f900000000UL),
+    Color(0xff161b2c00000000UL),
+    Color(0xff75546f00000000UL),
+    Color(0xffffffff00000000UL),
+    Color(0xffffd7f600000000UL),
+    Color(0xff2c122a00000000UL),
+    Color(0xfffefbff00000000UL),
+    Color(0xff1b1b1f00000000UL),
+    Color(0xfffefbff00000000UL),
+    Color(0xff1b1b1f00000000UL),
+    Color(0xffe2e1ec00000000UL),
+    Color(0xff45464f00000000UL),
+    Color(0xff4d5c9200000000UL),
+    Color(0xff30303400000000UL),
+    Color(0xfff2f0f400000000UL),
+    Color(0xffb3261e00000000UL),
+    Color(0xffffffff00000000UL),
+    Color(0xfff9dedc00000000UL),
+    Color(0xff410e0b00000000UL),
+    Color(0xff75757f00000000UL),
+    Color(0xffcac4d000000000UL),
+    Color(0xff00000000000000UL)
 )
 
 val ModernDarkColorScheme = darkColorScheme(
-    primary = md_theme_dark_primary,
-    onPrimary = md_theme_dark_onPrimary,
-    primaryContainer = md_theme_dark_primaryContainer,
-    onPrimaryContainer = md_theme_dark_onPrimaryContainer,
-    secondary = md_theme_dark_secondary,
-    onSecondary = md_theme_dark_onSecondary,
-    secondaryContainer = md_theme_dark_secondaryContainer,
-    onSecondaryContainer = md_theme_dark_onSecondaryContainer,
-    tertiary = md_theme_dark_tertiary,
-    onTertiary = md_theme_dark_onTertiary,
-    tertiaryContainer = md_theme_dark_tertiaryContainer,
-    onTertiaryContainer = md_theme_dark_onTertiaryContainer,
-    error = md_theme_dark_error,
-    errorContainer = md_theme_dark_errorContainer,
-    onError = md_theme_dark_onError,
-    onErrorContainer = md_theme_dark_onErrorContainer,
-    background = md_theme_dark_background,
-    onBackground = md_theme_dark_onBackground,
-    surface = md_theme_dark_surface,
-    onSurface = md_theme_dark_onSurface,
-    surfaceVariant = md_theme_dark_surfaceVariant,
-    onSurfaceVariant = md_theme_dark_onSurfaceVariant,
-    outline = md_theme_dark_outline,
-    inverseOnSurface = md_theme_dark_inverseOnSurface,
-    inverseSurface = md_theme_dark_inverseSurface,
-    inversePrimary = md_theme_dark_inversePrimary,
-    surfaceTint = md_theme_dark_surfaceTint,
-    outlineVariant = md_theme_dark_outlineVariant,
-    scrim = md_theme_dark_scrim
+    Color(0xffb6c4ff00000000UL),
+    Color(0xff1d2d6100000000UL),
+    Color(0xff35447900000000UL),
+    Color(0xffdce1ff00000000UL),
+    Color(0xff4d5c9200000000UL),
+    Color(0xffc2c5dd00000000UL),
+    Color(0xff2b304200000000UL),
+    Color(0xff42465900000000UL),
+    Color(0xffdee1f900000000UL),
+    Color(0xffe3bada00000000UL),
+    Color(0xff43274000000000UL),
+    Color(0xff5b3d5700000000UL),
+    Color(0xffffd7f600000000UL),
+    Color(0xff1b1b1f00000000UL),
+    Color(0xffe4e1e600000000UL),
+    Color(0xff1b1b1f00000000UL),
+    Color(0xffe4e1e600000000UL),
+    Color(0xff45464f00000000UL),
+    Color(0xffc6c6d000000000UL),
+    Color(0xffb6c4ff00000000UL),
+    Color(0xffe4e1e600000000UL),
+    Color(0xff30303400000000UL),
+    Color(0xfff2b8b500000000UL),
+    Color(0xff60141000000000UL),
+    Color(0xff8c1d1800000000UL),
+    Color(0xfff9dedc00000000UL),
+    Color(0xff90909a00000000UL),
+    Color(0xff49454f00000000UL),
+    Color(0xff00000000000000UL)
 )
 
 private var _isDark = false
@@ -172,7 +177,9 @@ fun LeafIDETheme(
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             } else {
                 _isDark = appBrightnessEnabled
-                if (appBrightnessEnabled) ModernDarkColorScheme else ModernLightColorScheme
+                if (appBrightnessEnabled) dynamicDarkColorScheme(context) else dynamicLightColorScheme(
+                    context
+                )
             }
         }
 
@@ -186,7 +193,6 @@ fun LeafIDETheme(
             }
         }
     }
-
 
     val view = LocalView.current
     if (!view.isInEditMode) {
@@ -204,7 +210,48 @@ fun LeafIDETheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = typography(),
         content = content
     )
 }
+
+@Composable
+private fun typography(): Typography {
+    if (_Typography != null) {
+        return _Typography!!
+    }
+
+    _Typography = Typography(
+        displayLarge = MaterialTheme.typography.displayLarge.copy(fontFamily = fontFamily()),
+        displayMedium = MaterialTheme.typography.displayMedium.copy(fontFamily = fontFamily()),
+        displaySmall = MaterialTheme.typography.displaySmall.copy(fontFamily = fontFamily()),
+        headlineLarge = MaterialTheme.typography.headlineLarge.copy(fontFamily = fontFamily()),
+        headlineMedium = MaterialTheme.typography.headlineMedium.copy(fontFamily = fontFamily()),
+        headlineSmall = MaterialTheme.typography.headlineSmall.copy(fontFamily = fontFamily()),
+        titleLarge = MaterialTheme.typography.titleLarge.copy(fontFamily = fontFamily()),
+        titleMedium = MaterialTheme.typography.titleMedium.copy(fontFamily = fontFamily()),
+        titleSmall = MaterialTheme.typography.titleSmall.copy(fontFamily = fontFamily()),
+        bodyLarge = MaterialTheme.typography.bodyLarge.copy(fontFamily = fontFamily()),
+        bodyMedium = MaterialTheme.typography.bodyLarge.copy(fontFamily = fontFamily()),
+        bodySmall = MaterialTheme.typography.bodySmall.copy(fontFamily = fontFamily()),
+        labelLarge = MaterialTheme.typography.labelLarge.copy(fontFamily = fontFamily()),
+        labelMedium = MaterialTheme.typography.labelMedium.copy(fontFamily = fontFamily()),
+        labelSmall = MaterialTheme.typography.labelSmall.copy(fontFamily = fontFamily())
+    )
+    return _Typography!!
+}
+
+@Composable
+private fun fontFamily(): FontFamily {
+    if (_FontFamily != null) {
+        return _FontFamily!!
+    }
+
+    _FontFamily = Font("font/MiSans-Regular.ttf", LocalContext.current.assets)
+        .toFontFamily()
+    return _FontFamily!!
+}
+
+private var _Typography: Typography? = null
+
+private var _FontFamily: FontFamily? = null

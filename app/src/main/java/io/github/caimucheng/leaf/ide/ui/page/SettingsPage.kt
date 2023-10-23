@@ -32,7 +32,7 @@ fun SettingsPage(pageNavController: NavController) {
                         summary = stringResource(id = R.string.editor_summary),
                         singleLineTitle = true,
                         onClick = {
-
+                            pageNavController.navigate(LeafIDEDestinations.SETTINGS_EDITOR_PAGE)
                         }
                     ),
                     Preference.PreferenceItem.TextPreference(
@@ -40,7 +40,7 @@ fun SettingsPage(pageNavController: NavController) {
                         summary = stringResource(id = R.string.build_and_run_summary),
                         singleLineTitle = true,
                         onClick = {
-
+                            pageNavController.navigate(LeafIDEDestinations.SETTINGS_BUILD_AND_RUN_PAGE)
                         }
                     )
                 )

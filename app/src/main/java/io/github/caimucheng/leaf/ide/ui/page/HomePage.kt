@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,9 +65,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.core.graphics.drawable.toBitmap
 import androidx.navigation.NavController
+import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
-import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.model.Project
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIIntent
@@ -195,15 +196,23 @@ private fun ProjectList(pageNavController: NavController, projects: List<Project
                             mutableStateOf(false)
                         }
 
+
                         Card(
                             Modifier
                                 .fillMaxWidth()
                                 .padding(20.dp)
-                                .combinedClickable(onLongClick = {
-                                    expanded = true
-                                }, onClick = {
-                                    pageNavController.navigate("${LeafIDEDestinations.EDITOR_PAGE}?packageName=${plugin.packageName}&path=${project.path}")
-                                })
+                                .combinedClickable(
+                                    interactionSource = remember {
+                                        MutableInteractionSource()
+                                    },
+                                    indication = null,
+                                    onLongClick = {
+                                        expanded = true
+                                    },
+                                    onClick = {
+                                        pageNavController.navigate("${LeafIDEDestinations.EDITOR_PAGE}?packageName=${plugin.packageName}&path=${project.path}")
+                                    }
+                                )
                                 .pointerInput(null) {
                                     coroutineScope {
                                         while (true) {
@@ -227,6 +236,7 @@ private fun ProjectList(pageNavController: NavController, projects: List<Project
                                 defaultElevation = 2.dp,
                                 pressedElevation = 2.dp
                             ),
+                            shape = RoundedCornerShape(8.dp)
                         ) {
                             Column(
                                 Modifier.fillMaxWidth()

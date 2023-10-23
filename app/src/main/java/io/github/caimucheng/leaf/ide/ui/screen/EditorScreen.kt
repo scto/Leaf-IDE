@@ -85,17 +85,19 @@ import io.github.caimucheng.leaf.common.component.CodeEditorController
 import io.github.caimucheng.leaf.common.component.FileList
 import io.github.caimucheng.leaf.common.component.FileTabs
 import io.github.caimucheng.leaf.common.component.LeafApp
+import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.common.component.LoadingDialog
 import io.github.caimucheng.leaf.common.component.SymbolTabLayout
 import io.github.caimucheng.leaf.common.manager.DataStoreManager
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
+import io.github.caimucheng.leaf.common.scheme.DynamicEditorColorScheme
 import io.github.caimucheng.leaf.common.util.DisplayConfigurationDirKey
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
+import io.github.caimucheng.leaf.common.util.invert
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.AppContext
 import io.github.caimucheng.leaf.ide.application.appViewModel
-import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.manager.IconManager
 import io.github.caimucheng.leaf.ide.manager.ProjectManager
 import io.github.caimucheng.leaf.ide.model.Plugin
@@ -387,6 +389,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     if (showEditor) {
                         ConstraintLayout(Modifier.fillMaxSize()) {
                             val (codeEditor, spacer, symbolTabLayout) = createRefs()
+                            val colorScheme = MaterialTheme.colorScheme
                             CodeEditor(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -396,6 +399,9 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         height = Dimension.fillToConstraints
                                     },
                                 content = viewModel.content,
+                                colorScheme = remember {
+                                    DynamicEditorColorScheme(colorScheme)
+                                },
                                 cursorPosition = viewModel.cursorPosition
                             ) { editor ->
                                 editor.subscribeEvent<ContentChangeEvent> { _, _ ->
@@ -703,7 +709,7 @@ private fun ColorPickerDialog(
                     ) {
                         Text(
                             text = hexCode,
-                            color = MaterialTheme.colorScheme.background
+                            color = controller.selectedColor.value.invert
                         )
                     }
                 }

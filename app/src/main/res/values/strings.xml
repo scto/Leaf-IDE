@@ -98,4 +98,11 @@
     <string name="color_picker">Color Picker</string>
     <string name="copy">Copy</string>
     <string name="search">Search</string>
+    <string name="editor_configuration">Editor Configuration</string>
+    <string name="build_and_run_configuration">Build &amp; Run Configuration</string>
+    <string name="theme">Theme</string>
+    <string name="color_scheme">Color Scheme</string>
+    <string name="color_scheme_summary">Choose a color scheme to use in the editor</string>
+    <string name="apply">Apply</string>
+    <string name="dynamic_color_matching">Dynamic Color Matching</string>
 </resources>
