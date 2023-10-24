@@ -13,6 +13,7 @@ import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.EditorSearcher
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 import io.github.rosemoe.sora.widget.subscribeEvent
 
@@ -29,6 +30,9 @@ fun CodeEditor(
     val context = LocalContext.current
     val codeEditor = remember {
         CodeEditor(context)
+            .also {
+                it.setLineSpacing(2f, 1.1f)
+            }
             .also(init)
             .also {
                 it.subscribeEvent<SelectionChangeEvent> { event, _ ->
@@ -87,6 +91,22 @@ fun CodeEditor(
 class CodeEditorController(
     private val editor: CodeEditor
 ) {
+
+    fun invalidate() = editor.invalidate()
+
+    fun postInvalidate() = editor.postInvalidate()
+
+    fun isSelected() = editor.isSelected
+
+    fun replaceSelection() {
+        editor.text.replace(
+            editor.cursor.left,
+            editor.cursor.right,
+            ""
+        )
+    }
+
+    fun searcher(): EditorSearcher = editor.searcher
 
     fun canUndo() = editor.canUndo()
 

@@ -5,6 +5,9 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -22,9 +25,13 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowRight
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
@@ -32,6 +39,7 @@ import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.DropdownMenu
@@ -40,15 +48,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,7 +72,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -112,12 +129,15 @@ import io.github.caimucheng.leaf.plugin.PluginProject
 import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.text.Content
+import io.github.rosemoe.sora.widget.EditorSearcher
 import io.github.rosemoe.sora.widget.subscribeEvent
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.File
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 
 @Composable
 fun EditorScreen(
@@ -244,7 +264,23 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
     var codeEditorController: CodeEditorController? by remember {
         mutableStateOf(null)
     }
+    var showSearchPanel by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var pattern by rememberSaveable {
+        mutableStateOf("")
+    }
+    var replacement by rememberSaveable {
+        mutableStateOf("")
+    }
+    var isRegexMode by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var isCaseSensitiveMode by rememberSaveable {
+        mutableStateOf(false)
+    }
 
+    val snackbarHostState = remember { SnackbarHostState() }
     LeafApp(
         title = project.name,
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
@@ -258,6 +294,9 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     contentDescription = null
                 )
             }
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState)
         },
         actions = {
             IconButton(
@@ -313,7 +352,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                             viewModel.intent.trySend(EditorUIIntent.StatisticsProject(project.path))
                         },
                         onSearch = {
-
+                            showSearchPanel = true
                         },
                         onColorPick = {
                             showColorPickerDialog = true
@@ -353,6 +392,13 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                     .fillMaxSize()
                     .padding(it)
             ) {
+                BackHandler(enabled = showSearchPanel) {
+                    codeEditorController?.apply {
+                        searcher().stopSearch()
+                        postInvalidate()
+                    }
+                    showSearchPanel = false
+                }
                 AnimatedVisibility(visible = viewModel.fileTabItems.isNotEmpty()) {
                     FileTabs(
                         items = viewModel.fileTabItems,
@@ -390,10 +436,13 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                 ) { showEditor ->
                     if (showEditor) {
                         ConstraintLayout(Modifier.fillMaxSize()) {
-                            val (codeEditor, spacer, symbolTabLayout) = createRefs()
+                            val (codeEditor, layout) = createRefs()
                             val dataStoreManager =
                                 DataStoreManager(LocalContext.current.SettingsDataStore)
                             val colorScheme = MaterialTheme.colorScheme
+                            val handleColor = LocalTextSelectionColors.current.handleColor
+                            val selectionBackgroundColor =
+                                LocalTextSelectionColors.current.backgroundColor
                             val editorColorSchemeRequest = PreferenceRequest(
                                 key = EditorColorSchemeKey,
                                 defaultValue = "dynamic"
@@ -406,18 +455,29 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                     .fillMaxWidth()
                                     .constrainAs(codeEditor) {
                                         linkTo(parent.start, parent.end)
-                                        linkTo(parent.top, spacer.top)
+                                        linkTo(parent.top, layout.top)
                                         height = Dimension.fillToConstraints
                                     },
                                 content = viewModel.content,
                                 colorScheme = remember(currentType) {
                                     when (currentType) {
-                                        "dynamic" -> DynamicEditorColorScheme(colorScheme)
+                                        "dynamic" -> DynamicEditorColorScheme(
+                                            colorScheme = colorScheme,
+                                            handleColor = handleColor,
+                                            selectionBackgroundColor = selectionBackgroundColor
+                                        )
+
                                         else -> throw RuntimeException("Stub!")
                                     }
                                 },
                                 cursorPosition = viewModel.cursorPosition
                             ) { editor ->
+                                if (editor.horizontalScrollbarThumbDrawable != null) {
+                                    editor.horizontalScrollbarThumbDrawable = null
+                                }
+                                if (editor.verticalScrollbarThumbDrawable != null) {
+                                    editor.verticalScrollbarThumbDrawable = null
+                                }
                                 editor.subscribeEvent<ContentChangeEvent> { _, _ ->
                                     viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
                                 }
@@ -430,26 +490,541 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                 }
                                 codeEditorController = CodeEditorController(editor)
                             }
-                            Divider(
-                                modifier = Modifier
+                            Column(
+                                Modifier
                                     .fillMaxWidth()
-                                    .height(1.dp)
-                                    .constrainAs(spacer) {
-                                        linkTo(parent.start, parent.end)
-                                        linkTo(parent.top, symbolTabLayout.top, bias = 1f)
-                                    },
-                                color = DividerDefaults.color.copy(alpha = 0.4f)
-                            )
-                            SymbolTabLayout(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(50.dp)
-                                    .background(MaterialTheme.colorScheme.background)
-                                    .constrainAs(symbolTabLayout) {
+                                    .animateContentSize()
+                                    .constrainAs(layout) {
                                         linkTo(parent.start, parent.end)
                                         linkTo(parent.top, parent.bottom, bias = 1f)
                                     }
-                            )
+                            ) {
+                                Divider(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(1.dp),
+                                    color = DividerDefaults.color.copy(alpha = 0.4f)
+                                )
+                                SymbolTabLayout(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(40.dp)
+                                        .background(MaterialTheme.colorScheme.background)
+                                )
+                                if (showSearchPanel) {
+                                    var isReplacingMode by rememberSaveable {
+                                        mutableStateOf(false)
+                                    }
+                                    val regexSyntaxException =
+                                        stringResource(id = R.string.regex_syntax_exception)
+                                    SideEffect {
+                                        if (pattern.isNotEmpty()) {
+                                            try {
+                                                codeEditorController?.searcher()
+                                                    ?.search(
+                                                        pattern,
+                                                        EditorSearcher.SearchOptions(
+                                                            !isCaseSensitiveMode,
+                                                            isRegexMode
+                                                        )
+                                                    )
+                                            } catch (_: PatternSyntaxException) {
+                                            }
+                                        }
+                                    }
+                                    Divider(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(1.dp),
+                                        color = DividerDefaults.color.copy(alpha = 0.4f)
+                                    )
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(40.dp)
+                                            .background(MaterialTheme.colorScheme.background),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = R.string.find),
+                                            fontSize = 14.sp,
+                                            modifier = Modifier.padding(horizontal = 10.dp)
+                                        )
+                                        val interactionSource = remember {
+                                            MutableInteractionSource()
+                                        }
+                                        Column(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .padding(end = 10.dp)
+                                        ) {
+                                            var isFocused by remember {
+                                                mutableStateOf(false)
+                                            }
+                                            val dividerHeight by animateDpAsState(
+                                                targetValue = if (isFocused) 2.dp else 1.dp,
+                                                label = "animateHeight"
+                                            )
+                                            val dividerColor by animateColorAsState(
+                                                targetValue = if (isFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                                label = "animateColor"
+                                            )
+                                            BasicTextField(
+                                                value = pattern,
+                                                onValueChange = { text ->
+                                                    pattern = text
+                                                    if (pattern.isNotEmpty()) {
+                                                        try {
+                                                            codeEditorController?.searcher()
+                                                                ?.search(
+                                                                    pattern,
+                                                                    EditorSearcher.SearchOptions(
+                                                                        !isCaseSensitiveMode,
+                                                                        isRegexMode
+                                                                    )
+                                                                )
+                                                        } catch (_: PatternSyntaxException) {
+                                                        }
+                                                    } else {
+                                                        codeEditorController?.apply {
+                                                            searcher().stopSearch()
+                                                            postInvalidate()
+                                                        }
+                                                    }
+                                                },
+                                                textStyle = LocalTextStyle.current.copy(
+                                                    fontSize = 14.sp,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                ),
+                                                interactionSource = interactionSource,
+                                                singleLine = true,
+                                                cursorBrush = SolidColor(LocalTextSelectionColors.current.handleColor),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .onFocusChanged { state ->
+                                                        isFocused = state.isFocused
+                                                    }
+                                                    .focusRequester(FocusRequester.Default)
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Divider(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                thickness = dividerHeight,
+                                                color = dividerColor
+                                            )
+                                        }
+                                    }
+                                    if (isReplacingMode) {
+                                        Row(
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(40.dp)
+                                                .background(MaterialTheme.colorScheme.background),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.replace),
+                                                fontSize = 14.sp,
+                                                modifier = Modifier.padding(horizontal = 10.dp)
+                                            )
+                                            val interactionSource = remember {
+                                                MutableInteractionSource()
+                                            }
+                                            Column(
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(end = 10.dp)
+                                            ) {
+                                                var isFocused by remember {
+                                                    mutableStateOf(false)
+                                                }
+                                                val dividerHeight by animateDpAsState(
+                                                    targetValue = if (isFocused) 2.dp else 1.dp,
+                                                    label = "animateHeight"
+                                                )
+                                                val dividerColor by animateColorAsState(
+                                                    targetValue = if (isFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                                    label = "animateColor"
+                                                )
+                                                BasicTextField(
+                                                    value = replacement,
+                                                    onValueChange = { text ->
+                                                        replacement = text
+                                                    },
+                                                    textStyle = LocalTextStyle.current.copy(
+                                                        fontSize = 14.sp,
+                                                        color = MaterialTheme.colorScheme.onSurface
+                                                    ),
+                                                    interactionSource = interactionSource,
+                                                    singleLine = true,
+                                                    cursorBrush = SolidColor(
+                                                        LocalTextSelectionColors.current.handleColor
+                                                    ),
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .onFocusChanged { state ->
+                                                            isFocused = state.isFocused
+                                                        }
+                                                        .focusRequester(FocusRequester.Default)
+                                                )
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                Divider(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    thickness = dividerHeight,
+                                                    color = dividerColor
+                                                )
+                                            }
+                                        }
+                                    }
+                                    Divider(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(1.dp),
+                                        color = DividerDefaults.color.copy(alpha = 0.4f)
+                                    )
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(40.dp)
+                                            .background(MaterialTheme.colorScheme.background)
+                                    ) {
+                                        val textNotFound =
+                                            stringResource(id = R.string.text_not_found)
+                                        val totalReplacement =
+                                            stringResource(id = R.string.total_replacement)
+                                        TextButton(
+                                            onClick = {
+                                                codeEditorController?.searcher()?.apply {
+                                                    if (pattern.isNotEmpty()) {
+                                                        if (hasQuery()) {
+                                                            try {
+                                                                if (isRegexMode) {
+                                                                    Pattern.compile(pattern)
+                                                                }
+                                                                gotoPrevious()
+                                                            } catch (_: IllegalStateException) {
+                                                            } catch (e: PatternSyntaxException) {
+                                                                coroutineScope.launch {
+                                                                    snackbarHostState.showSnackbar(
+                                                                        message = regexSyntaxException.format(
+                                                                            e.message
+                                                                        ),
+                                                                        withDismissAction = true,
+                                                                        duration = SnackbarDuration.Long
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .weight(1f),
+                                            shape = RoundedCornerShape(0.dp),
+                                            colors = ButtonDefaults.textButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.previous),
+                                                fontSize = 14.sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                        TextButton(
+                                            onClick = {
+                                                codeEditorController?.searcher()?.apply {
+                                                    if (pattern.isNotEmpty()) {
+                                                        if (hasQuery()) {
+                                                            try {
+                                                                if (isRegexMode) {
+                                                                    Pattern.compile(pattern)
+                                                                }
+                                                                gotoNext()
+                                                            } catch (_: IllegalStateException) {
+                                                            } catch (e: PatternSyntaxException) {
+                                                                coroutineScope.launch {
+                                                                    snackbarHostState.showSnackbar(
+                                                                        message = regexSyntaxException.format(
+                                                                            e.message
+                                                                        ),
+                                                                        withDismissAction = true,
+                                                                        duration = SnackbarDuration.Long
+                                                                    )
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .weight(1f),
+                                            shape = RoundedCornerShape(0.dp),
+                                            colors = ButtonDefaults.textButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.next),
+                                                fontSize = 14.sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                        TextButton(
+                                            onClick = {
+                                                if (!isReplacingMode) {
+                                                    isReplacingMode = true
+                                                } else {
+                                                    codeEditorController?.apply {
+                                                        val searcher = searcher()
+                                                        try {
+                                                            if (isRegexMode) {
+                                                                Pattern.compile(pattern)
+                                                            }
+                                                            if (replacement.isEmpty()) {
+                                                                if (!searcher.isMatchedPositionSelected) {
+                                                                    searcher.gotoNext()
+                                                                } else {
+                                                                    replaceSelection()
+                                                                    codeEditorController?.searcher()
+                                                                        ?.search(
+                                                                            pattern,
+                                                                            EditorSearcher.SearchOptions(
+                                                                                !isCaseSensitiveMode,
+                                                                                isRegexMode
+                                                                            )
+                                                                        )
+                                                                }
+                                                                return@apply
+                                                            }
+                                                            searcher.replaceThis(replacement)
+                                                        } catch (_: IllegalStateException) {
+                                                        } catch (e: PatternSyntaxException) {
+                                                            coroutineScope.launch {
+                                                                snackbarHostState.showSnackbar(
+                                                                    message = regexSyntaxException.format(
+                                                                        e.message
+                                                                    ),
+                                                                    withDismissAction = true,
+                                                                    duration = SnackbarDuration.Long
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .weight(1f),
+                                            shape = RoundedCornerShape(0.dp),
+                                            colors = ButtonDefaults.textButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.replace),
+                                                fontSize = 14.sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                        TextButton(
+                                            onClick = {
+                                                codeEditorController?.apply {
+                                                    val searcher = searcher()
+                                                    val count = searcher.matchedPositionCount
+                                                    if (count == 0) {
+                                                        coroutineScope.launch {
+                                                            snackbarHostState.showSnackbar(
+                                                                textNotFound,
+                                                                withDismissAction = true
+                                                            )
+                                                        }
+                                                        return@apply
+                                                    }
+                                                    try {
+                                                        if (isRegexMode) {
+                                                            Pattern.compile(pattern)
+                                                        }
+                                                        searcher.replaceAll(replacement) {
+                                                            coroutineScope.launch {
+                                                                snackbarHostState.showSnackbar(
+                                                                    totalReplacement.format(count),
+                                                                    withDismissAction = true
+                                                                )
+                                                            }
+                                                        }
+                                                    } catch (_: IllegalStateException) {
+                                                    } catch (e: PatternSyntaxException) {
+                                                        coroutineScope.launch {
+                                                            snackbarHostState.showSnackbar(
+                                                                message = regexSyntaxException.format(e.message),
+                                                                withDismissAction = true,
+                                                                duration = SnackbarDuration.Long
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .weight(1f),
+                                            shape = RoundedCornerShape(0.dp),
+                                            colors = ButtonDefaults.textButtonColors(
+                                                contentColor = MaterialTheme.colorScheme.onSurface
+                                            ),
+                                            enabled = isReplacingMode
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.all),
+                                                fontSize = 14.sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                        var showMoreOptions by remember {
+                                            mutableStateOf(false)
+                                        }
+                                        Box(modifier = Modifier.size(40.dp)) {
+                                            TextButton(
+                                                onClick = {
+                                                    showMoreOptions = true
+                                                },
+                                                modifier = Modifier.fillMaxSize(),
+                                                shape = RoundedCornerShape(0.dp),
+                                                colors = ButtonDefaults.textButtonColors(
+                                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                                )
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.MoreVert,
+                                                    contentDescription = null
+                                                )
+                                            }
+
+                                            DropdownMenu(
+                                                expanded = showMoreOptions,
+                                                onDismissRequest = {
+                                                    showMoreOptions = false
+                                                },
+                                                modifier = Modifier
+                                                    .sizeIn(maxWidth = 240.dp)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(id = R.string.search_options),
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .padding(12.dp),
+                                                    fontSize = 14.sp,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(
+                                                            text = stringResource(id = R.string.regex)
+                                                        )
+                                                    },
+                                                    trailingIcon = {
+                                                        AnimatedContent(
+                                                            targetState = isRegexMode,
+                                                            label = "animateRegexContent"
+                                                        ) { value ->
+                                                            if (value) {
+                                                                Icon(
+                                                                    imageVector = Icons.Filled.CheckBox,
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(20.dp),
+                                                                    tint = MaterialTheme.colorScheme.primary
+                                                                )
+                                                            } else {
+                                                                Icon(
+                                                                    imageVector = Icons.Filled.CheckBoxOutlineBlank,
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(20.dp),
+                                                                    tint = MaterialTheme.colorScheme.onSurface
+                                                                )
+                                                            }
+                                                        }
+                                                    },
+                                                    onClick = {
+                                                        isRegexMode = !isRegexMode
+                                                        codeEditorController?.apply {
+                                                            val searcher = searcher()
+                                                            if (searcher.hasQuery()) {
+                                                                try {
+                                                                    codeEditorController?.searcher()
+                                                                        ?.search(
+                                                                            pattern,
+                                                                            EditorSearcher.SearchOptions(
+                                                                                !isCaseSensitiveMode,
+                                                                                isRegexMode
+                                                                            )
+                                                                        )
+                                                                } catch (_: PatternSyntaxException) {}
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(
+                                                            text = stringResource(id = R.string.case_sensitive)
+                                                        )
+                                                    },
+                                                    trailingIcon = {
+                                                        AnimatedContent(
+                                                            targetState = isCaseSensitiveMode,
+                                                            label = "animateCaseSensitiveContent"
+                                                        ) { value ->
+                                                            if (value) {
+                                                                Icon(
+                                                                    imageVector = Icons.Filled.CheckBox,
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(20.dp),
+                                                                    tint = MaterialTheme.colorScheme.primary
+                                                                )
+                                                            } else {
+                                                                Icon(
+                                                                    imageVector = Icons.Filled.CheckBoxOutlineBlank,
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(20.dp),
+                                                                    tint = MaterialTheme.colorScheme.onSurface
+                                                                )
+                                                            }
+                                                        }
+                                                    },
+                                                    onClick = {
+                                                        isCaseSensitiveMode = !isCaseSensitiveMode
+                                                        codeEditorController?.apply {
+                                                            val searcher = searcher()
+                                                            if (searcher.hasQuery()) {
+                                                                try {
+                                                                    codeEditorController?.searcher()
+                                                                        ?.search(
+                                                                            pattern,
+                                                                            EditorSearcher.SearchOptions(
+                                                                                !isCaseSensitiveMode,
+                                                                                isRegexMode
+                                                                            )
+                                                                        )
+                                                                } catch (_: PatternSyntaxException) {}
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
                         }
                     } else {
                         Column(
@@ -1018,6 +1593,7 @@ private fun OptionDropdownMenu(
                             },
                             onClick = {
                                 onSearch()
+                                onDismissRequest()
                             }
                         )
                     }
@@ -1153,6 +1729,9 @@ private fun OptionDropdownPopup(
                     Text(text = stringResource(id = R.string.create_file))
                 },
                 text = {
+                    val focusRequester = remember {
+                        FocusRequester()
+                    }
                     OutlinedTextField(
                         value = name,
                         onValueChange = {
@@ -1169,7 +1748,11 @@ private fun OptionDropdownPopup(
                                 Text(text = nameError)
                             }
                         },
+                        modifier = Modifier.focusRequester(focusRequester)
                     )
+                    SideEffect {
+                        focusRequester.requestFocus()
+                    }
                 },
                 confirmButton = {
                     ConstraintLayout(Modifier.fillMaxWidth()) {

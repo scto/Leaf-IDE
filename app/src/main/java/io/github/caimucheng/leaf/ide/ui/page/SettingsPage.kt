@@ -44,6 +44,19 @@ fun SettingsPage(pageNavController: NavController) {
                         }
                     )
                 )
+            ),
+            Preference.PreferenceGroup(
+                title = stringResource(id = R.string.debugging),
+                preferenceItems = listOf(
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(id = R.string.developer_options),
+                        summary = stringResource(id = R.string.developer_options_summary),
+                        singleLineTitle = true,
+                        onClick = {
+                            pageNavController.navigate(LeafIDEDestinations.SETTINGS_DEVELOPER_OPTIONS_PAGE)
+                        }
+                    )
+                )
             )
         ),
         modifier = Modifier.fillMaxSize(),

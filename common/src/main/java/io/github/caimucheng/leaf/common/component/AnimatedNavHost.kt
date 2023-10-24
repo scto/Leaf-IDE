@@ -4,8 +4,6 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,9 +24,6 @@ fun AnimatedNavHost(
             slideIntoContainer(
                 AnimatedContentTransitionScope.SlideDirection.Left,
                 animationSpec = tween(220, delayMillis = 90)
-            ) + scaleIn(
-                initialScale = 0.92f,
-                animationSpec = tween(220, delayMillis = 90)
             )
         },
     exitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) =
@@ -36,20 +31,12 @@ fun AnimatedNavHost(
             slideOutOfContainer(
                 AnimatedContentTransitionScope.SlideDirection.Left,
                 animationSpec = tween(220, delayMillis = 90)
-            ) + fadeOut(
-                animationSpec = tween(
-                    220,
-                    delayMillis = 90
-                )
             )
         },
     popEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) =
         {
             slideIntoContainer(
                 AnimatedContentTransitionScope.SlideDirection.Right,
-                animationSpec = tween(220, delayMillis = 90)
-            ) + scaleIn(
-                initialScale = 0.92f,
                 animationSpec = tween(220, delayMillis = 90)
             )
         },
@@ -58,11 +45,6 @@ fun AnimatedNavHost(
             slideOutOfContainer(
                 AnimatedContentTransitionScope.SlideDirection.Right,
                 animationSpec = tween(220, delayMillis = 90)
-            ) + fadeOut(
-                animationSpec = tween(
-                    220,
-                    delayMillis = 90
-                )
             )
         },
     builder: NavGraphBuilder.() -> Unit

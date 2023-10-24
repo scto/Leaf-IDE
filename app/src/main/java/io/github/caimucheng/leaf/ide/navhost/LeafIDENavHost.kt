@@ -11,6 +11,8 @@ import io.github.caimucheng.leaf.ide.ui.screen.DisplayProjectScreen
 import io.github.caimucheng.leaf.ide.ui.screen.EditorScreen
 import io.github.caimucheng.leaf.ide.ui.screen.MainScreen
 import io.github.caimucheng.leaf.ide.ui.screen.SettingsBuildAndRunScreen
+import io.github.caimucheng.leaf.ide.ui.screen.SettingsColorSchemeDebugging
+import io.github.caimucheng.leaf.ide.ui.screen.SettingsDeveloperOptionsScreen
 import io.github.caimucheng.leaf.ide.ui.screen.SettingsEditorScreen
 import io.github.caimucheng.leaf.ide.ui.screen.SettingsGeneralScreen
 
@@ -22,6 +24,8 @@ object LeafIDEDestinations {
     const val SETTINGS_GENERAL_PAGE = "/settings/general"
     const val SETTINGS_EDITOR_PAGE = "/settings/editor"
     const val SETTINGS_BUILD_AND_RUN_PAGE = "/settings/build_and_run"
+    const val SETTINGS_DEVELOPER_OPTIONS_PAGE = "/settings/developer_options"
+    const val SETTINGS_COLOR_SCHEME_DEBUGGING_PAGE = "/settings/developer_options/color_scheme_debugging"
 }
 
 @Composable
@@ -67,6 +71,12 @@ fun LeafIDENavHost(pageNavController: NavHostController) {
         }
         composable(LeafIDEDestinations.SETTINGS_BUILD_AND_RUN_PAGE) {
             SettingsBuildAndRunScreen(pageNavController)
+        }
+        composable(LeafIDEDestinations.SETTINGS_DEVELOPER_OPTIONS_PAGE) {
+            SettingsDeveloperOptionsScreen(pageNavController)
+        }
+        composable(LeafIDEDestinations.SETTINGS_COLOR_SCHEME_DEBUGGING_PAGE) {
+            SettingsColorSchemeDebugging(pageNavController)
         }
     }
 }

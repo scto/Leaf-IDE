@@ -1,46 +1,46 @@
 package io.github.caimucheng.leaf.common.scheme
 
-import android.graphics.Color
 import androidx.compose.material3.ColorScheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import io.github.caimucheng.leaf.common.ui.theme.isDark
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 
-class DynamicEditorColorScheme(private val colorScheme: ColorScheme?) :
-    EditorColorScheme(isDark) {
+class DynamicEditorColorScheme(
+    private val colorScheme: ColorScheme?,
+    private val handleColor: Color?,
+    private val selectionBackgroundColor: Color?
+) :
+    EditorColorScheme(false) {
 
     init {
         applyDefault()
     }
 
     override fun applyDefault() {
-        if (colorScheme == null) {
+        if (
+            colorScheme == null ||
+            handleColor == null ||
+            selectionBackgroundColor == null
+        ) {
             return
         }
         super.applyDefault()
-        if (isDark) {
-            colorScheme.applyDark()
-        } else {
-            colorScheme.applyLight()
-        }
-    }
 
-    private fun ColorScheme.applyLight() {
-        setColor(WHOLE_BACKGROUND, "#FFFFFFFF".toColor())
-        setColor(LINE_NUMBER_BACKGROUND, "#FFFFFFFF".toColor())
-        setColor(LINE_NUMBER_CURRENT, primary.toArgb())
-        setColor(LINE_NUMBER, onSurface.toArgb())
-        setColor(TEXT_NORMAL, onSurface.toArgb())
+        setColor(WHOLE_BACKGROUND, colorScheme.inverseOnSurface.copy(alpha = 0.25f).toArgb())
+        setColor(LINE_NUMBER_BACKGROUND, colorScheme.inverseOnSurface.copy(alpha = 0.6f).toArgb())
+        setColor(LINE_NUMBER, colorScheme.onSurfaceVariant.copy(alpha = 0.8f).toArgb())
+        setColor(LINE_NUMBER_CURRENT, colorScheme.primary.toArgb())
+        setColor(LINE_DIVIDER, Color.Transparent.toArgb())
+        setColor(SELECTION_HANDLE, handleColor.toArgb())
+        setColor(SELECTION_INSERT, handleColor.toArgb())
+        setColor(SELECTED_TEXT_BACKGROUND, selectionBackgroundColor.toArgb())
+        setColor(TEXT_NORMAL, colorScheme.onSurfaceVariant.toArgb())
+        setColor(CURRENT_LINE, colorScheme.inverseOnSurface.copy(alpha = 0.8f).toArgb())
+        setColor(SCROLL_BAR_TRACK, colorScheme.onSurfaceVariant.copy(alpha = 0.08f).toArgb())
+        setColor(SCROLL_BAR_THUMB, colorScheme.onSurfaceVariant.copy(alpha = 0.2f).toArgb())
+        setColor(SCROLL_BAR_THUMB_PRESSED, colorScheme.onSurfaceVariant.copy(alpha = 0.4f).toArgb())
+        setColor(LINE_NUMBER_PANEL, Color.Black.copy(alpha = 0.6f).toArgb())
+        setColor(LINE_NUMBER_PANEL_TEXT, Color.White.toArgb())
     }
-
-    private fun ColorScheme.applyDark() {
-        setColor(WHOLE_BACKGROUND, "#FF1B1B1B".toColor())
-        setColor(LINE_NUMBER_BACKGROUND, "#FF1B1B1B".toColor())
-        setColor(LINE_NUMBER_CURRENT, primary.toArgb())
-        setColor(LINE_NUMBER, onSurface.toArgb())
-        setColor(TEXT_NORMAL, onSurface.toArgb())
-    }
-
-    private fun String.toColor() = Color.parseColor(this)
 
 }
