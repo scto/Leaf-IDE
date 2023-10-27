@@ -56,6 +56,11 @@ fun Project.configureBaseExtension() {
                         extKeyAlias = "fallback"
                         extKeyPassword = "123456"
                     }
+                } else if (!extStoreFile.exists()) {
+                        extStoreFile = rootProject.file("fallback.jks")
+                        extStorePassword = "123456"
+                        extKeyAlias = "fallback"
+                        extKeyPassword = "123456"
                 }
 
                 storeFile = extStoreFile
