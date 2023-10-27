@@ -32,7 +32,7 @@ fun Project.configureBaseExtension() {
                 var extKeyAlias: String? = System.getenv("KEY_ALIAS")
                 var extKeyPassword: String? = System.getenv("KEY_PASSWORD")
                 val extIsNativeEnvironment =
-                    (extStorePassword == null || extKeyAlias == null || extKeyPassword == null) && extStoreFile.exists()
+                    extStorePassword == null || extKeyAlias == null || extKeyPassword == null
                 val extKeystoreProperties = Properties()
                 if (extIsNativeEnvironment) {
                     val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -56,11 +56,13 @@ fun Project.configureBaseExtension() {
                         extKeyAlias = "fallback"
                         extKeyPassword = "123456"
                     }
-                } else if (!extStoreFile.exists()) {
+                } else {
+                    if (!extStoreFile.exists()) {
                         extStoreFile = rootProject.file("fallback.jks")
                         extStorePassword = "123456"
                         extKeyAlias = "fallback"
                         extKeyPassword = "123456"
+                    }
                 }
 
                 storeFile = extStoreFile
