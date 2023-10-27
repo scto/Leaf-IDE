@@ -32,11 +32,11 @@ fun Project.configureBaseExtension() {
                 var extKeyAlias: String? = System.getenv("KEY_ALIAS")
                 var extKeyPassword: String? = System.getenv("KEY_PASSWORD")
                 val extIsNativeEnvironment =
-                    extStorePassword == null || extKeyAlias == null || extKeyPassword == null
+                    (extStorePassword == null || extKeyAlias == null || extKeyPassword == null) && extStoreFile.exists()
                 val extKeystoreProperties = Properties()
                 if (extIsNativeEnvironment) {
                     val keystorePropertiesFile = rootProject.file("keystore.properties")
-                    if (keystorePropertiesFile.exists() && keystorePropertiesFile.isFile && extStoreFile.exists()) {
+                    if (keystorePropertiesFile.exists() && keystorePropertiesFile.isFile) {
                         runCatching {
                             FileInputStream(keystorePropertiesFile).use {
                                 extKeystoreProperties.load(it)
