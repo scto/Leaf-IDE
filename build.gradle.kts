@@ -36,7 +36,7 @@ fun Project.configureBaseExtension() {
                 val extKeystoreProperties = Properties()
                 if (extIsNativeEnvironment) {
                     val keystorePropertiesFile = rootProject.file("keystore.properties")
-                    if (keystorePropertiesFile.exists() && keystorePropertiesFile.isFile) {
+                    if (keystorePropertiesFile.exists() && keystorePropertiesFile.isFile && extStoreFile.exists()) {
                         runCatching {
                             FileInputStream(keystorePropertiesFile).use {
                                 extKeystoreProperties.load(it)
