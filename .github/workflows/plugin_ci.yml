@@ -30,7 +30,7 @@ jobs:
 
       - name: Decrypt keystore
         run: |
-          openssl aes-256-cbc -K ${{ secrets.ENCRYPTED_KEYSTORE_KEY }} -iv ${{ secrets.ENCRYPTED_KEYSTORE_IV }} -in buildKey.jks.enc -out buildKey.jks -d || echo "Decrypt key failed"
+          openssl aes-256-cbc -K ${{ secrets.ENCRYPTED_KEYSTORE_KEY }} -iv ${{ secrets.ENCRYPTED_KEYSTORE_IV }} -in buildKey.jks.enc -out buildKey.jks -d || echo "Decrypt key failed, use default key" && rm buildKey.jks
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
