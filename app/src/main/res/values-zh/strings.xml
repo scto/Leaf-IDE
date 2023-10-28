@@ -108,7 +108,6 @@
     <string name="developer_options_summary">Leaf IDE 的调试或实验性选项</string>
     <string name="color_scheme_debugging">配色方案调试</string>
     <string name="color_scheme_debugging_summary">展示配色方案及对应色值</string>
-    <string name="find">查找</string>
     <string name="all">全部</string>
     <string name="replace">替换</string>
     <string name="total_replacement">共替换了 %d 次</string>
@@ -117,4 +116,5 @@
     <string name="regex">正则表达式</string>
     <string name="case_sensitive">区分大小写</string>
     <string name="regex_syntax_exception">正则表达式错误：%s</string>
+    <string name="whole_word">全词匹配</string>
 </resources>

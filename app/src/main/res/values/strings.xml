@@ -110,7 +110,6 @@
     <string name="developer_options_summary">Debug or experimental options for Leaf IDE</string>
     <string name="color_scheme_debugging">Color Scheme Debugging</string>
     <string name="color_scheme_debugging_summary">Display color schemes and corresponding color values</string>
-    <string name="find">Find</string>
     <string name="all">All</string>
     <string name="replace">Replace</string>
     <string name="total_replacement">Replaced %d times in total</string>
@@ -119,4 +118,5 @@
     <string name="regex">Regex</string>
     <string name="case_sensitive">Case Sensitive</string>
     <string name="regex_syntax_exception">Regex error: %s</string>
+    <string name="whole_word">Whole Word</string>
 </resources>

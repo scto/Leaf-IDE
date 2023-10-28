@@ -96,14 +96,8 @@ class CodeEditorController(
 
     fun postInvalidate() = editor.postInvalidate()
 
-    fun isSelected() = editor.isSelected
+    fun selectIndex(index: Int) {
 
-    fun replaceSelection() {
-        editor.text.replace(
-            editor.cursor.left,
-            editor.cursor.right,
-            ""
-        )
     }
 
     fun searcher(): EditorSearcher = editor.searcher

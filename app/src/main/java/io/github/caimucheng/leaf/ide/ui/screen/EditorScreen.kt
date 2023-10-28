@@ -276,6 +276,9 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
     var isRegexMode by rememberSaveable {
         mutableStateOf(false)
     }
+    var isWholeWordMode by rememberSaveable {
+        mutableStateOf(false)
+    }
     var isCaseSensitiveMode by rememberSaveable {
         mutableStateOf(false)
     }
@@ -296,7 +299,9 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
             }
         },
         snackbarHost = {
-            SnackbarHost(snackbarHostState)
+            SnackbarHost(
+                snackbarHostState
+            )
         },
         actions = {
             IconButton(
@@ -524,8 +529,20 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                                     ?.search(
                                                         pattern,
                                                         EditorSearcher.SearchOptions(
+                                                            when {
+                                                                !isRegexMode && !isWholeWordMode -> {
+                                                                    EditorSearcher.SearchOptions.TYPE_NORMAL
+                                                                }
+
+                                                                isRegexMode -> {
+                                                                    EditorSearcher.SearchOptions.TYPE_REGULAR_EXPRESSION
+                                                                }
+
+                                                                else -> {
+                                                                    EditorSearcher.SearchOptions.TYPE_WHOLE_WORD
+                                                                }
+                                                            },
                                                             !isCaseSensitiveMode,
-                                                            isRegexMode
                                                         )
                                                     )
                                             } catch (_: PatternSyntaxException) {
@@ -546,7 +563,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            text = stringResource(id = R.string.find),
+                                            text = stringResource(id = R.string.search),
                                             fontSize = 14.sp,
                                             modifier = Modifier.padding(horizontal = 10.dp)
                                         )
@@ -579,8 +596,20 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                                                 ?.search(
                                                                     pattern,
                                                                     EditorSearcher.SearchOptions(
-                                                                        !isCaseSensitiveMode,
-                                                                        isRegexMode
+                                                                        when {
+                                                                            !isRegexMode && !isWholeWordMode -> {
+                                                                                EditorSearcher.SearchOptions.TYPE_NORMAL
+                                                                            }
+
+                                                                            isRegexMode -> {
+                                                                                EditorSearcher.SearchOptions.TYPE_REGULAR_EXPRESSION
+                                                                            }
+
+                                                                            else -> {
+                                                                                EditorSearcher.SearchOptions.TYPE_WHOLE_WORD
+                                                                            }
+                                                                        },
+                                                                        !isCaseSensitiveMode
                                                                     )
                                                                 )
                                                         } catch (_: PatternSyntaxException) {
@@ -695,24 +724,33 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         TextButton(
                                             onClick = {
                                                 codeEditorController?.searcher()?.apply {
-                                                    if (pattern.isNotEmpty()) {
-                                                        if (hasQuery()) {
-                                                            try {
-                                                                if (isRegexMode) {
-                                                                    Pattern.compile(pattern)
-                                                                }
-                                                                gotoPrevious()
-                                                            } catch (_: IllegalStateException) {
-                                                            } catch (e: PatternSyntaxException) {
+                                                    if (hasQuery() && pattern.isNotEmpty()) {
+                                                        try {
+                                                            if (isRegexMode) {
+                                                                Pattern.compile(pattern)
+                                                            }
+                                                            if (matchedPositionCount == 0) {
                                                                 coroutineScope.launch {
+                                                                    snackbarHostState.currentSnackbarData?.dismiss()
                                                                     snackbarHostState.showSnackbar(
-                                                                        message = regexSyntaxException.format(
-                                                                            e.message
-                                                                        ),
-                                                                        withDismissAction = true,
-                                                                        duration = SnackbarDuration.Long
+                                                                        textNotFound,
+                                                                        withDismissAction = true
                                                                     )
                                                                 }
+                                                                return@apply
+                                                            }
+                                                            gotoPrevious()
+                                                        } catch (_: IllegalStateException) {
+                                                        } catch (e: PatternSyntaxException) {
+                                                            coroutineScope.launch {
+                                                                snackbarHostState.currentSnackbarData?.dismiss()
+                                                                snackbarHostState.showSnackbar(
+                                                                    message = regexSyntaxException.format(
+                                                                        e.message
+                                                                    ),
+                                                                    withDismissAction = true,
+                                                                    duration = SnackbarDuration.Long
+                                                                )
                                                             }
                                                         }
                                                     }
@@ -736,24 +774,33 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         TextButton(
                                             onClick = {
                                                 codeEditorController?.searcher()?.apply {
-                                                    if (pattern.isNotEmpty()) {
-                                                        if (hasQuery()) {
-                                                            try {
-                                                                if (isRegexMode) {
-                                                                    Pattern.compile(pattern)
-                                                                }
-                                                                gotoNext()
-                                                            } catch (_: IllegalStateException) {
-                                                            } catch (e: PatternSyntaxException) {
+                                                    if (hasQuery() && pattern.isNotEmpty()) {
+                                                        try {
+                                                            if (isRegexMode) {
+                                                                Pattern.compile(pattern)
+                                                            }
+                                                            if (matchedPositionCount == 0) {
                                                                 coroutineScope.launch {
+                                                                    snackbarHostState.currentSnackbarData?.dismiss()
                                                                     snackbarHostState.showSnackbar(
-                                                                        message = regexSyntaxException.format(
-                                                                            e.message
-                                                                        ),
-                                                                        withDismissAction = true,
-                                                                        duration = SnackbarDuration.Long
+                                                                        textNotFound,
+                                                                        withDismissAction = true
                                                                     )
                                                                 }
+                                                                return@apply
+                                                            }
+                                                            gotoNext()
+                                                        } catch (_: IllegalStateException) {
+                                                        } catch (e: PatternSyntaxException) {
+                                                            coroutineScope.launch {
+                                                                snackbarHostState.currentSnackbarData?.dismiss()
+                                                                snackbarHostState.showSnackbar(
+                                                                    message = regexSyntaxException.format(
+                                                                        e.message
+                                                                    ),
+                                                                    withDismissAction = true,
+                                                                    duration = SnackbarDuration.Long
+                                                                )
                                                             }
                                                         }
                                                     }
@@ -779,25 +826,24 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                                 if (!isReplacingMode) {
                                                     isReplacingMode = true
                                                 } else {
+                                                    if (pattern.isEmpty()) {
+                                                        return@TextButton
+                                                    }
                                                     codeEditorController?.apply {
                                                         val searcher = searcher()
                                                         try {
                                                             if (isRegexMode) {
                                                                 Pattern.compile(pattern)
                                                             }
-                                                            if (replacement.isEmpty()) {
-                                                                if (!searcher.isMatchedPositionSelected) {
-                                                                    searcher.gotoNext()
-                                                                } else {
-                                                                    replaceSelection()
-                                                                    codeEditorController?.searcher()
-                                                                        ?.search(
-                                                                            pattern,
-                                                                            EditorSearcher.SearchOptions(
-                                                                                !isCaseSensitiveMode,
-                                                                                isRegexMode
-                                                                            )
-                                                                        )
+                                                            val count =
+                                                                searcher.matchedPositionCount
+                                                            if (count == 0) {
+                                                                coroutineScope.launch {
+                                                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                                                    snackbarHostState.showSnackbar(
+                                                                        textNotFound,
+                                                                        withDismissAction = true
+                                                                    )
                                                                 }
                                                                 return@apply
                                                             }
@@ -805,6 +851,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                                         } catch (_: IllegalStateException) {
                                                         } catch (e: PatternSyntaxException) {
                                                             coroutineScope.launch {
+                                                                snackbarHostState.currentSnackbarData?.dismiss()
                                                                 snackbarHostState.showSnackbar(
                                                                     message = regexSyntaxException.format(
                                                                         e.message
@@ -834,11 +881,15 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         }
                                         TextButton(
                                             onClick = {
+                                                if (pattern.isEmpty()) {
+                                                    return@TextButton
+                                                }
                                                 codeEditorController?.apply {
                                                     val searcher = searcher()
                                                     val count = searcher.matchedPositionCount
                                                     if (count == 0) {
                                                         coroutineScope.launch {
+                                                            snackbarHostState.currentSnackbarData?.dismiss()
                                                             snackbarHostState.showSnackbar(
                                                                 textNotFound,
                                                                 withDismissAction = true
@@ -852,6 +903,7 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                                         }
                                                         searcher.replaceAll(replacement) {
                                                             coroutineScope.launch {
+                                                                snackbarHostState.currentSnackbarData?.dismiss()
                                                                 snackbarHostState.showSnackbar(
                                                                     totalReplacement.format(count),
                                                                     withDismissAction = true
@@ -861,8 +913,11 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                                     } catch (_: IllegalStateException) {
                                                     } catch (e: PatternSyntaxException) {
                                                         coroutineScope.launch {
+                                                            snackbarHostState.currentSnackbarData?.dismiss()
                                                             snackbarHostState.showSnackbar(
-                                                                message = regexSyntaxException.format(e.message),
+                                                                message = regexSyntaxException.format(
+                                                                    e.message
+                                                                ),
                                                                 withDismissAction = true,
                                                                 duration = SnackbarDuration.Long
                                                             )
@@ -955,19 +1010,94 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                                     },
                                                     onClick = {
                                                         isRegexMode = !isRegexMode
+                                                        isWholeWordMode = false
                                                         codeEditorController?.apply {
                                                             val searcher = searcher()
-                                                            if (searcher.hasQuery()) {
+                                                            if (searcher.hasQuery() && pattern.isNotEmpty()) {
                                                                 try {
                                                                     codeEditorController?.searcher()
                                                                         ?.search(
                                                                             pattern,
                                                                             EditorSearcher.SearchOptions(
-                                                                                !isCaseSensitiveMode,
-                                                                                isRegexMode
+                                                                                when {
+                                                                                    !isRegexMode && !isWholeWordMode -> {
+                                                                                        EditorSearcher.SearchOptions.TYPE_NORMAL
+                                                                                    }
+
+                                                                                    isRegexMode -> {
+                                                                                        EditorSearcher.SearchOptions.TYPE_REGULAR_EXPRESSION
+                                                                                    }
+
+                                                                                    else -> {
+                                                                                        EditorSearcher.SearchOptions.TYPE_WHOLE_WORD
+                                                                                    }
+                                                                                },
+                                                                                !isCaseSensitiveMode
                                                                             )
                                                                         )
-                                                                } catch (_: PatternSyntaxException) {}
+                                                                } catch (_: PatternSyntaxException) {
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                )
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(
+                                                            text = stringResource(id = R.string.whole_word)
+                                                        )
+                                                    },
+                                                    trailingIcon = {
+                                                        AnimatedContent(
+                                                            targetState = isWholeWordMode,
+                                                            label = "animateWholeWordContent"
+                                                        ) { value ->
+                                                            if (value) {
+                                                                Icon(
+                                                                    imageVector = Icons.Filled.CheckBox,
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(20.dp),
+                                                                    tint = MaterialTheme.colorScheme.primary
+                                                                )
+                                                            } else {
+                                                                Icon(
+                                                                    imageVector = Icons.Filled.CheckBoxOutlineBlank,
+                                                                    contentDescription = null,
+                                                                    modifier = Modifier.size(20.dp),
+                                                                    tint = MaterialTheme.colorScheme.onSurface
+                                                                )
+                                                            }
+                                                        }
+                                                    },
+                                                    onClick = {
+                                                        isWholeWordMode = !isWholeWordMode
+                                                        isRegexMode = false
+                                                        codeEditorController?.apply {
+                                                            val searcher = searcher()
+                                                            if (searcher.hasQuery() && pattern.isNotEmpty()) {
+                                                                try {
+                                                                    codeEditorController?.searcher()
+                                                                        ?.search(
+                                                                            pattern,
+                                                                            EditorSearcher.SearchOptions(
+                                                                                when {
+                                                                                    !isRegexMode && !isWholeWordMode -> {
+                                                                                        EditorSearcher.SearchOptions.TYPE_NORMAL
+                                                                                    }
+
+                                                                                    isRegexMode -> {
+                                                                                        EditorSearcher.SearchOptions.TYPE_REGULAR_EXPRESSION
+                                                                                    }
+
+                                                                                    else -> {
+                                                                                        EditorSearcher.SearchOptions.TYPE_WHOLE_WORD
+                                                                                    }
+                                                                                },
+                                                                                !isCaseSensitiveMode
+                                                                            )
+                                                                        )
+                                                                } catch (_: PatternSyntaxException) {
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -1004,17 +1134,30 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                                         isCaseSensitiveMode = !isCaseSensitiveMode
                                                         codeEditorController?.apply {
                                                             val searcher = searcher()
-                                                            if (searcher.hasQuery()) {
+                                                            if (searcher.hasQuery() && pattern.isNotEmpty()) {
                                                                 try {
                                                                     codeEditorController?.searcher()
                                                                         ?.search(
                                                                             pattern,
                                                                             EditorSearcher.SearchOptions(
-                                                                                !isCaseSensitiveMode,
-                                                                                isRegexMode
+                                                                                when {
+                                                                                    !isRegexMode && !isWholeWordMode -> {
+                                                                                        EditorSearcher.SearchOptions.TYPE_NORMAL
+                                                                                    }
+
+                                                                                    isRegexMode -> {
+                                                                                        EditorSearcher.SearchOptions.TYPE_REGULAR_EXPRESSION
+                                                                                    }
+
+                                                                                    else -> {
+                                                                                        EditorSearcher.SearchOptions.TYPE_WHOLE_WORD
+                                                                                    }
+                                                                                },
+                                                                                !isCaseSensitiveMode
                                                                             )
                                                                         )
-                                                                } catch (_: PatternSyntaxException) {}
+                                                                } catch (_: PatternSyntaxException) {
+                                                                }
                                                             }
                                                         }
                                                     }
