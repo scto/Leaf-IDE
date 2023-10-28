@@ -5,10 +5,9 @@
 
     <style name="AppThemeDark" parent="android:Theme.Material.NoActionBar" />
 
-    <style name="Theme.LeafIDE.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.LeafIDE.Splash" parent="Theme.SplashScreen.IconBackground">
         <item name="postSplashScreenTheme">@style/AppThemeLight</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_splash</item>
-        <item name="windowSplashScreenIconBackgroundColor">@color/white</item>
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
     </style>
 
 </resources>
