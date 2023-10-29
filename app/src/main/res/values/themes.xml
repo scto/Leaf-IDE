@@ -7,7 +7,7 @@
 
     <style name="Theme.LeafIDE.Splash" parent="Theme.SplashScreen.IconBackground">
         <item name="postSplashScreenTheme">@style/AppThemeLight</item>
-        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_transparent</item>
     </style>
 
 </resources>

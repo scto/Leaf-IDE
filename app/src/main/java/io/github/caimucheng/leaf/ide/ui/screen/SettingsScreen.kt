@@ -25,6 +25,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Brightness2
 import androidx.compose.material.icons.filled.Brightness6
 import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.EmojiSymbols
+import androidx.compose.material.icons.filled.SpaceBar
+import androidx.compose.material.icons.filled.WrapText
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,6 +36,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.SnackbarHost
@@ -40,6 +44,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +55,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -65,16 +72,29 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import io.github.caimucheng.leaf.common.component.LeafApp
+import io.github.caimucheng.leaf.common.component.Magnify
 import io.github.caimucheng.leaf.common.component.NoImplementation
+import io.github.caimucheng.leaf.common.icon.ArrowExpandAll
+import io.github.caimucheng.leaf.common.icon.NotEqualVariant
+import io.github.caimucheng.leaf.common.icon.Symbol
 import io.github.caimucheng.leaf.common.manager.DataStoreManager
 import io.github.caimucheng.leaf.common.model.Preference
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
 import io.github.caimucheng.leaf.common.ui.preferences.PreferenceScreen
 import io.github.caimucheng.leaf.common.util.AppBrightnessKey
 import io.github.caimucheng.leaf.common.util.AutoDarkLightThemeKey
+import io.github.caimucheng.leaf.common.util.DEFAULT_SYMBOL_INPUT_BAR
 import io.github.caimucheng.leaf.common.util.EditorColorSchemeKey
+import io.github.caimucheng.leaf.common.util.InsertIndentSymbolKey
+import io.github.caimucheng.leaf.common.util.LigatureKey
+import io.github.caimucheng.leaf.common.util.MagnifierKey
 import io.github.caimucheng.leaf.common.util.MaterialYouEnabledKey
+import io.github.caimucheng.leaf.common.util.OverScrollKey
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
+import io.github.caimucheng.leaf.common.util.ShowSymbolInputBarKey
+import io.github.caimucheng.leaf.common.util.SymbolInputBarKey
+import io.github.caimucheng.leaf.common.util.UseICULibKey
+import io.github.caimucheng.leaf.common.util.WordWrapKey
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
 import kotlinx.coroutines.flow.launchIn
@@ -243,6 +263,39 @@ private fun EditorUI() {
         key = EditorColorSchemeKey,
         defaultValue = "dynamic"
     )
+    val ligatureRequest = PreferenceRequest(
+        key = LigatureKey,
+        defaultValue = true
+    )
+    val wordWrapRequest = PreferenceRequest(
+        key = WordWrapKey,
+        defaultValue = false
+    )
+    val symbolInputBarRequest = PreferenceRequest(
+        key = SymbolInputBarKey,
+        defaultValue = DEFAULT_SYMBOL_INPUT_BAR
+    )
+    val showSymbolInputBarRequest = PreferenceRequest(
+        key = ShowSymbolInputBarKey,
+        defaultValue = true
+    )
+    val insertIndentSymbolRequest = PreferenceRequest(
+        key = InsertIndentSymbolKey,
+        defaultValue = true
+    )
+    val magnifierRequest = PreferenceRequest(
+        key = MagnifierKey,
+        defaultValue = true
+    )
+    val overScrollRequest = PreferenceRequest(
+        key = OverScrollKey,
+        defaultValue = false
+    )
+    val useICULibRequest = PreferenceRequest(
+        key = UseICULibKey,
+        defaultValue = false
+    )
+
     val colorSchemeItemList = remember {
         listOf(
             ColorSchemeItem(
@@ -251,10 +304,16 @@ private fun EditorUI() {
             )
         )
     }
-    var currentType by remember {
+    var colorSchemeCurrentType by remember {
         mutableStateOf(dataStoreManager.getPreferenceBlocking(editorColorSchemeRequest))
     }
+    var symbolInputBar by rememberSaveable {
+        mutableStateOf(dataStoreManager.getPreferenceBlocking(symbolInputBarRequest))
+    }
     var showColorSchemeDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var showSymbolInputBarDialog by rememberSaveable {
         mutableStateOf(false)
     }
     PreferenceScreen(
@@ -279,6 +338,125 @@ private fun EditorUI() {
                         }
                     )
                 )
+            ),
+            Preference.PreferenceGroup(
+                title = stringResource(id = R.string.common),
+                preferenceItems = listOf(
+                    Preference.PreferenceItem.SwitchPreference(
+                        request = ligatureRequest,
+                        title = stringResource(id = R.string.ligature),
+                        summary = stringResource(id = R.string.ligature_summary),
+                        singleLineTitle = true,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.NotEqualVariant,
+                                contentDescription = stringResource(
+                                    id = R.string.ligature
+                                )
+                            )
+                        }
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        request = wordWrapRequest,
+                        title = stringResource(id = R.string.word_wrap),
+                        summary = stringResource(id = R.string.word_wrap_summary),
+                        singleLineTitle = true,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.WrapText,
+                                contentDescription = stringResource(
+                                    id = R.string.word_wrap
+                                )
+                            )
+                        }
+                    ),
+                    Preference.PreferenceItem.TextPreference(
+                        title = stringResource(id = R.string.symbol_input_bar),
+                        summary = stringResource(id = R.string.symbol_input_bar_summary),
+                        singleLineTitle = true,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.EmojiSymbols,
+                                contentDescription = stringResource(
+                                    id = R.string.symbol_input_bar
+                                )
+                            )
+                        },
+                        onClick = {
+                            showSymbolInputBarDialog = true
+                        }
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        request = showSymbolInputBarRequest,
+                        title = stringResource(id = R.string.show_symbol_input_bar),
+                        summary = stringResource(id = R.string.show_symbol_input_bar_summary),
+                        singleLineTitle = true,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Symbol,
+                                contentDescription = stringResource(
+                                    id = R.string.show_symbol_input_bar
+                                )
+                            )
+                        }
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        request = insertIndentSymbolRequest,
+                        title = stringResource(id = R.string.insert_indent_symbol),
+                        summary = stringResource(id = R.string.insert_indent_symbol_summary),
+                        singleLineTitle = true,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.SpaceBar,
+                                contentDescription = stringResource(
+                                    id = R.string.insert_indent_symbol
+                                )
+                            )
+                        }
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        request = magnifierRequest,
+                        title = stringResource(id = R.string.magnifier),
+                        summary = stringResource(id = R.string.magnifier_summary),
+                        singleLineTitle = true,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.Magnify,
+                                contentDescription = stringResource(
+                                    id = R.string.magnifier
+                                )
+                            )
+                        }
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        request = overScrollRequest,
+                        title = stringResource(id = R.string.over_scroll),
+                        summary = stringResource(id = R.string.over_scroll_summary),
+                        singleLineTitle = true,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowExpandAll,
+                                contentDescription = stringResource(
+                                    id = R.string.over_scroll
+                                )
+                            )
+                        }
+                    ),
+                    Preference.PreferenceItem.SwitchPreference(
+                        request = useICULibRequest,
+                        title = stringResource(id = R.string.use_icu_lib),
+                        summary = stringResource(id = R.string.use_icu_lib_summary),
+                        singleLineTitle = true,
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowExpandAll,
+                                contentDescription = stringResource(
+                                    id = R.string.use_icu_lib
+                                )
+                            )
+                        }
+                    )
+                )
             )
         ),
         modifier = Modifier.fillMaxSize(),
@@ -286,7 +464,7 @@ private fun EditorUI() {
     )
     if (showColorSchemeDialog) {
         var selectedType by remember {
-            mutableStateOf(currentType)
+            mutableStateOf(colorSchemeCurrentType)
         }
         AlertDialog(
             onDismissRequest = {
@@ -359,12 +537,12 @@ private fun EditorUI() {
                     TextButton(
                         onClick = {
                             showColorSchemeDialog = false
-                            if (currentType != selectedType) {
-                                currentType = selectedType
+                            if (colorSchemeCurrentType != selectedType) {
+                                colorSchemeCurrentType = selectedType
                                 coroutineScope.launch {
                                     dataStoreManager.editPreference(
                                         editorColorSchemeRequest.key,
-                                        currentType
+                                        colorSchemeCurrentType
                                     )
                                 }
                             }
@@ -379,7 +557,83 @@ private fun EditorUI() {
             }
         )
     }
-
+    if (showSymbolInputBarDialog) {
+        var input by remember {
+            mutableStateOf(symbolInputBar.joinToString(separator = " "))
+        }
+        AlertDialog(
+            onDismissRequest = {},
+            title = {
+                Text(text = stringResource(id = R.string.symbol_input_bar))
+            },
+            text = {
+                val focusRequester = remember {
+                    FocusRequester()
+                }
+                OutlinedTextField(
+                    value = input,
+                    onValueChange = {
+                        input = it
+                    },
+                    label = {
+                        Text(text = stringResource(id = R.string.symbol_list))
+                    },
+                    singleLine = true,
+                    modifier = Modifier.focusRequester(focusRequester)
+                )
+                SideEffect {
+                    focusRequester.requestFocus()
+                }
+            },
+            confirmButton = {
+                ConstraintLayout(Modifier.fillMaxWidth()) {
+                    val (cancel, reset, sure) = createRefs()
+                    TextButton(
+                        onClick = { showSymbolInputBarDialog = false },
+                        modifier = Modifier.constrainAs(cancel) {
+                            linkTo(parent.start, parent.end, bias = 0f)
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.cancel))
+                    }
+                    TextButton(
+                        onClick = {
+                            showSymbolInputBarDialog = false
+                            coroutineScope.launch {
+                                symbolInputBar = DEFAULT_SYMBOL_INPUT_BAR
+                                dataStoreManager.editPreference(
+                                    SymbolInputBarKey,
+                                    symbolInputBar
+                                )
+                            }
+                        },
+                        modifier = Modifier.constrainAs(reset) {
+                            linkTo(cancel.end, sure.start, endMargin = 8.dp, bias = 1f)
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.reset))
+                    }
+                    TextButton(
+                        onClick = {
+                            showSymbolInputBarDialog = false
+                            coroutineScope.launch {
+                                symbolInputBar = input.trim().split("\\s+".toRegex()).toSet()
+                                dataStoreManager.editPreference(
+                                    SymbolInputBarKey,
+                                    symbolInputBar
+                                )
+                            }
+                        },
+                        modifier = Modifier.constrainAs(sure) {
+                            linkTo(cancel.end, parent.end, bias = 1f)
+                        }
+                    ) {
+                        Text(text = stringResource(id = R.string.sure))
+                    }
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

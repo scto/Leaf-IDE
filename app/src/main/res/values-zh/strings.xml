@@ -117,4 +117,24 @@
     <string name="case_sensitive">区分大小写</string>
     <string name="regex_syntax_exception">正则表达式错误：%s</string>
     <string name="whole_word">全词匹配</string>
+    <string name="common">通用</string>
+    <string name="symbol_input_bar">符号输入栏</string>
+    <string name="symbol_input_bar_summary">使用空格分隔</string>
+    <string name="symbol_list">符号列表</string>
+    <string name="reset">重置</string>
+    <string name="sure">确定</string>
+    <string name="show_symbol_input_bar">显示符号输入栏</string>
+    <string name="show_symbol_input_bar_summary">在编辑器底部显示符号输入栏</string>
+    <string name="insert_indent_symbol">插入缩进符号</string>
+    <string name="insert_indent_symbol_summary">使用空格代替制表符 (\\t)</string>
+    <string name="word_wrap">自动换行</string>
+    <string name="word_wrap_summary">在编辑器中使用自动换行</string>
+    <string name="ligature">连体字</string>
+    <string name="ligature_summary">在编辑器中使用连体字</string>
+    <string name="magnifier">放大镜</string>
+    <string name="magnifier_summary">在编辑器中启用放大镜</string>
+    <string name="over_scroll">过度滑动</string>
+    <string name="over_scroll_summary">启用过度滚动后，如果滚动得足够快，可以滚动到显示范围之外</string>
+    <string name="use_icu_lib">使用 ICU 库</string>
+    <string name="use_icu_lib_summary">使用 ICU 库以检索字词边缘进行双击和长按字词的选择</string>
 </resources>

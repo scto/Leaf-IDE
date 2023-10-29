@@ -110,9 +110,18 @@ import io.github.caimucheng.leaf.common.manager.DataStoreManager
 import io.github.caimucheng.leaf.common.model.BreadcrumbItem
 import io.github.caimucheng.leaf.common.model.PreferenceRequest
 import io.github.caimucheng.leaf.common.scheme.DynamicEditorColorScheme
+import io.github.caimucheng.leaf.common.util.DEFAULT_SYMBOL_INPUT_BAR
 import io.github.caimucheng.leaf.common.util.DisplayConfigurationDirKey
 import io.github.caimucheng.leaf.common.util.EditorColorSchemeKey
+import io.github.caimucheng.leaf.common.util.InsertIndentSymbolKey
+import io.github.caimucheng.leaf.common.util.LigatureKey
+import io.github.caimucheng.leaf.common.util.MagnifierKey
+import io.github.caimucheng.leaf.common.util.OverScrollKey
 import io.github.caimucheng.leaf.common.util.SettingsDataStore
+import io.github.caimucheng.leaf.common.util.ShowSymbolInputBarKey
+import io.github.caimucheng.leaf.common.util.SymbolInputBarKey
+import io.github.caimucheng.leaf.common.util.UseICULibKey
+import io.github.caimucheng.leaf.common.util.WordWrapKey
 import io.github.caimucheng.leaf.common.util.invert
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.AppContext
@@ -130,6 +139,8 @@ import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.EditorSearcher
+import io.github.rosemoe.sora.widget.component.Magnifier
+import io.github.rosemoe.sora.widget.getComponent
 import io.github.rosemoe.sora.widget.subscribeEvent
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -452,8 +463,66 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                 key = EditorColorSchemeKey,
                                 defaultValue = "dynamic"
                             )
-                            val currentType = remember {
+                            val ligatureRequest = PreferenceRequest(
+                                key = LigatureKey,
+                                defaultValue = true
+                            )
+                            val wordWrapRequest = PreferenceRequest(
+                                key = WordWrapKey,
+                                defaultValue = false
+                            )
+                            val symbolInputBarRequest = PreferenceRequest(
+                                key = SymbolInputBarKey,
+                                defaultValue = DEFAULT_SYMBOL_INPUT_BAR
+                            )
+                            val showSymbolInputBarRequest = PreferenceRequest(
+                                key = ShowSymbolInputBarKey,
+                                defaultValue = true
+                            )
+                            val insertIndentSymbolRequest = PreferenceRequest(
+                                key = InsertIndentSymbolKey,
+                                defaultValue = true
+                            )
+                            val magnifierRequest = PreferenceRequest(
+                                key = MagnifierKey,
+                                defaultValue = true
+                            )
+                            val overScrollRequest = PreferenceRequest(
+                                key = OverScrollKey,
+                                defaultValue = false
+                            )
+                            val useICULibRequest = PreferenceRequest(
+                                key = UseICULibKey,
+                                defaultValue = false
+                            )
+
+
+                            val currentColorSchemeType = remember {
                                 dataStoreManager.getPreferenceBlocking(editorColorSchemeRequest)
+                            }
+                            val ligature = remember {
+                                dataStoreManager.getPreferenceBlocking(ligatureRequest)
+                            }
+                            val wordWrap = remember {
+                                dataStoreManager.getPreferenceBlocking(wordWrapRequest)
+                            }
+                            val symbolInputBar = remember {
+                                dataStoreManager.getPreferenceBlocking(symbolInputBarRequest)
+                            }
+                            val showSymbolInputBar = remember {
+                                dataStoreManager.getPreferenceBlocking(showSymbolInputBarRequest)
+                            }
+                            val insertIndentSymbol = remember {
+                                dataStoreManager.getPreferenceBlocking(insertIndentSymbolRequest)
+                            }
+                            val magnify = remember {
+                                dataStoreManager.getPreferenceBlocking(magnifierRequest)
+                            }
+                            val overScroll = remember {
+                                dataStoreManager.getPreferenceBlocking(overScrollRequest)
+                            }
+                            val useICULib = remember {
+                                dataStoreManager.getPreferenceBlocking(useICULibRequest)
                             }
                             CodeEditor(
                                 modifier = Modifier
@@ -464,8 +533,8 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         height = Dimension.fillToConstraints
                                     },
                                 content = viewModel.content,
-                                colorScheme = remember(currentType) {
-                                    when (currentType) {
+                                colorScheme = remember(currentColorSchemeType) {
+                                    when (currentColorSchemeType) {
                                         "dynamic" -> DynamicEditorColorScheme(
                                             colorScheme = colorScheme,
                                             handleColor = handleColor,
@@ -483,6 +552,11 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                 if (editor.verticalScrollbarThumbDrawable != null) {
                                     editor.verticalScrollbarThumbDrawable = null
                                 }
+                                editor.isLigatureEnabled = ligature
+                                editor.getComponent<Magnifier>().isEnabled = magnify
+                                editor.isWordwrap = wordWrap
+                                editor.props.useICULibToSelectWords = useICULib
+                                editor.props.overScrollEnabled = overScroll
                                 editor.subscribeEvent<ContentChangeEvent> { _, _ ->
                                     viewModel.intent.trySend(EditorUIIntent.SaveFile(viewModel.editingFile))
                                 }
@@ -504,18 +578,25 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                         linkTo(parent.top, parent.bottom, bias = 1f)
                                     }
                             ) {
-                                Divider(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(1.dp),
-                                    color = DividerDefaults.color.copy(alpha = 0.4f)
-                                )
-                                SymbolTabLayout(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(40.dp)
-                                        .background(MaterialTheme.colorScheme.background)
-                                )
+                                if (showSymbolInputBar) {
+                                    Divider(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(1.dp),
+                                        color = DividerDefaults.color.copy(alpha = 0.4f)
+                                    )
+                                    SymbolTabLayout(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(40.dp)
+                                            .background(MaterialTheme.colorScheme.background),
+                                        items = symbolInputBar,
+                                        useSpaceInsteadOfTab = insertIndentSymbol,
+                                        onInsert = { text ->
+                                            codeEditorController?.insertText(text, text.length)
+                                        }
+                                    )
+                                }
                                 if (showSearchPanel) {
                                     var isReplacingMode by rememberSaveable {
                                         mutableStateOf(false)

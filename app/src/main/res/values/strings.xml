@@ -119,4 +119,24 @@
     <string name="case_sensitive">Case Sensitive</string>
     <string name="regex_syntax_exception">Regex error: %s</string>
     <string name="whole_word">Whole Word</string>
+    <string name="common">Common</string>
+    <string name="symbol_input_bar">Symbol Input Bar</string>
+    <string name="symbol_input_bar_summary">Use spaces to separate</string>
+    <string name="symbol_list">Symbol List</string>
+    <string name="reset">Reset</string>
+    <string name="sure">Sure</string>
+    <string name="show_symbol_input_bar">Show Symbol Input Bar</string>
+    <string name="show_symbol_input_bar_summary">Show symbol input bar at bottom of editor</string>
+    <string name="insert_indent_symbol">Insert Indent Symbol</string>
+    <string name="insert_indent_symbol_summary">Use spaces instead of tabs (\\t)</string>
+    <string name="word_wrap">Word Wrap</string>
+    <string name="word_wrap_summary">Use word wrapping in the editor</string>
+    <string name="ligature">Ligature</string>
+    <string name="ligature_summary">Use ligatures in the editor</string>
+    <string name="magnifier">Magnifier</string>
+    <string name="magnifier_summary">Enable magnifying glass in editor</string>
+    <string name="over_scroll">Over Scroll</string>
+    <string name="over_scroll_summary">With over-scrolling enabled, you can scroll beyond the display if you scroll fast enough</string>
+    <string name="use_icu_lib">Use ICU Library</string>
+    <string name="use_icu_lib_summary">Use the ICU library to retrieve word edges for double-click and long-press selection of words</string>
 </resources>

@@ -96,8 +96,8 @@ class CodeEditorController(
 
     fun postInvalidate() = editor.postInvalidate()
 
-    fun selectIndex(index: Int) {
-
+    fun insertText(text: String, selectionOffset: Int) {
+        editor.insertText(text, selectionOffset)
     }
 
     fun searcher(): EditorSearcher = editor.searcher

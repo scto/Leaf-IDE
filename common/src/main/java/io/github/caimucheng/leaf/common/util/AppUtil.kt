@@ -16,6 +16,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import java.io.File
 import kotlin.properties.Delegates
@@ -25,9 +26,23 @@ val MaterialYouEnabledKey = booleanPreferencesKey("material_you_enabled")
 val AutoDarkLightThemeKey = booleanPreferencesKey("auto_dark_light_theme")
 val AppBrightnessKey = booleanPreferencesKey("app_brightness")
 val EditorColorSchemeKey = stringPreferencesKey("editor_color_scheme")
+val LigatureKey = booleanPreferencesKey("ligature")
+val WordWrapKey = booleanPreferencesKey("word_wrap")
+val SymbolInputBarKey = stringSetPreferencesKey("symbol_input_bar")
+val ShowSymbolInputBarKey = booleanPreferencesKey("show_symbol_input_bar")
+val InsertIndentSymbolKey = booleanPreferencesKey("insert_indent_symbol")
+val MagnifierKey = booleanPreferencesKey("magnifier")
+val OverScrollKey = booleanPreferencesKey("over_scroll")
+val UseICULibKey = booleanPreferencesKey("use_icu_lib")
 val DisplayConfigurationDirKey = booleanPreferencesKey("display_configuration_dir")
 
 const val LAUNCH_MODE = "launch_mode"
+
+val DEFAULT_SYMBOL_INPUT_BAR = setOf(
+    "<", ">", "/", "=", "\"", ":", ";", "(",
+    ")", ",", ".", "$", "?", "|", "\\", "&",
+    "!", "[", "]", "{", "}", "_", "-"
+)
 
 val ExternalRootPath =
     Environment.getExternalStorageDirectory()!!
