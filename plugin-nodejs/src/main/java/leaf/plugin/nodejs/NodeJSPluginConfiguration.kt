@@ -4,10 +4,6 @@ import io.github.caimucheng.leaf.plugin.PluginConfiguration
 
 class NodeJSPluginConfiguration : PluginConfiguration() {
 
-    override fun enabled(): Boolean {
-        return true
-    }
-
     override fun pluginNameId(): Int {
         return R.string.app_name
     }

@@ -558,15 +558,15 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                 colorScheme = remember(currentColorSchemeType) {
                                     when (currentColorSchemeType) {
                                         "dynamic" -> DynamicEditorColorScheme(
-                                            colorScheme = colorScheme,
                                             handleColor = handleColor,
-                                            selectionBackgroundColor = selectionBackgroundColor
+                                            selectionBackgroundColor = selectionBackgroundColor,
+                                            colorScheme = colorScheme,
                                         )
 
                                         "atom_one_light" -> DynamicEditorColorScheme(
-                                            colorScheme = colorScheme,
                                             handleColor = handleColor,
-                                            selectionBackgroundColor = selectionBackgroundColor
+                                            selectionBackgroundColor = selectionBackgroundColor,
+                                            colorScheme = colorScheme,
                                         )
 
                                         else -> throw RuntimeException("Stub!")
