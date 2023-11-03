@@ -25,11 +25,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
-import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.model.Plugin
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
+import io.github.caimucheng.leaf.ide.ui.util.enabled
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 
 @Composable

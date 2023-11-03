@@ -139,4 +139,6 @@
     <string name="over_scroll_summary">With over-scrolling enabled, you can scroll beyond the display if you scroll fast enough</string>
     <string name="use_icu_lib">Use ICU Library</string>
     <string name="use_icu_lib_summary">Use the ICU library to retrieve word edges for double-click and long-press selection of words</string>
+    <string name="enabled">Enabled</string>
+    <string name="atom_one_light" translatable="false">Atom One Light</string>
 </resources>

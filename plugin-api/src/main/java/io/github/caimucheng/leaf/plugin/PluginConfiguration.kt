@@ -2,8 +2,6 @@ package io.github.caimucheng.leaf.plugin
 
 abstract class PluginConfiguration : PluginBase() {
 
-    abstract fun enabled(): Boolean
-
     abstract fun pluginNameId(): Int
 
     abstract fun descriptionId(): Int

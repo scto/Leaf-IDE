@@ -301,6 +301,10 @@ private fun EditorUI() {
             ColorSchemeItem(
                 titleId = R.string.dynamic_color_matching,
                 type = "dynamic"
+            ),
+            ColorSchemeItem(
+                titleId = R.string.atom_one_light,
+                type = "atom_one_light"
             )
         )
     }

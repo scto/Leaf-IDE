@@ -1,12 +1,15 @@
 package io.github.caimucheng.leaf.ide.ui.page
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -27,6 +30,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -64,6 +70,8 @@ import io.github.caimucheng.leaf.common.util.uninstallAPP
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
 import io.github.caimucheng.leaf.ide.model.Plugin
+import io.github.caimucheng.leaf.ide.ui.util.enabled
+import io.github.caimucheng.leaf.ide.ui.util.toggle
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -164,6 +172,9 @@ private fun PluginList(plugins: List<Plugin>) {
                         var expanded by remember {
                             mutableStateOf(false)
                         }
+                        var isEnabled by remember {
+                            mutableStateOf(plugin.configuration.enabled() && plugin.isSupported)
+                        }
                         Card(
                             colors = CardDefaults.cardColors(
                                 containerColor = MaterialTheme.colorScheme.background
@@ -194,7 +205,13 @@ private fun PluginList(plugins: List<Plugin>) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(20.dp)
-                                    .alpha(if (plugin.configuration.enabled() && plugin.isSupported) 1f else 0.6f)
+                                    .alpha(
+                                        animateFloatAsState(
+                                            targetValue = if (isEnabled) 1f else 0.6f,
+                                            label = "animateAlpha",
+                                            animationSpec = tween(220)
+                                        ).value
+                                    )
                             ) {
                                 val (icon, content) = createRefs()
                                 Icon(
@@ -310,7 +327,12 @@ private fun PluginList(plugins: List<Plugin>) {
                             PluginDropdownMenu(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false },
-                                plugin = plugin
+                                plugin = plugin,
+                                isEnabled = isEnabled,
+                                onClick = {
+                                    plugin.configuration.toggle()
+                                    isEnabled = !isEnabled && plugin.isSupported
+                                }
                             )
                         }
                     }
@@ -324,7 +346,9 @@ private fun PluginList(plugins: List<Plugin>) {
 private fun PluginDropdownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    plugin: Plugin
+    plugin: Plugin,
+    isEnabled: Boolean,
+    onClick: () -> Unit
 ) {
     DropdownMenu(
         expanded = expanded,
@@ -344,6 +368,38 @@ private fun PluginDropdownMenu(
             overflow = TextOverflow.Ellipsis
         )
         val context = LocalContext.current
+        DropdownMenuItem(
+            text = {
+                Text(
+                    text = stringResource(id = R.string.enabled)
+                )
+            },
+            trailingIcon = {
+                AnimatedContent(
+                    targetState = isEnabled,
+                    label = "animatePluginEnabledContent"
+                ) { value ->
+                    if (value) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckBox,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.CheckBoxOutlineBlank,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            },
+            onClick = {
+                onClick()
+            }
+        )
         DropdownMenuItem(
             text = {
                 Text(text = stringResource(id = R.string.uninstall))

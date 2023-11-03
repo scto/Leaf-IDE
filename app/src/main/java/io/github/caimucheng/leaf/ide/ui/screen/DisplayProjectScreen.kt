@@ -44,11 +44,12 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import io.github.caimucheng.leaf.common.component.LeafApp
+import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
-import io.github.caimucheng.leaf.common.component.Loading
 import io.github.caimucheng.leaf.ide.model.Plugin
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
+import io.github.caimucheng.leaf.ide.ui.util.enabled
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 
 @SuppressLint("CoroutineCreationDuringComposition")

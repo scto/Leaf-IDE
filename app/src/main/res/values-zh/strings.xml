@@ -137,4 +137,5 @@
     <string name="over_scroll_summary">启用过度滚动后，如果滚动得足够快，可以滚动到显示范围之外</string>
     <string name="use_icu_lib">使用 ICU 库</string>
     <string name="use_icu_lib_summary">使用 ICU 库以检索字词边缘进行双击和长按字词的选择</string>
+    <string name="enabled">启用</string>
 </resources>

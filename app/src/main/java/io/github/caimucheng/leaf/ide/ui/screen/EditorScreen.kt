@@ -130,6 +130,7 @@ import io.github.caimucheng.leaf.ide.manager.IconManager
 import io.github.caimucheng.leaf.ide.manager.ProjectManager
 import io.github.caimucheng.leaf.ide.model.Plugin
 import io.github.caimucheng.leaf.ide.model.Project
+import io.github.caimucheng.leaf.ide.ui.util.enabled
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIIntent
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import io.github.caimucheng.leaf.ide.viewmodel.EditorUIIntent
@@ -142,6 +143,9 @@ import io.github.rosemoe.sora.widget.EditorSearcher
 import io.github.rosemoe.sora.widget.component.Magnifier
 import io.github.rosemoe.sora.widget.getComponent
 import io.github.rosemoe.sora.widget.subscribeEvent
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -225,7 +229,6 @@ fun EditorScreen(
                                 break
                             }
                         }
-
                         isLoading = false
                     }
 
@@ -496,34 +499,53 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                 defaultValue = false
                             )
 
+                            var currentColorSchemeType = ""
+                            var ligature = false
+                            var wordWrap = false
+                            var symbolInputBar: Set<String> = emptySet()
+                            var showSymbolInputBar = false
+                            var insertIndentSymbol = false
+                            var magnify = false
+                            var overScroll = false
+                            var useICULib = false
 
-                            val currentColorSchemeType = remember {
-                                dataStoreManager.getPreferenceBlocking(editorColorSchemeRequest)
+                            runBlocking {
+                                listOf(
+                                    async(start = CoroutineStart.LAZY) {
+                                        currentColorSchemeType =
+                                            dataStoreManager.getPreference(editorColorSchemeRequest)
+                                    },
+                                    async(start = CoroutineStart.LAZY) {
+                                        ligature = dataStoreManager.getPreference(ligatureRequest)
+                                    },
+                                    async(start = CoroutineStart.LAZY) {
+                                        wordWrap = dataStoreManager.getPreference(wordWrapRequest)
+                                    },
+                                    async(start = CoroutineStart.LAZY) {
+                                        symbolInputBar =
+                                            dataStoreManager.getPreference(symbolInputBarRequest)
+                                    },
+                                    async(start = CoroutineStart.LAZY) {
+                                        showSymbolInputBar =
+                                            dataStoreManager.getPreference(showSymbolInputBarRequest)
+                                    },
+                                    async(start = CoroutineStart.LAZY) {
+                                        insertIndentSymbol =
+                                            dataStoreManager.getPreference(insertIndentSymbolRequest)
+                                    },
+                                    async(start = CoroutineStart.LAZY) {
+                                        magnify = dataStoreManager.getPreference(magnifierRequest)
+                                    },
+                                    async(start = CoroutineStart.LAZY) {
+                                        overScroll =
+                                            dataStoreManager.getPreference(overScrollRequest)
+                                    },
+                                    async(start = CoroutineStart.LAZY) {
+                                        useICULib = dataStoreManager.getPreference(useICULibRequest)
+                                    }
+                                ).awaitAll()
                             }
-                            val ligature = remember {
-                                dataStoreManager.getPreferenceBlocking(ligatureRequest)
-                            }
-                            val wordWrap = remember {
-                                dataStoreManager.getPreferenceBlocking(wordWrapRequest)
-                            }
-                            val symbolInputBar = remember {
-                                dataStoreManager.getPreferenceBlocking(symbolInputBarRequest)
-                            }
-                            val showSymbolInputBar = remember {
-                                dataStoreManager.getPreferenceBlocking(showSymbolInputBarRequest)
-                            }
-                            val insertIndentSymbol = remember {
-                                dataStoreManager.getPreferenceBlocking(insertIndentSymbolRequest)
-                            }
-                            val magnify = remember {
-                                dataStoreManager.getPreferenceBlocking(magnifierRequest)
-                            }
-                            val overScroll = remember {
-                                dataStoreManager.getPreferenceBlocking(overScrollRequest)
-                            }
-                            val useICULib = remember {
-                                dataStoreManager.getPreferenceBlocking(useICULibRequest)
-                            }
+
                             CodeEditor(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -536,6 +558,12 @@ private fun MineUI(plugin: Plugin, pluginProject: PluginProject, project: Projec
                                 colorScheme = remember(currentColorSchemeType) {
                                     when (currentColorSchemeType) {
                                         "dynamic" -> DynamicEditorColorScheme(
+                                            colorScheme = colorScheme,
+                                            handleColor = handleColor,
+                                            selectionBackgroundColor = selectionBackgroundColor
+                                        )
+
+                                        "atom_one_light" -> DynamicEditorColorScheme(
                                             colorScheme = colorScheme,
                                             handleColor = handleColor,
                                             selectionBackgroundColor = selectionBackgroundColor

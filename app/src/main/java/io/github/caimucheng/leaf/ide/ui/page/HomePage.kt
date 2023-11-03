@@ -73,6 +73,7 @@ import io.github.caimucheng.leaf.ide.R
 import io.github.caimucheng.leaf.ide.application.appViewModel
 import io.github.caimucheng.leaf.ide.model.Project
 import io.github.caimucheng.leaf.ide.navhost.LeafIDEDestinations
+import io.github.caimucheng.leaf.ide.ui.util.enabled
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIIntent
 import io.github.caimucheng.leaf.ide.viewmodel.AppUIState
 import kotlinx.coroutines.coroutineScope
