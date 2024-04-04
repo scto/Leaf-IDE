@@ -36,7 +36,7 @@ jobs:
         uses: gradle/gradle-build-action@v2.4.2
         id: buildNodeJSDebug
         with:
-          arguments: :plugin-nodejs:assembleRelease
+          arguments: :plugin-nodejs:assembleDebug
 
       - name: Build nodejs plugin release APK
         uses: gradle/gradle-build-action@v2.4.2
