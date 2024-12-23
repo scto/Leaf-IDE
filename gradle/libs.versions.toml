@@ -1,5 +1,13 @@
 [versions]
+compileSdkVersion = "34"
+buildToolsVersion = "33.0.4"
+cmakeVersion = "3.25.1"
+ndkVersion = "27.1.12297006"
+r8 = "8.1.56"
+
 android = "8.1.2"
+kotlin-android = "1.9.20-Beta"
+
 activity-compose = "1.8.0"
 compose-bom = "2023.10.01"
 constraintlayout-compose = "1.0.1"
@@ -11,10 +19,10 @@ lifecycle-extensions = "2.2.0"
 lifecycle-runtime-ktx = "2.6.2"
 material-icons-extended = "1.5.4"
 navigation-compose = "2.7.5"
-org-jetbrains-kotlin-android = "1.9.20-Beta"
-io-github-Rosemoe-sora-editor = "0.22.1-de0c232-SNAPSHOT"
+
+io-github-Rosemoe-sora-editor = "0.23.2"
+
 com-github-skydoves = "1.0.5"
-r8 = "8.1.56"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
@@ -37,14 +45,20 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "org-jetbrains-kotlin-android" }
 # Su process and file-system
 libsu-core = { module = "com.github.topjohnwu.libsu:core", version.ref = "libsu" }
+
 # Sora Editor Library
 sora-editor-bom = { module = "io.github.Rosemoe.sora-editor:bom", version.ref = "io-github-Rosemoe-sora-editor" }
 sora-editor-editor = { module = "io.github.Rosemoe.sora-editor:editor" }
+sora-editor-editor-lsp = { module = "io.github.Rosemoe.sora-editor:editor-lsp" }
+sora-editor-language-treesitter = { module = "io.github.Rosemoe.sora-editor:language-treesitter" }
+sora-editor-language-java = { module = "io.github.Rosemoe.sora-editor:language-java" }
+sora-editor-language-textmate = { module = "io.github.Rosemoe.sora-editor:language-textmate" }
+
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version.ref = "com-github-skydoves" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "android" }
 com-android-library = { id = "com.android.library", version.ref = "android" }
-org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
+org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin-android" }
 
 [bundles]
