@@ -59,14 +59,11 @@ jobs:
       - name: Give permission to executable
         run: chmod +x gradlew
 
-      - name: Build with gradle
-        uses: gradle/gradle-build-action@v2.9.0
-        with:
-          gradle-version: nightly
-          arguments: assembleDebug
+      - name: Build debug
+        run: ./gradlew assembleDebug
 
-      - name: Upload debug apks
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v3
-        with:
+          name: app-debug
           path: app/build/outputs/apk/debug/app-debug.apk
-
+          if-no-files-found: error
