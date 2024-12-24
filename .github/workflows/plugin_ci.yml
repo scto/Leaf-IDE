@@ -45,7 +45,7 @@ jobs:
           arguments: :plugin-nodejs:assembleRelease
 
       - name: Upload nodejs plugin debug APK artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ always() && github.ref == 'refs/heads/master' && steps.buildNodeJSDebug.outcome == 'success' }}
         with:
           name: plugin-nodejs-debug
@@ -53,7 +53,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload nodejs plugin release APK artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ always() && github.ref == 'refs/heads/master' && steps.buildNodeJSRelease.outcome == 'success' }}
         with:
           name: plugin-nodejs-release
