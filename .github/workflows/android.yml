@@ -56,6 +56,7 @@ jobs:
         uses: amyu/setup-android@v4
         with:
           sdk-version: ${{ steps.read_version.outputs.sdkVersion }}
+          build-tools-version: ${{ steps.read_version.outputs.buildToolsVersion }}
           cmake-version: ${{ steps.read_version.outputs.cmakeVersion }}
           ndk-version: ${{ steps.read_version.outputs.ndkVersion }}
           generate-job-summary: true
