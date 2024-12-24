@@ -61,8 +61,8 @@ jobs:
           ndk-version: ${{ steps.read_ndkVersion.outputs.ndkVersion }}
           generate-job-summary: true
 
-      - name: Accept Android SDK licenses
-        run: yes | /usr/local/lib/android/sdk/tools/bin/sdkmanager --licenses
+#      - name: Accept Android SDK licenses
+#        run: yes | /usr/local/lib/android/sdk/tools/bin/sdkmanager --licenses
       
       - name: Give permission to executable
         run: chmod +x gradlew
