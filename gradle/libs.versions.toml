@@ -1,7 +1,7 @@
 [versions]
 compileSdkVersion = "34"
 buildToolsVersion = "33.0.2"
-cmakeVersion = "3.25.1"
+cmakeVersion = "3.10.2.4988404"
 ndkVersion = "27.1.12297006"
 r8 = "8.1.56"
 
