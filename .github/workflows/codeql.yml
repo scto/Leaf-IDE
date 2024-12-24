@@ -11,6 +11,7 @@ on:
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    
     timeout-minutes: 30
     permissions:
       # required for all workflows
@@ -22,8 +23,10 @@ jobs:
       # only required for workflows in private repositories
       actions: read
       contents: read
+      
     env:
       LANGUAGE: java-kotlin
+      
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -34,13 +37,16 @@ jobs:
       with:
         languages: ${{ env.LANGUAGE }}
         build-mode: manual
+
     # Build
     - uses: actions/setup-java@v4
       with:
         distribution: temurin
         java-version-file: .java-version
+        
     - name: Validate Gradle Wrapper
       uses: gradle/actions/wrapper-validation@v4
+      
     - name: Cache konan
       uses: actions/cache@v4
       with:
@@ -48,10 +54,12 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('*.gradle.kts') }}
         restore-keys: |
             ${{ runner.os }}-gradle-
+            
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
       with:
         gradle-version: wrapper
+        
     - name: Build
       run: ./gradlew --no-daemon -S -Dorg.gradle.dependency.verification=off -Dorg.gradle.warning.mode=none testClasses
 
