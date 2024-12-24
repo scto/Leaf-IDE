@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           version=`perl -nlE 'say if s/buildToolsVersion \= \"(.*)\"/$1/g' gradle/libs.versions.toml`
-          echo "buildToolsVersion" >> $GITHUB_OUTPUT
+          echo "buildToolsVersion=$version" >> $GITHUB_OUTPUT
 
       - name: 'Get cmakeVersion from versions.toml'
         id: read_cmakeVersion
